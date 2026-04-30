@@ -171,7 +171,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div
-                            className={`text-[14px] font-semibold truncate tracking-[0.005em] ${isSelected ? 'text-[#b4a7ff]' : 'text-white'}`}
+                            className={`text-[14px] font-semibold truncate tracking-[0.005em] ${isSelected ? 'text-[#7DFFBF]' : 'text-white'}`}
                           >
                             {agent.name}
                           </div>
@@ -232,7 +232,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                     whileHover={{ x: 2 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                    className="w-full px-4 py-3 text-left text-[13px] text-[#b4a7ff] hover:text-white hover:bg-white/[0.03] transition-colors flex items-center gap-2 tracking-[0.005em]"
+                    className="w-full px-4 py-3 text-left text-[13px] text-[#7DFFBF] hover:text-white hover:bg-white/[0.03] transition-colors flex items-center gap-2 tracking-[0.005em]"
                   >
                     <Plus className="w-4 h-4" />
                     Create New Agent

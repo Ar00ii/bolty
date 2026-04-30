@@ -60,7 +60,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
               'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 24px -6px rgba(20, 241, 149,0.45)',
           }}
         >
-          <Icon className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+          <Icon className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.5} />
         </motion.div>
       )}
       <h3 className="relative text-lg font-semibold text-white tracking-[-0.005em] mb-1.5">{title}</h3>

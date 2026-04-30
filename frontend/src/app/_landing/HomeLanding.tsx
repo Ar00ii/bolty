@@ -89,7 +89,7 @@ export function HomeLanding() {
         >
           <p
             className="text-[10.5px] font-mono uppercase tracking-[0.22em] mb-5"
-            style={{ color: '#b4a7ff' }}
+            style={{ color: '#7DFFBF' }}
           >
             Solana · AI agents · Code repos
           </p>
@@ -120,7 +120,7 @@ export function HomeLanding() {
                 boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
               }}
             >
-              <Sparkles className="w-3.5 h-3.5" style={{ color: '#b4a7ff' }} />
+              <Sparkles className="w-3.5 h-3.5" style={{ color: '#7DFFBF' }} />
               Watch how it works
             </button>
           </div>
@@ -144,7 +144,7 @@ export function HomeLanding() {
 
       <footer className="relative z-10 px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-[11.5px] font-semibold text-zinc-500">
         <div className="flex items-center gap-1.5">
-          <Zap className="w-3 h-3" style={{ color: '#b4a7ff' }} />
+          <Zap className="w-3 h-3" style={{ color: '#7DFFBF' }} />
           <span>Direct on-chain · 5% protocol fee</span>
         </div>
         <div className="flex gap-4">

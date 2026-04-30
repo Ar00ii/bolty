@@ -2471,8 +2471,8 @@ aside button[data-active='true']::after {
    asked for a subtle diffuse purple on some headings. */
 .mk-scope .gradient-text.gradient-text-purple {
   background: none !important;
-  -webkit-text-fill-color: #b4a7ff !important;
-  color: #b4a7ff !important;
+  -webkit-text-fill-color: #7DFFBF !important;
+  color: #7DFFBF !important;
   text-shadow: 0 0 18px rgba(20, 241, 149, 0.28);
   animation: none !important;
 }
@@ -2488,7 +2488,7 @@ aside button[data-active='true']::after {
 .mk-scope .text-bolty-300,
 .mk-scope .text-bolty-400,
 .mk-scope .text-bolty-400,
-.mk-scope .text-\[\#b4a7ff\],
+.mk-scope .text-\[\#7DFFBF\],
 .mk-scope .text-\[\#9b88ff\],
 .mk-scope .text-\[\#14F195\] {
   color: var(--mk-text-secondary) !important;
@@ -3315,7 +3315,7 @@ aside button[data-active='true']::after {
    ============================================================ */
 
 :root {
-  --mk-accent: #b4a7ff;
+  --mk-accent: #7DFFBF;
   --mk-accent-strong: #14f195;
   --mk-accent-soft: rgba(180, 167, 255, 0.82);
 }
@@ -3334,7 +3334,7 @@ aside button[data-active='true']::after {
 
 /* Gradient headline text (white → soft purple) */
 .mk-scope .mk-accent-gradient {
-  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 55%, #b4a7ff 100%);
+  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 55%, #7DFFBF 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -3359,7 +3359,7 @@ aside button[data-active='true']::after {
 /* Highlight just the listings / overview heading (acts as the
    page-hero accent without being loud) */
 .mk-scope .mk-section-title--accent {
-  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 60%, #b4a7ff 100%);
+  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 60%, #7DFFBF 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -3411,7 +3411,7 @@ aside button[data-active='true']::after {
 
 /* Alerts card CTA — soft purple with diffuse glow */
 .mk-scope .mk-alerts-card__cta {
-  background: linear-gradient(180deg, #b4a7ff 0%, #14f195 100%) !important;
+  background: linear-gradient(180deg, #7DFFBF 0%, #14f195 100%) !important;
   color: #0a0a0a !important;
   box-shadow: 0 0 24px rgba(20, 241, 149, 0.35);
 }

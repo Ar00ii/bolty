@@ -194,7 +194,7 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
             type="button"
             onClick={() => handleConnect({ forceLogin: true })}
             disabled={busy}
-            className="underline decoration-zinc-600 underline-offset-2 hover:text-[#b4a7ff] hover:decoration-[#b4a7ff] transition disabled:opacity-50"
+            className="underline decoration-zinc-600 underline-offset-2 hover:text-[#7DFFBF] hover:decoration-[#7DFFBF] transition disabled:opacity-50"
           >
             Switch X account
           </button>{' '}

@@ -987,7 +987,7 @@ function Row({
           </div>
         </div>
 
-        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#7DFFBF]">
           {formatEth(listing.price)}
           <span className="text-zinc-300 ml-1 text-[10px]">{listing.currency}</span>
         </div>
@@ -1124,7 +1124,7 @@ function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="font-mono text-[11.5px] text-[#b4a7ff] tabular-nums">
+          <div className="font-mono text-[11.5px] text-[#7DFFBF] tabular-nums">
             {formatEth(trade.priceEth)}
           </div>
           <div className="text-[10px] text-zinc-300 font-semibold">{timeAgo(trade.createdAt)}</div>

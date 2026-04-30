@@ -262,7 +262,7 @@ function DisputeRow({
         </div>
 
         <div className="text-right flex-shrink-0">
-          <div className="font-mono font-normal text-[13px] text-[#b4a7ff]">
+          <div className="font-mono font-normal text-[13px] text-[#7DFFBF]">
             {formatEth(order.amountWei)} ETH
           </div>
           <div className="text-[10px] text-zinc-600 uppercase tracking-[0.14em] font-medium mt-0.5">
@@ -379,7 +379,7 @@ function ResolveModal({
           <DetailRow
             label="Amount"
             value={
-              <span className="font-mono text-[#b4a7ff]">{formatEth(order.amountWei)} ETH</span>
+              <span className="font-mono text-[#7DFFBF]">{formatEth(order.amountWei)} ETH</span>
             }
           />
           <DetailRow
@@ -473,7 +473,7 @@ function ResolveModal({
               )}
               {txHash && phase !== 'done' && (
                 <div className="rounded-lg border border-[#14F195]/30 bg-[#14F195]/5 px-3 py-2 text-[12px] text-zinc-300 font-semibold">
-                  Tx: <code className="text-[#b4a7ff] font-mono">{shortAddr(txHash)}</code>
+                  Tx: <code className="text-[#7DFFBF] font-mono">{shortAddr(txHash)}</code>
                 </div>
               )}
               {phase === 'done' && (

@@ -2,25 +2,9 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Bell,
-  BookOpen,
-  Bot,
   ChevronRight,
-  ChevronsUpDown,
-  FileText,
   Flame,
-  GitBranch,
-  Heart,
-  LayoutGrid,
-  LifeBuoy,
-  MessageCircle,
-  MessageSquare,
-  Package,
   Search,
-  Settings,
-  ShoppingBag,
-  Trophy,
-  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -30,6 +14,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { prefetch } from '@/lib/cache/pageCache';
+import {
+  MAIN_NAV,
+  type NavItem,
+  type NavSection,
+  isItemActive,
+} from '@/lib/nav-config';
+
+// Re-export so existing call sites (PowerNavbar) keep working.
+export { isItemActive };
+export const NAV: NavSection[] = MAIN_NAV;
 
 // Kick off API fetches for the most likely-visited pages the moment
 // the user's cursor touches the sidebar row. The prefetch module
@@ -96,101 +90,6 @@ function prefetchForHref(href: string) {
     default:
       break;
   }
-}
-
-interface NavChild {
-  label: string;
-  icon?: LucideIcon;
-  href: string;
-}
-
-interface NavItem {
-  label: string;
-  icon: LucideIcon;
-  href: string;
-  count?: number;
-  badge?: string;
-  hot?: boolean;
-  dot?: boolean;
-  kbd?: string;
-  children?: NavChild[];
-}
-
-interface NavSection {
-  section: string;
-  items: NavItem[];
-}
-
-export const NAV: NavSection[] = [
-  {
-    section: 'Discover',
-    items: [
-      {
-        label: 'Marketplace',
-        icon: LayoutGrid,
-        href: '/market',
-        children: [
-          { label: 'Agents', icon: Bot, href: '/market/agents' },
-          { label: 'Repos', icon: GitBranch, href: '/market/repos' },
-        ],
-      },
-      { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
-      { label: '$BOLTY', icon: Zap, href: '/bolty' },
-    ],
-  },
-  {
-    section: 'My work',
-    items: [
-      { label: 'Inventory', icon: Package, href: '/inventory' },
-      { label: 'Saved', icon: Heart, href: '/inventory?tab=saved' },
-      { label: 'Orders', icon: ShoppingBag, href: '/orders' },
-    ],
-  },
-  {
-    section: 'Community',
-    items: [
-      { label: 'Feed', icon: MessageSquare, href: '/feed' },
-      { label: 'Messages', icon: MessageCircle, href: '/dm' },
-      { label: 'Notifications', icon: Bell, href: '/notifications' },
-    ],
-  },
-  {
-    section: 'Account',
-    items: [
-      { label: 'Settings', icon: Settings, href: '/profile' },
-      { label: 'How it works', icon: FileText, href: '/how-it-works' },
-      { label: 'Docs', icon: BookOpen, href: '/docs/agent-protocol' },
-      { label: 'Help', icon: LifeBuoy, href: '/help' },
-    ],
-  },
-];
-
-export function isItemActive(
-  pathname: string | null,
-  searchParams: URLSearchParams | null,
-  href: string,
-): boolean {
-  const path = pathname ?? '';
-  const tab = searchParams?.get('tab') ?? null;
-  const [cleanHref, query] = href.split('?');
-  if (cleanHref === '/market') return path === '/market';
-  if (cleanHref === '/profile') {
-    if (!(path === '/profile' || path.startsWith('/profile/'))) return false;
-    if (query) {
-      const expected = new URLSearchParams(query);
-      return expected.get('tab') === tab;
-    }
-    return !tab || tab === 'profile';
-  }
-  if (cleanHref === '/inventory') {
-    if (path !== '/inventory') return false;
-    if (query) {
-      const expected = new URLSearchParams(query);
-      return expected.get('tab') === tab;
-    }
-    return !tab;
-  }
-  return path === cleanHref || path.startsWith(cleanHref + '/');
 }
 
 function shortenAddress(addr: string): string {
@@ -379,18 +278,33 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     scheduleClose();
   };
 
-  const iconColor = active ? '#a594ff' : '#ffffff';
+  const iconColor = active ? '#48F9A6' : '#ffffff';
 
   const rowStyle: React.CSSProperties = {
     gridTemplateColumns: '10px 16px 1fr auto',
     color: active ? '#ffffff' : '#ffffff',
     background: active ? 'rgba(20, 241, 149,0.08)' : 'transparent',
     fontSize: '13px',
-    fontWeight: 300,
+    fontWeight: 600,
   };
 
   const rowClassName =
-    'grid items-center gap-[10px] px-[10px] py-[7px] rounded-md transition-colors group relative w-full text-left';
+    'grid items-center gap-[10px] px-[10px] py-[7px] rounded-md transition-colors group relative w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[rgba(20,241,149,0.65)]';
+
+  // Keyboard support for collapsible groups: ArrowRight expands, ArrowLeft
+  // collapses, Space/Enter on the parent toggles. Click still navigates,
+  // matching the standard sidebar pattern.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (!hasChildren) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setOpen(true);
+      cancelClose();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (!childActiveHref) setOpen(false);
+    }
+  };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
     if (!active) {
@@ -398,7 +312,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
       e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
     }
     const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
-    if (iconEl) iconEl.style.color = '#a594ff';
+    if (iconEl) iconEl.style.color = '#48F9A6';
     const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
     if (kbdEl) kbdEl.style.opacity = '1';
     // Prefetch API data for the most common destinations so by the time
@@ -452,6 +366,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
       <Link
         href={item.href}
         aria-expanded={open}
+        onKeyDown={handleKeyDown}
         className={rowClassName}
         style={rowStyle}
         onMouseEnter={handleMouseEnter}
@@ -490,7 +405,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                       color: '#ffffff',
                       background: isActive ? 'rgba(20, 241, 149,0.08)' : 'transparent',
                       fontSize: '12.5px',
-                      fontWeight: 300,
+                      fontWeight: 600,
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
@@ -512,7 +427,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                       <ChildIcon
                         className="w-[14px] h-[14px] shrink-0"
                         strokeWidth={1.5}
-                        style={{ color: isActive ? '#a594ff' : '#ffffff' }}
+                        style={{ color: isActive ? '#48F9A6' : '#ffffff' }}
                       />
                     )}
                     <span className="truncate">{c.label}</span>

@@ -416,7 +416,7 @@ export default function HelpPage() {
                 </p>
                 <p className="text-[11.5px] text-zinc-500 font-semibold mt-1">
                   Try a different keyword or{' '}
-                  <Link href="mailto:support@bolty.run" className="text-[#b4a7ff] hover:text-white">
+                  <Link href="mailto:support@bolty.run" className="text-[#7DFFBF] hover:text-white">
                     reach out to support
                   </Link>
                   .

@@ -567,7 +567,7 @@ function PurchaseRow({
         />
         <div className="min-w-0 flex-1">
           <Link href={href} className="block">
-            <div className="text-[13px] text-white font-semibold truncate hover:text-[#b4a7ff] transition-colors">
+            <div className="text-[13px] text-white font-semibold truncate hover:text-[#7DFFBF] transition-colors">
               {title}
             </div>
             <div className="text-[11px] text-zinc-500 font-semibold truncate">{subtitle}</div>
@@ -577,7 +577,7 @@ function PurchaseRow({
               from{' '}
               <Link
                 href={`/u/${seller.username ?? ''}`}
-                className="text-[#b4a7ff] hover:underline"
+                className="text-[#7DFFBF] hover:underline"
               >
                 @{seller.username ?? 'unknown'}
               </Link>
@@ -587,7 +587,7 @@ function PurchaseRow({
               <Clock className="w-3 h-3" /> {formatDate(purchasedAt)}
             </span>
             <span className="text-zinc-700">·</span>
-            <span className="font-mono tabular-nums text-[#b4a7ff]">
+            <span className="font-mono tabular-nums text-[#7DFFBF]">
               {formatEth(amountWei)} ETH
             </span>
             <span className="text-zinc-700">·</span>
@@ -701,7 +701,7 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
             boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.45)',
           }}
         >
-          <Shield className="w-4 h-4 text-[#b4a7ff]" />
+          <Shield className="w-4 h-4 text-[#7DFFBF]" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-[13px] font-semibold text-white">Missing a purchase?</h3>
@@ -906,7 +906,7 @@ function SavedTab({
                 <div className="truncate text-[11px] text-zinc-500">{l.description}</div>
               </Link>
               <span
-                className="text-[12px] font-mono tabular-nums text-[#b4a7ff]"
+                className="text-[12px] font-mono tabular-nums text-[#7DFFBF]"
                 style={{ textAlign: 'right' }}
               >
                 {l.price === 0 ? 'Free' : `${l.price} ${l.currency}`}
@@ -1008,7 +1008,7 @@ function Section({
             boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
           }}
         >
-          <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
+          <Icon className="w-3.5 h-3.5 text-[#7DFFBF]" />
         </div>
         <h2 className="text-[11px] uppercase tracking-[0.18em] font-medium text-zinc-300">
           {title}
@@ -1064,7 +1064,7 @@ function EmptyState({
           boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
         }}
       >
-        <Icon className="w-5 h-5 text-[#b4a7ff]" />
+        <Icon className="w-5 h-5 text-[#7DFFBF]" />
       </div>
       <div>
         <p className="text-sm text-white font-semibold">{title}</p>

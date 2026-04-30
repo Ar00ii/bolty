@@ -228,14 +228,14 @@ function FavoriteRepoRow({ repo, onRemove }: { repo: RepoSummary; onRemove: () =
     >
       <Link href={`/market/repos/${repo.id}`} className="min-w-0 block">
         <div className="flex items-center gap-2 min-w-0">
-          <GitBranch className="w-3.5 h-3.5 text-[#b4a7ff] flex-shrink-0" />
+          <GitBranch className="w-3.5 h-3.5 text-[#7DFFBF] flex-shrink-0" />
           <span className="text-[13px] text-white font-semibold truncate">{repo.name}</span>
           {repo.isLocked && repo.lockedPriceUsd && (
             <span
               className="px-1.5 py-0.5 rounded text-[10px] font-mono"
               style={{
                 background: 'rgba(20, 241, 149,0.1)',
-                color: '#b4a7ff',
+                color: '#7DFFBF',
                 boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
               }}
             >
@@ -290,13 +290,13 @@ function FavoriteListingRow({
         className="min-w-0 block"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Bot className="w-3.5 h-3.5 text-[#b4a7ff] flex-shrink-0" />
+          <Bot className="w-3.5 h-3.5 text-[#7DFFBF] flex-shrink-0" />
           <span className="text-[13px] text-white font-semibold truncate">{listing.title}</span>
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-mono"
             style={{
               background: 'rgba(20, 241, 149,0.1)',
-              color: '#b4a7ff',
+              color: '#7DFFBF',
               boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
             }}
           >

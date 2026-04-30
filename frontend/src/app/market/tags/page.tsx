@@ -270,7 +270,7 @@ export default function MarketTagsPage() {
                       }px -4px rgba(20, 241, 149,${0.12 + weight * 0.18})`,
                     }}
                   >
-                    <Hash className="w-3 h-3 text-[#b4a7ff]" strokeWidth={2} />
+                    <Hash className="w-3 h-3 text-[#7DFFBF]" strokeWidth={2} />
                     <span
                       className="font-normal text-white tracking-[0.005em]"
                       style={{ fontSize: `${12 + weight * 4}px` }}

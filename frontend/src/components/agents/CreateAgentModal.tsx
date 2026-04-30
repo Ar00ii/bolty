@@ -128,7 +128,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
                       'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                   }}
                 >
-                  <Bot className="w-4 h-4 text-[#b4a7ff]" />
+                  <Bot className="w-4 h-4 text-[#7DFFBF]" />
                 </div>
                 <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                   Create New Agent

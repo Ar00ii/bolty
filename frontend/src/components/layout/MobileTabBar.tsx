@@ -1,46 +1,9 @@
 'use client';
 
-import { Mail, MessageSquare, Package, Store, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const TABS: Array<{
-  href: string;
-  label: string;
-  icon: typeof Store;
-  matches: (pathname: string) => boolean;
-}> = [
-  {
-    href: '/market',
-    label: 'Market',
-    icon: Store,
-    matches: (p) => p === '/market' || p.startsWith('/market/'),
-  },
-  {
-    href: '/feed',
-    label: 'Feed',
-    icon: MessageSquare,
-    matches: (p) => p === '/feed' || p.startsWith('/feed/'),
-  },
-  {
-    href: '/inventory',
-    label: 'Items',
-    icon: Package,
-    matches: (p) => p === '/inventory',
-  },
-  {
-    href: '/dm',
-    label: 'Messages',
-    icon: Mail,
-    matches: (p) => p === '/dm' || p.startsWith('/dm/'),
-  },
-  {
-    href: '/profile',
-    label: 'Profile',
-    icon: User,
-    matches: (p) => p === '/profile' || p.startsWith('/profile/'),
-  },
-];
+import { MOBILE_TABS, isPathActive } from '@/lib/nav-config';
 
 export function MobileTabBar() {
   const pathname = usePathname();
@@ -50,8 +13,8 @@ export function MobileTabBar() {
       role="navigation"
       aria-label="Primary"
     >
-      {TABS.map((t) => {
-        const active = t.matches(pathname);
+      {MOBILE_TABS.map((t) => {
+        const active = isPathActive(pathname, t.href);
         const Icon = t.icon;
         return (
           <Link

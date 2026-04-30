@@ -270,7 +270,7 @@ export default function TopSellersPage() {
                   'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.35)',
               }}
             >
-              <Users className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+              <Users className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.5} />
             </div>
             <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
               No top sellers yet
@@ -318,7 +318,7 @@ export default function TopSellersPage() {
                   'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.35)',
               }}
             >
-              <Users className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+              <Users className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.5} />
             </div>
             <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
               {query ? `No creators match "${query}"` : 'No matches'}
@@ -406,7 +406,7 @@ export default function TopSellersPage() {
                           <span className="inline-flex items-center gap-1.5">
                             <Star
                               className="w-3 h-3"
-                              style={{ color: '#b4a7ff', fill: '#b4a7ff' }}
+                              style={{ color: '#7DFFBF', fill: '#7DFFBF' }}
                             />
                             {s.avgRating.toFixed(2)}
                             <span className="text-zinc-600">({s.reviewCount})</span>

@@ -311,7 +311,7 @@ export default function LeaderboardPage() {
                     }}
                   >
                     <span className="text-[12px] text-zinc-400 font-semibold">{p.label}</span>
-                    <span className="text-[11.5px] font-mono tabular-nums text-[#b4a7ff] ml-4 flex-shrink-0">
+                    <span className="text-[11.5px] font-mono tabular-nums text-[#7DFFBF] ml-4 flex-shrink-0">
                       +{p.rays}
                     </span>
                   </div>

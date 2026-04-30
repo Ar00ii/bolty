@@ -480,7 +480,7 @@ function DmPageInner() {
               whileTap={{ scale: 0.95 }}
               className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
               style={{
-                color: '#b4a7ff',
+                color: '#7DFFBF',
                 background:
                   'linear-gradient(180deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
                 boxShadow:
@@ -571,7 +571,7 @@ function DmPageInner() {
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                   className={`relative text-[10.5px] uppercase tracking-[0.14em] font-medium px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1 ${
-                    active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+                    active ? 'text-[#7DFFBF]' : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
                   {active && (
@@ -708,7 +708,7 @@ function DmPageInner() {
                     'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 32px -6px rgba(20, 241, 149,0.5)',
                 }}
               >
-                <MessageSquare className="w-7 h-7" style={{ color: '#b4a7ff' }} strokeWidth={1.5} />
+                <MessageSquare className="w-7 h-7" style={{ color: '#7DFFBF' }} strokeWidth={1.5} />
               </motion.div>
               <h3 className="text-lg font-semibold mb-2 text-white tracking-[-0.01em]">Messages</h3>
               <p className="text-sm text-zinc-400 mb-6 max-w-xs">
@@ -785,7 +785,7 @@ function DmPageInner() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.14em] font-medium h-7 px-3 rounded-md"
                     style={{
-                      color: '#b4a7ff',
+                      color: '#7DFFBF',
                       background:
                         'linear-gradient(180deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
                       boxShadow:

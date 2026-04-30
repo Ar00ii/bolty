@@ -43,7 +43,7 @@ export function LegalPage({
                   'inset 0 0 0 1px rgba(20, 241, 149,0.38), 0 0 22px -4px rgba(20, 241, 149,0.5)',
               }}
             >
-              <Icon className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
+              <Icon className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.75} />
             </div>
             <div>
               <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">

@@ -217,7 +217,7 @@ export default function SellerProfilePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl font-semibold" style={{ color: '#b4a7ff' }}>
+                <span className="text-2xl font-semibold" style={{ color: '#7DFFBF' }}>
                   {seller.username.slice(0, 1).toUpperCase()}
                 </span>
               )}
@@ -261,7 +261,7 @@ export default function SellerProfilePage() {
                 href={`/u/${seller.username}`}
                 className="text-[11px] transition-colors"
                 style={{ color: 'rgba(161,161,170,0.6)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#b4a7ff')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#7DFFBF')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(161,161,170,0.6)')}
               >
                 View full profile →
@@ -313,7 +313,7 @@ export default function SellerProfilePage() {
                     'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 24px -6px rgba(20, 241, 149,0.5)',
                 }}
               >
-                <Package className="w-5 h-5" style={{ color: '#b4a7ff' }} />
+                <Package className="w-5 h-5" style={{ color: '#7DFFBF' }} />
               </div>
               <p className="text-sm text-zinc-400">
                 This seller hasn't published any listings yet.
@@ -325,7 +325,7 @@ export default function SellerProfilePage() {
             {agentListings.length > 0 && (
               <section>
                 <h2 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-4 flex items-center gap-2">
-                  <Bot className="w-3 h-3" style={{ color: '#b4a7ff' }} />
+                  <Bot className="w-3 h-3" style={{ color: '#7DFFBF' }} />
                   AI Agents ({agentListings.length})
                 </h2>
                 <ListingsGrid items={agentListings} has={has} toggle={toggle} />
@@ -334,7 +334,7 @@ export default function SellerProfilePage() {
             {repoListings.length > 0 && (
               <section className="mt-8">
                 <h2 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-4 flex items-center gap-2">
-                  <GitBranch className="w-3 h-3" style={{ color: '#b4a7ff' }} />
+                  <GitBranch className="w-3 h-3" style={{ color: '#7DFFBF' }} />
                   Repositories ({repoListings.length})
                 </h2>
                 <ListingsGrid items={repoListings} has={has} toggle={toggle} />
@@ -389,7 +389,7 @@ export default function SellerProfilePage() {
                       <Link
                         href={`/market/agents/${r.listing.id}`}
                         className="truncate transition-colors"
-                        style={{ color: '#b4a7ff' }}
+                        style={{ color: '#7DFFBF' }}
                       >
                         {r.listing.title}
                       </Link>
@@ -403,7 +403,7 @@ export default function SellerProfilePage() {
                           className="w-3 h-3"
                           style={
                             i <= r.rating
-                              ? { color: '#b4a7ff', fill: '#b4a7ff' }
+                              ? { color: '#7DFFBF', fill: '#7DFFBF' }
                               : { color: '#3f3f46' }
                           }
                         />
@@ -604,7 +604,7 @@ function ListingsGrid({
                   l.reviewAverage !== undefined &&
                   (l.reviewCount ?? 0) > 0 && (
                     <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
-                      <Star className="w-3 h-3" style={{ color: '#b4a7ff', fill: '#b4a7ff' }} />
+                      <Star className="w-3 h-3" style={{ color: '#7DFFBF', fill: '#7DFFBF' }} />
                       {l.reviewAverage.toFixed(1)}
                       <span className="text-zinc-600">({l.reviewCount})</span>
                     </span>

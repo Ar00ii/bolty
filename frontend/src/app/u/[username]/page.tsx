@@ -217,7 +217,7 @@ export default function PublicProfilePage() {
                   />
                 ) : (
                   <div
-                    className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-semibold text-[#b4a7ff]"
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-semibold text-[#7DFFBF]"
                     style={{
                       background:
                         'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
@@ -285,7 +285,7 @@ export default function PublicProfilePage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   {profile.role === 'ADMIN' && (
                     <span
-                      className="text-[10px] uppercase tracking-[0.18em] font-medium px-2 py-0.5 rounded-md text-[#b4a7ff]"
+                      className="text-[10px] uppercase tracking-[0.18em] font-medium px-2 py-0.5 rounded-md text-[#7DFFBF]"
                       style={{
                         background: 'rgba(20, 241, 149,0.12)',
                         boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
@@ -498,7 +498,7 @@ export default function PublicProfilePage() {
               {profile.repositories.map((repo, idx) => {
                 const listingId = repoListingMap[repo.id];
                 const titleEl = repo.isLocked ? (
-                  <span className="text-[#b4a7ff] font-mono font-semibold text-sm truncate">
+                  <span className="text-[#7DFFBF] font-mono font-semibold text-sm truncate">
                     {repo.name}
                   </span>
                 ) : (
@@ -506,7 +506,7 @@ export default function PublicProfilePage() {
                     href={repo.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#b4a7ff] font-mono font-semibold text-sm truncate hover:text-white transition-colors"
+                    className="text-[#7DFFBF] font-mono font-semibold text-sm truncate hover:text-white transition-colors"
                   >
                     {repo.name}
                   </a>
@@ -533,7 +533,7 @@ export default function PublicProfilePage() {
                           <Lock
                             className="w-3.5 h-3.5 shrink-0"
                             strokeWidth={2}
-                            style={{ color: '#b4a7ff' }}
+                            style={{ color: '#7DFFBF' }}
                             aria-label="Locked — available to unlock"
                           />
                         )}
@@ -679,16 +679,16 @@ export default function PublicProfilePage() {
                           <GitBranch
                             className="w-3.5 h-3.5 shrink-0"
                             strokeWidth={2}
-                            style={{ color: '#b4a7ff' }}
+                            style={{ color: '#7DFFBF' }}
                           />
                         ) : (
                           <Bot
                             className="w-3.5 h-3.5 shrink-0"
                             strokeWidth={2}
-                            style={{ color: '#b4a7ff' }}
+                            style={{ color: '#7DFFBF' }}
                           />
                         )}
-                        <span className="text-[#b4a7ff] font-mono font-semibold text-sm truncate">
+                        <span className="text-[#7DFFBF] font-mono font-semibold text-sm truncate">
                           {l.title}
                         </span>
                       </div>

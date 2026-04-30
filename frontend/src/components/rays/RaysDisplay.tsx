@@ -23,7 +23,7 @@ const RANK_META: Record<string, { color: string; textColor: string }> = {
   BRONCE: { color: '180,83,9', textColor: '#fcd34d' },
   PLATA: { color: '148,163,184', textColor: '#e2e8f0' },
   ORO: { color: '234,179,8', textColor: '#fde047' },
-  PLATINO: { color: '131,110,249', textColor: '#b4a7ff' },
+  PLATINO: { color: '131,110,249', textColor: '#7DFFBF' },
   DIAMANTE: { color: '6,182,212', textColor: '#67e8f9' },
   MAESTRIA: { color: '59,130,246', textColor: '#93c5fd' },
   CAMPEON: { color: '239,68,68', textColor: '#fda4af' },
@@ -202,7 +202,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
                 'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
             }}
           >
-            <TrendingUp className="w-3.5 h-3.5 text-[#b4a7ff]" />
+            <TrendingUp className="w-3.5 h-3.5 text-[#7DFFBF]" />
           </div>
           <p className="text-[14px] font-semibold text-white tracking-[0.005em]">Ranking Benefits</p>
         </div>
@@ -224,7 +224,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
               }}
               className="text-[13px] text-zinc-400 flex items-start gap-2 tracking-[0.005em]"
             >
-              <Sparkles className="w-3 h-3 text-[#b4a7ff] mt-1 flex-shrink-0" />
+              <Sparkles className="w-3 h-3 text-[#7DFFBF] mt-1 flex-shrink-0" />
               {benefit}
             </motion.li>
           ))}
@@ -289,8 +289,8 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
           }}
         />
         <div className="flex items-center justify-center gap-2">
-          <Trophy className="w-4 h-4 text-[#b4a7ff]" />
-          <p className="text-[14px] font-semibold text-[#b4a7ff] tracking-[0.005em]">
+          <Trophy className="w-4 h-4 text-[#7DFFBF]" />
+          <p className="text-[14px] font-semibold text-[#7DFFBF] tracking-[0.005em]">
             You are at the highest rank
           </p>
         </div>

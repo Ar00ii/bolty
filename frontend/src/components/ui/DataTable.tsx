@@ -150,7 +150,7 @@ export function DataTable<T extends Record<string, any>>({
                       whileTap={{ scale: 0.96 }}
                       transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                       className={`flex items-center gap-1.5 transition-colors ${
-                        isSorted ? 'text-[#b4a7ff]' : 'hover:text-zinc-300'
+                        isSorted ? 'text-[#7DFFBF]' : 'hover:text-zinc-300'
                       }`}
                     >
                       {col.label}

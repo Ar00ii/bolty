@@ -652,7 +652,7 @@ export default function RepoDetailPage() {
               }}
             />
             {recoverMsg && (
-              <p className="mt-3 text-[11.5px] font-semibold text-[#b4a7ff]">{recoverMsg}</p>
+              <p className="mt-3 text-[11.5px] font-semibold text-[#7DFFBF]">{recoverMsg}</p>
             )}
             <div className="mt-5 flex items-center justify-end gap-2">
               <button
@@ -709,7 +709,7 @@ function Section({
             boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.28)',
           }}
         >
-          <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
+          <Icon className="w-3.5 h-3.5 text-[#7DFFBF]" />
         </div>
         <h2 className="text-[11px] uppercase tracking-[0.18em] font-medium text-zinc-300">
           {title}

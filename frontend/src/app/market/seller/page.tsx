@@ -241,7 +241,7 @@ export default function SellerDashboardPage() {
             }}
           >
             <Plus
-              className="w-3.5 h-3.5 text-[#b4a7ff] group-hover:text-white transition-colors"
+              className="w-3.5 h-3.5 text-[#7DFFBF] group-hover:text-white transition-colors"
               strokeWidth={2}
             />
             <span className="tracking-[0.005em]">New listing</span>
@@ -315,7 +315,7 @@ export default function SellerDashboardPage() {
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                     }}
                   >
-                    <BarChart3 className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
+                    <BarChart3 className="w-3.5 h-3.5 text-[#7DFFBF]" strokeWidth={1.75} />
                   </div>
                   <h2 className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium">
                     Sales · last 30 days
@@ -399,7 +399,7 @@ export default function SellerDashboardPage() {
                         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                       }}
                     >
-                      <TrendingUp className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
+                      <TrendingUp className="w-3.5 h-3.5 text-[#7DFFBF]" strokeWidth={1.75} />
                     </div>
                     <h2 className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium">
                       Listing performance
@@ -650,7 +650,7 @@ export default function SellerDashboardPage() {
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                     }}
                   >
-                    <ShoppingCart className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
+                    <ShoppingCart className="w-3.5 h-3.5 text-[#7DFFBF]" strokeWidth={1.75} />
                   </div>
                   <h2 className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium">
                     Recent sales
@@ -878,7 +878,7 @@ function EmptyState() {
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 28px -8px rgba(20, 241, 149,0.4)',
         }}
       >
-        <Package className="w-6 h-6 text-[#b4a7ff]" strokeWidth={1.5} />
+        <Package className="w-6 h-6 text-[#7DFFBF]" strokeWidth={1.5} />
       </div>
       <h2 className="relative text-[16px] font-normal text-white mb-1.5 tracking-[0.005em]">
         You don&apos;t have any listings yet
@@ -897,7 +897,7 @@ function EmptyState() {
         }}
       >
         <Plus
-          className="w-3.5 h-3.5 text-[#b4a7ff] group-hover:text-white transition-colors"
+          className="w-3.5 h-3.5 text-[#7DFFBF] group-hover:text-white transition-colors"
           strokeWidth={2}
         />
         <span className="tracking-[0.005em]">Create a listing</span>

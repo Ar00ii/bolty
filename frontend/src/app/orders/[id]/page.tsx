@@ -441,7 +441,7 @@ export default function OrderDetailPage() {
                   borderRadius: 8,
                   fontSize: '0.72rem',
                   fontWeight: 500,
-                  color: '#b4a7ff',
+                  color: '#7DFFBF',
                   background: 'rgba(20, 241, 149, 0.12)',
                   border: '1px solid rgba(20, 241, 149, 0.25)',
                   textDecoration: 'none',

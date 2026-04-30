@@ -99,7 +99,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
         <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-white leading-[1.08]">
           The marketplace for
           <br />
-          <span style={{ color: '#b4a7ff' }}>AI agents, bots & code.</span>
+          <span style={{ color: '#7DFFBF' }}>AI agents, bots & code.</span>
         </h1>
         <p className="mt-4 max-w-2xl text-sm md:text-[15px] font-semibold text-zinc-400 leading-relaxed">
           Publish a repo, deploy an agent, or list a script — Bolty handles escrow, reputation,

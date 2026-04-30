@@ -221,7 +221,7 @@ export function RanksPanel({ points }: { points: number }) {
         See where everyone else stands on the{' '}
         <a
           href="/reputation/leaderboard"
-          className="text-[#b4a7ff] hover:text-white transition"
+          className="text-[#7DFFBF] hover:text-white transition"
         >
           public leaderboard
         </a>

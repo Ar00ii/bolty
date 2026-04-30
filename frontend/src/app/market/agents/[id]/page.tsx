@@ -665,7 +665,7 @@ export default function AgentDetailPage() {
                         'inset 0 0 0 1px rgba(20, 241, 149,0.28), 0 0 18px -6px rgba(20, 241, 149,0.4)',
                     }}
                   >
-                    <Terminal className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
+                    <Terminal className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.75} />
                   </div>
                   <p className="text-sm text-zinc-300 mb-1 font-semibold tracking-[0.005em]">
                     No live endpoint on this listing
@@ -832,7 +832,7 @@ export default function AgentDetailPage() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
             <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(20, 241, 149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)' }}>
-              <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" />
+              <ShoppingBag className="w-5 h-5 text-[#7DFFBF]" />
             </div>
             <h3 className="text-base font-semibold text-white mb-2">{listing.price === 0 ? 'Claimed!' : 'Payment sent!'}</h3>
             <p className="text-[12.5px] text-zinc-400 font-semibold leading-relaxed mb-5">
@@ -872,7 +872,7 @@ function Section({
             boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.28)',
           }}
         >
-          <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
+          <Icon className="w-3.5 h-3.5 text-[#7DFFBF]" />
         </div>
         <h2 className="text-[11px] uppercase tracking-[0.18em] font-medium text-zinc-300">
           {title}

@@ -1633,7 +1633,7 @@ function AgentsPageContent() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
             <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(20, 241, 149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)' }}>
-              <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" />
+              <ShoppingBag className="w-5 h-5 text-[#7DFFBF]" />
             </div>
             <h3 className="text-base font-semibold text-white mb-2">
               {buyingListing.price === 0 ? 'Claimed!' : 'Payment sent!'}
@@ -1681,7 +1681,7 @@ function AgentsPageContent() {
                 boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)',
               }}
             >
-              <Plus className="w-5 h-5 text-[#b4a7ff]" />
+              <Plus className="w-5 h-5 text-[#7DFFBF]" />
             </div>
             <h3 className="text-base font-semibold text-white mb-2">
               Deploy from desktop

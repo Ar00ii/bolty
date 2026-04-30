@@ -16,7 +16,7 @@ const sizeClasses = {
 };
 
 const colorClasses = {
-  purple: 'text-[#b4a7ff]',
+  purple: 'text-[#7DFFBF]',
   white: 'text-white',
   gray: 'text-zinc-400',
 };

@@ -127,7 +127,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                 'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
             }}
           >
-            <Zap className="w-4 h-4 text-[#b4a7ff]" />
+            <Zap className="w-4 h-4 text-[#7DFFBF]" />
           </div>
           <h3 className="text-2xl font-semibold text-white tracking-[-0.01em]">Purchase Rays</h3>
         </div>
@@ -230,7 +230,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
               <div className="flex items-center justify-between mb-3">
                 <p
                   className={`text-[14px] font-semibold tracking-[0.005em] ${
-                    isSelected ? 'text-[#b4a7ff]' : 'text-white'
+                    isSelected ? 'text-[#7DFFBF]' : 'text-white'
                   }`}
                 >
                   {pack.rays.toLocaleString()} Rays
@@ -250,7 +250,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                           'inset 0 0 0 1px rgba(20, 241, 149,0.6), 0 0 12px -2px rgba(20, 241, 149,0.5)',
                       }}
                     >
-                      <CheckCircle className="w-3.5 h-3.5 text-[#b4a7ff]" />
+                      <CheckCircle className="w-3.5 h-3.5 text-[#7DFFBF]" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -311,7 +311,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                 <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
                   Price
                 </p>
-                <p className="text-2xl font-semibold text-[#b4a7ff] mt-1 tabular-nums tracking-[-0.01em]">
+                <p className="text-2xl font-semibold text-[#7DFFBF] mt-1 tabular-nums tracking-[-0.01em]">
                   {selectedPackData.boltyPrice.toLocaleString()} BOLTY
                 </p>
               </div>
@@ -338,7 +338,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                   {
                     Icon: InfinityIcon,
                     color: '131,110,249',
-                    textColor: '#b4a7ff',
+                    textColor: '#7DFFBF',
                     label: 'Rays accumulate permanently',
                   },
                   {

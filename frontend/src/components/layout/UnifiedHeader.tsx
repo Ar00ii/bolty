@@ -6,9 +6,6 @@ import {
   X,
   ChevronDown,
   Sparkles,
-  Bot,
-  GitBranch,
-  BookOpen,
   User,
   KeyRound,
   Settings,
@@ -26,12 +23,7 @@ import { getReputationRank } from '@/components/ui/reputation-badge';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/lib/auth/AuthProvider';
-
-const NAV_LINKS = [
-  { href: '/market/agents', label: 'Agents', icon: Bot },
-  { href: '/market/repos', label: 'Repos', icon: GitBranch },
-  { href: '/docs/agent-protocol', label: 'Docs', icon: BookOpen },
-];
+import { PUBLIC_NAV as NAV_LINKS } from '@/lib/nav-config';
 
 export function UnifiedHeader() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -71,6 +63,16 @@ export function UnifiedHeader() {
         document.body.style.overflow = prev;
       };
     }
+  }, [mobileMenuOpen]);
+
+  // Escape closes the mobile drawer (matches sheet/dialog conventions).
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [mobileMenuOpen]);
 
   return (
@@ -433,7 +435,7 @@ export function UnifiedHeader() {
                   }}
                 >
                   <div className="flex items-center gap-2.5 mb-2.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
+                    <Sparkles className="w-3.5 h-3.5 text-[#7DFFBF]" strokeWidth={1.75} />
                     <span className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-400">
                       Join Bolty
                     </span>
@@ -505,7 +507,7 @@ export function UnifiedHeader() {
                             }}
                           >
                             <Icon
-                              className={`w-3.5 h-3.5 ${active ? 'text-[#b4a7ff]' : 'text-zinc-400 group-hover:text-zinc-200'}`}
+                              className={`w-3.5 h-3.5 ${active ? 'text-[#7DFFBF]' : 'text-zinc-400 group-hover:text-zinc-200'}`}
                               strokeWidth={1.75}
                             />
                           </span>

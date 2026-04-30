@@ -239,7 +239,7 @@ function SetupXContent() {
               href="https://developer.x.com/en/portal/dashboard"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+              className="text-[#7DFFBF] hover:text-white underline decoration-dotted underline-offset-2"
             >
               developer.x.com
             </a>{' '}
@@ -375,7 +375,7 @@ function SetupXContent() {
           href="/docs/agent-x/agent-x"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[12px] text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+          className="text-[12px] text-[#7DFFBF] hover:text-white underline decoration-dotted underline-offset-2"
         >
           Read the BYO X setup docs →
         </Link>

@@ -46,7 +46,7 @@ interface EventConfig {
 
 const eventConfig: Record<EventType, EventConfig> = {
   login: { icon: LogIn, color: '59,130,246', textColor: '#93c5fd' },
-  api_key: { icon: KeyRound, color: '131,110,249', textColor: '#b4a7ff' },
+  api_key: { icon: KeyRound, color: '131,110,249', textColor: '#7DFFBF' },
   settings: { icon: Settings, color: '161,161,170', textColor: '#d4d4d8' },
   download: { icon: Download, color: '34,197,94', textColor: '#86efac' },
   security: { icon: Shield, color: '245,158,11', textColor: '#fcd34d' },
@@ -130,7 +130,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
                   'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
               }}
             >
-              <FileText className="w-5 h-5 text-[#b4a7ff]" />
+              <FileText className="w-5 h-5 text-[#7DFFBF]" />
             </div>
             <p className="text-[13px] text-zinc-400 tracking-[0.005em] mb-1">No activity yet</p>
             <p className="text-xs text-zinc-500">Your account activity will appear here</p>
@@ -225,7 +225,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="text-[13px] font-semibold tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors"
+            className="text-[13px] font-semibold tracking-[0.005em] text-[#7DFFBF] hover:text-white transition-colors"
           >
             Load more activity
           </motion.button>

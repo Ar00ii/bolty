@@ -50,7 +50,7 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
           style={
             copied
               ? {
-                  color: '#b4a7ff',
+                  color: '#7DFFBF',
                   background:
                     'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                   boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',

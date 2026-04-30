@@ -178,7 +178,7 @@ export function ConnectedAccountsPanel({
             <div className="mt-2">
               <Link
                 href="/market/agents"
-                className="inline-flex items-center gap-1 text-[#b4a7ff] hover:text-white transition"
+                className="inline-flex items-center gap-1 text-[#7DFFBF] hover:text-white transition"
               >
                 Publish one
                 <ExternalLink className="w-3 h-3" />

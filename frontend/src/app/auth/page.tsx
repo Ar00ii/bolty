@@ -156,9 +156,9 @@ function AuthInner() {
                   </span>
                 </span>
                 {connecting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
+                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#7DFFBF' }} />
                 ) : (
-                  <span className="text-[11.5px] font-semibold" style={{ color: '#b4a7ff' }}>
+                  <span className="text-[11.5px] font-semibold" style={{ color: '#7DFFBF' }}>
                     Connect →
                   </span>
                 )}
@@ -202,13 +202,13 @@ function AuthInner() {
                   }}
                 >
                   <span className="flex items-center gap-3">
-                    <Wallet className="w-4 h-4" style={{ color: '#b4a7ff' }} />
+                    <Wallet className="w-4 h-4" style={{ color: '#7DFFBF' }} />
                     <span className="text-[13.5px] font-semibold">Sign to continue</span>
                   </span>
                   {phase === 'signing' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#7DFFBF' }} />
                   ) : (
-                    <span className="text-[11.5px] font-semibold" style={{ color: '#b4a7ff' }}>
+                    <span className="text-[11.5px] font-semibold" style={{ color: '#7DFFBF' }}>
                       Sign →
                     </span>
                   )}
@@ -269,11 +269,11 @@ function AuthInner() {
 
         <p className="mt-4 text-center text-[11px] font-semibold text-zinc-500">
           By connecting you accept the{' '}
-          <Link href="/terms" className="hover:text-white transition" style={{ color: '#b4a7ff' }}>
+          <Link href="/terms" className="hover:text-white transition" style={{ color: '#7DFFBF' }}>
             terms
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="hover:text-white transition" style={{ color: '#b4a7ff' }}>
+          <Link href="/privacy" className="hover:text-white transition" style={{ color: '#7DFFBF' }}>
             privacy policy
           </Link>
           .

@@ -38,7 +38,7 @@ export function Tooltip({ content, children, side = 'top', showIcon = true }: To
       >
         {children ||
           (showIcon && (
-            <HelpCircle className="w-3.5 h-3.5 text-zinc-500 hover:text-[#b4a7ff] transition-colors inline" />
+            <HelpCircle className="w-3.5 h-3.5 text-zinc-500 hover:text-[#7DFFBF] transition-colors inline" />
           ))}
       </div>
 

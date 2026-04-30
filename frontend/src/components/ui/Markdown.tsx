@@ -108,7 +108,7 @@ function renderInline(text: string): React.ReactNode[] {
       nodes.push(
         <code
           key={key++}
-          className="px-1.5 py-0.5 rounded-md text-[#b4a7ff] text-[0.85em] font-mono"
+          className="px-1.5 py-0.5 rounded-md text-[#7DFFBF] text-[0.85em] font-mono"
           style={{
             background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
             boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.2)',
@@ -132,7 +132,7 @@ function renderInline(text: string): React.ReactNode[] {
             href={link[2]}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#b4a7ff] hover:text-white underline underline-offset-2 transition-colors"
+            className="text-[#7DFFBF] hover:text-white underline underline-offset-2 transition-colors"
           >
             {link[1]}
           </a>,
@@ -167,7 +167,7 @@ export function Markdown({ source, className }: { source: string; className?: st
           return (
             <ul
               key={i}
-              className="list-disc list-outside pl-5 my-3 space-y-1.5 text-[13px] text-zinc-300 tracking-[0.005em] marker:text-[#b4a7ff]"
+              className="list-disc list-outside pl-5 my-3 space-y-1.5 text-[13px] text-zinc-300 tracking-[0.005em] marker:text-[#7DFFBF]"
             >
               {b.items.map((item, j) => (
                 <li key={j}>{renderInline(item)}</li>

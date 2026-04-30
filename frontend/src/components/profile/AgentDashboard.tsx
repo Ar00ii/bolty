@@ -146,7 +146,7 @@ export const AgentDashboard: React.FC = () => {
               </p>
               <div className="flex items-center gap-2">
                 <code
-                  className="flex-1 rounded-lg px-3 py-2 text-sm text-[#b4a7ff] truncate font-mono"
+                  className="flex-1 rounded-lg px-3 py-2 text-sm text-[#7DFFBF] truncate font-mono"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',

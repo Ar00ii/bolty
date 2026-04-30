@@ -59,7 +59,7 @@ export default function AuthSuccessPage() {
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 32px -6px rgba(20, 241, 149,0.55)',
           }}
         >
-          <CheckCircle2 className="w-8 h-8 text-[#b4a7ff]" strokeWidth={1.5} />
+          <CheckCircle2 className="w-8 h-8 text-[#7DFFBF]" strokeWidth={1.5} />
         </motion.div>
         <div className="text-white text-lg font-semibold tracking-[0.005em] mb-1.5">
           Authentication successful

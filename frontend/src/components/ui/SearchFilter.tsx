@@ -164,7 +164,7 @@ export function SearchFilter({
             {selectedFilters.length > 0 && (
               <button
                 onClick={handleClearFilters}
-                className="text-[11px] text-[#b4a7ff] hover:text-white transition-colors tracking-[0.005em]"
+                className="text-[11px] text-[#7DFFBF] hover:text-white transition-colors tracking-[0.005em]"
               >
                 Clear all
               </button>

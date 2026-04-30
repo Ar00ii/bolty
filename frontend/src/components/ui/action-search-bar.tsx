@@ -120,7 +120,7 @@ function ActionSearchBar({
                   exit={{ y: 8, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <Send className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
+                  <Send className="w-3.5 h-3.5 text-[#7DFFBF]" strokeWidth={1.75} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -168,7 +168,7 @@ function ActionSearchBar({
                       onClick={() => handleSelect(action)}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-[#b4a7ff] flex-shrink-0 flex items-center">
+                        <span className="text-[#7DFFBF] flex-shrink-0 flex items-center">
                           {action.icon}
                         </span>
                         <span className="text-[13px] font-semibold text-zinc-200 truncate tracking-[0.005em]">
@@ -188,7 +188,7 @@ function ActionSearchBar({
                         )}
                         {action.end && (
                           <span
-                            className="text-[10px] px-1.5 py-0.5 rounded text-[#b4a7ff] font-mono tracking-[0.02em]"
+                            className="text-[10px] px-1.5 py-0.5 rounded text-[#7DFFBF] font-mono tracking-[0.02em]"
                             style={{
                               background:
                                 'linear-gradient(180deg, rgba(20, 241, 149,0.12) 0%, rgba(20, 241, 149,0.03) 100%)',

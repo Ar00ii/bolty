@@ -117,7 +117,7 @@ export default function ProfileSetupPage() {
             }}
           >
             <svg
-              className="w-6 h-6 text-[#b4a7ff]"
+              className="w-6 h-6 text-[#7DFFBF]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -164,7 +164,7 @@ export default function ProfileSetupPage() {
                 boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
             >
-              <span className="text-[#b4a7ff] font-mono text-sm">@</span>
+              <span className="text-[#7DFFBF] font-mono text-sm">@</span>
               <input
                 type="text"
                 value={username}

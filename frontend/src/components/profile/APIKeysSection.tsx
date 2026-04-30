@@ -155,7 +155,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
             }}
           >
-            <KeyRound className="w-5 h-5 text-[#b4a7ff]" />
+            <KeyRound className="w-5 h-5 text-[#7DFFBF]" />
           </div>
           <p className="text-[13px] text-zinc-400 tracking-[0.005em] mb-1">No API keys yet</p>
           <p className="text-xs text-zinc-500">Create your first API key to get started</p>
@@ -201,13 +201,13 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                           'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                       }}
                     >
-                      <KeyRound className="w-3.5 h-3.5 text-[#b4a7ff]" />
+                      <KeyRound className="w-3.5 h-3.5 text-[#7DFFBF]" />
                     </div>
                     <h3 className="font-semibold text-white truncate tracking-[0.005em]">
                       {apiKey.name}
                     </h3>
                     <span
-                      className="text-[10.5px] font-medium uppercase tracking-[0.18em] px-2 py-0.5 rounded-md text-[#b4a7ff]"
+                      className="text-[10.5px] font-medium uppercase tracking-[0.18em] px-2 py-0.5 rounded-md text-[#7DFFBF]"
                       style={{
                         background:
                           'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
@@ -254,7 +254,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                       whileHover={{ y: -1 }}
                       whileTap={{ scale: 0.92 }}
                       transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                      className="p-2 rounded-lg transition-colors hover:brightness-110 text-zinc-400 hover:text-[#b4a7ff]"
+                      className="p-2 rounded-lg transition-colors hover:brightness-110 text-zinc-400 hover:text-[#7DFFBF]"
                       style={{
                         background:
                           copiedId === apiKey.id
@@ -443,7 +443,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                       'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                   }}
                 >
-                  <KeyRound className="w-4 h-4 text-[#b4a7ff]" />
+                  <KeyRound className="w-4 h-4 text-[#7DFFBF]" />
                 </div>
                 <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                   Generate New API Key

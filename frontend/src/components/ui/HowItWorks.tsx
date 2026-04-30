@@ -163,7 +163,7 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                       height: 6,
                       background:
                         i === step
-                          ? 'linear-gradient(90deg, #14F195, #b4a7ff)'
+                          ? 'linear-gradient(90deg, #14F195, #7DFFBF)'
                           : 'rgba(255,255,255,0.12)',
                     }}
                   />
@@ -272,7 +272,7 @@ function BrowseVisual() {
                   item.kind === 'AGENT'
                     ? 'rgba(20, 241, 149,0.16)'
                     : 'rgba(6,182,212,0.16)',
-                color: item.kind === 'AGENT' ? '#b4a7ff' : '#67e8f9',
+                color: item.kind === 'AGENT' ? '#7DFFBF' : '#67e8f9',
               }}
             >
               {item.kind}
@@ -315,7 +315,7 @@ function PayVisual() {
           style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
           <span className="text-zinc-300">You pay</span>
-          <span className="font-mono" style={{ color: '#b4a7ff' }}>
+          <span className="font-mono" style={{ color: '#7DFFBF' }}>
             0.525 SOL
           </span>
         </div>

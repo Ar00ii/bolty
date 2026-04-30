@@ -1411,7 +1411,7 @@ export default function ProfilePage() {
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-[12px] font-mono text-[#b4a7ff]">
+                  <span className="text-[12px] font-mono text-[#7DFFBF]">
                     {(displayName || username || '?').slice(0, 2).toUpperCase()}
                   </span>
                 )}
@@ -2077,7 +2077,7 @@ export default function ProfilePage() {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-[10.5px] uppercase tracking-[0.16em] text-[#b4a7ff] font-medium">
+                  <span className="text-[10.5px] uppercase tracking-[0.16em] text-[#7DFFBF] font-medium">
                     What are API keys
                   </span>
                 </div>
@@ -2093,7 +2093,7 @@ export default function ProfilePage() {
                   </li>
                   <li>
                     <span className="text-zinc-200">Header:</span>{' '}
-                    <code className="text-[#b4a7ff] bg-black/30 px-1 rounded">Authorization: Bearer YOUR_KEY</code>
+                    <code className="text-[#7DFFBF] bg-black/30 px-1 rounded">Authorization: Bearer YOUR_KEY</code>
                   </li>
                   <li>
                     <span className="text-zinc-200">Rotate</span> any key you ever paste into a

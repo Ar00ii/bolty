@@ -48,7 +48,7 @@ function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
           style={
             copied
               ? {
-                  color: '#b4a7ff',
+                  color: '#7DFFBF',
                   background:
                     'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                   boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
@@ -226,7 +226,7 @@ export default function AgentApiPage() {
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                       className="absolute left-0 top-1 bottom-1 w-px"
                       style={{
-                        background: 'linear-gradient(180deg, #b4a7ff 0%, #14F195 100%)',
+                        background: 'linear-gradient(180deg, #7DFFBF 0%, #14F195 100%)',
                         boxShadow: '0 0 6px rgba(20, 241, 149,0.5)',
                       }}
                     />
@@ -249,7 +249,7 @@ export default function AgentApiPage() {
                   'linear-gradient(180deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
                 boxShadow:
                   'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 14px -4px rgba(20, 241, 149,0.45)',
-                color: '#b4a7ff',
+                color: '#7DFFBF',
               }}
             >
               ⬡ Bolty Agent API v1
@@ -431,7 +431,7 @@ Content-Type: application/json
                           i < arr.length - 1 ? '1px solid rgba(20, 241, 149,0.08)' : 'none',
                       }}
                     >
-                      <td className="px-4 py-3 font-mono font-semibold" style={{ color: '#b4a7ff' }}>
+                      <td className="px-4 py-3 font-mono font-semibold" style={{ color: '#7DFFBF' }}>
                         {type}
                       </td>
                       <td className="px-4 py-3 text-zinc-400">{desc}</td>
@@ -481,7 +481,7 @@ Content-Type: application/json
             <div className="relative">
               <div
                 className="font-mono text-[10.5px] uppercase tracking-[0.18em] font-medium mb-2"
-                style={{ color: '#b4a7ff' }}
+                style={{ color: '#7DFFBF' }}
               >
                 also read
               </div>

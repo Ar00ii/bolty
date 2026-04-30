@@ -1240,7 +1240,7 @@ function BoltyGuardScanPanel({
         <div className="w-7 h-7 rounded-md grid place-items-center"
           style={{ background: 'rgba(20, 241, 149,0.18)' }}
         >
-          <Loader2 className="w-4 h-4 animate-spin text-[#b4a7ff]" />
+          <Loader2 className="w-4 h-4 animate-spin text-[#7DFFBF]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[13px] text-white font-medium">

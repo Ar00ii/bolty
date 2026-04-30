@@ -255,7 +255,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                         'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                     }}
                   >
-                    <Shield className="w-4 h-4 text-[#b4a7ff]" />
+                    <Shield className="w-4 h-4 text-[#7DFFBF]" />
                   </div>
                   <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                     Set up Google Authenticator
@@ -291,7 +291,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                     Or enter this code manually
                   </p>
                   <code
-                    className="block p-3 rounded-lg text-center font-mono text-[12px] text-[#b4a7ff] break-words tracking-[0.005em]"
+                    className="block p-3 rounded-lg text-center font-mono text-[12px] text-[#7DFFBF] break-words tracking-[0.005em]"
                     style={{
                       background:
                         'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
@@ -544,10 +544,10 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                 'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
             }}
           >
-            <Shield className="w-3.5 h-3.5 text-[#b4a7ff]" />
+            <Shield className="w-3.5 h-3.5 text-[#7DFFBF]" />
           </div>
           <p className="text-[12px] text-zinc-300 tracking-[0.005em] leading-relaxed">
-            <span className="text-[#b4a7ff] font-medium">Security:</span> Only connect integrations
+            <span className="text-[#7DFFBF] font-medium">Security:</span> Only connect integrations
             you trust. Review and remove unused connections regularly.
           </p>
         </div>

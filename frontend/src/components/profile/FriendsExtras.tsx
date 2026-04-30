@@ -235,7 +235,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={u.avatarUrl} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-[10px] font-mono text-[#b4a7ff]">
+                      <span className="text-[10px] font-mono text-[#7DFFBF]">
                         {(u.displayName || u.username || '?').slice(0, 2).toUpperCase()}
                       </span>
                     )}
@@ -243,7 +243,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                   <div className="flex-1 min-w-0">
                     <Link
                       href={u.username ? `/u/${u.username}` : '#'}
-                      className="text-[13px] text-white font-semibold truncate hover:text-[#b4a7ff] transition block"
+                      className="text-[13px] text-white font-semibold truncate hover:text-[#7DFFBF] transition block"
                     >
                       {u.displayName || u.username || 'Anonymous'}
                     </Link>

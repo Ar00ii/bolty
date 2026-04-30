@@ -153,7 +153,7 @@ const LANG_COLORS: Record<string, string> = {
   Shell: '#89e051',
   Bash: '#89e051',
   Move: '#4a9eda',
-  Anchor: '#9945FF',
+  Anchor: '#14F195',
 };
 
 function LanguageDot({ lang }: { lang: string }) {

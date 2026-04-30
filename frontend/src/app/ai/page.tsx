@@ -202,7 +202,7 @@ export default function AiPage() {
                   'inset 0 0 0 1px rgba(20, 241, 149,0.38), 0 0 22px -4px rgba(20, 241, 149,0.5)',
               }}
             >
-              <Sparkles className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
+              <Sparkles className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.75} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight leading-none">
@@ -262,7 +262,7 @@ export default function AiPage() {
                         >
                           <MessageSquare
                             className="w-3.5 h-3.5 mt-0.5 shrink-0"
-                            style={{ color: active ? '#b4a7ff' : '#52525b' }}
+                            style={{ color: active ? '#7DFFBF' : '#52525b' }}
                           />
                           <div className="min-w-0 flex-1">
                             <p
@@ -305,7 +305,7 @@ export default function AiPage() {
                         'inset 0 0 0 1px rgba(20, 241, 149,0.38), 0 0 22px -4px rgba(20, 241, 149,0.5)',
                     }}
                   >
-                    <Bot className="w-7 h-7 text-[#b4a7ff]" strokeWidth={1.5} />
+                    <Bot className="w-7 h-7 text-[#7DFFBF]" strokeWidth={1.5} />
                   </div>
                   <p className="text-lg text-white font-semibold tracking-tight mb-1">
                     Ask me anything about Bolty
@@ -442,7 +442,7 @@ function MessageBubble({
         {isUser ? (
           <User className="w-4 h-4 text-zinc-300" strokeWidth={1.75} />
         ) : (
-          <Bot className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.75} />
+          <Bot className="w-4 h-4 text-[#7DFFBF]" strokeWidth={1.75} />
         )}
       </div>
       <div

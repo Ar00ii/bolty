@@ -547,7 +547,7 @@ function EmptyState({ query, typeFilter }: { query: string; typeFilter: string }
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.45)',
         }}
       >
-        <Bell className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+        <Bell className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.5} />
       </div>
       <p className="relative text-[14px] text-white font-normal">
         {query

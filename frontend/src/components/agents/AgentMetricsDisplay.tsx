@@ -74,7 +74,7 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
               'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
           }}
         >
-          <Activity className="w-5 h-5 text-[#b4a7ff]" />
+          <Activity className="w-5 h-5 text-[#7DFFBF]" />
         </div>
         <p className="text-[13px] text-zinc-400 tracking-[0.005em]">No metrics available</p>
       </div>
@@ -110,7 +110,7 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
       label: 'Avg Response Time',
       value: `${metrics.avgResponseTime}ms`,
       color: '131,110,249',
-      textColor: '#b4a7ff',
+      textColor: '#7DFFBF',
       icon: Zap,
     },
     {

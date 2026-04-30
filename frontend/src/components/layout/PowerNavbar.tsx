@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 
 import { MarketTicker } from '@/components/layout/MarketTicker';
-import { NAV, isItemActive } from '@/components/layout/StandardSidebar';
+import { MAIN_NAV as NAV, isItemActive } from '@/lib/nav-config';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useHowItWorks } from '@/components/providers/HowItWorksProvider';
@@ -559,7 +559,7 @@ export function PowerNavbar() {
                         >
                           <Icon
                             className="w-[15px] h-[15px] shrink-0"
-                            style={{ color: active ? '#a594ff' : '#71717a' }}
+                            style={{ color: active ? '#48F9A6' : '#71717a' }}
                             strokeWidth={1.75}
                           />
                           <span className="flex-1 truncate">{item.label}</span>
@@ -586,7 +586,7 @@ export function PowerNavbar() {
                               {ChildIcon && (
                                 <ChildIcon
                                   className="w-[14px] h-[14px] shrink-0"
-                                  style={{ color: childActive ? '#a594ff' : '#71717a' }}
+                                  style={{ color: childActive ? '#48F9A6' : '#71717a' }}
                                   strokeWidth={1.75}
                                 />
                               )}
@@ -816,7 +816,7 @@ function NavConnectChips({
             background: 'rgba(20, 241, 149,0.07)',
             border: `1px solid ${walletErr ? 'rgba(239,68,68,0.4)' : 'rgba(20, 241, 149,0.22)'}`,
             fontSize: '11.5px',
-            color: walletErr ? '#f87171' : '#a594ff',
+            color: walletErr ? '#f87171' : '#48F9A6',
             opacity: walletLoading ? 0.7 : 1,
           }}
           onMouseEnter={(e) => {

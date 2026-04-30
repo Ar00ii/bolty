@@ -155,7 +155,7 @@ export function AgentPickerModal({
                   boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                 }}
               >
-                <Zap className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.8} />
+                <Zap className="w-4 h-4 text-[#7DFFBF]" strokeWidth={1.8} />
               </div>
               <div className="min-w-0">
                 <div className="text-[13px] font-semibold text-white">
@@ -188,7 +188,7 @@ export function AgentPickerModal({
               </p>
               <Link
                 href="/market/agents?tab=mine&new=1"
-                className="inline-flex items-center gap-1 mt-2 text-[11.5px] text-[#b4a7ff] hover:text-white"
+                className="inline-flex items-center gap-1 mt-2 text-[11.5px] text-[#7DFFBF] hover:text-white"
               >
                 <Plus className="w-3 h-3" />
                 Deploy one

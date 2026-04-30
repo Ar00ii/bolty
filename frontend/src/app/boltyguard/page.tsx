@@ -234,7 +234,7 @@ export default function BoltyGuardPage() {
                 border: '1px solid rgba(20, 241, 149,0.5)',
               }}
             >
-              <Shield className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.8} />
+              <Shield className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.8} />
             </div>
             <div>
               <h1 className="text-[28px] text-white font-medium tracking-tight">
@@ -412,7 +412,7 @@ export default function BoltyGuardPage() {
                 />
                 {zipFile ? (
                   <div className="flex items-center justify-center gap-3">
-                    <FileArchive className="w-5 h-5 text-[#b4a7ff]" />
+                    <FileArchive className="w-5 h-5 text-[#7DFFBF]" />
                     <div className="text-left">
                       <div className="text-[13px] text-white font-medium">
                         {zipFile.name}

@@ -179,7 +179,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
         />
         <StatCard
           delay={0.28}
-          accent="#b4a7ff"
+          accent="#7DFFBF"
           label="Last 30 days"
           value={last30d}
           sub={`Last purchase ${timeAgo(data.lastPurchaseAt ?? null)}`}

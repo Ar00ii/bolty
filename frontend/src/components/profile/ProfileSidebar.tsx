@@ -81,12 +81,12 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
                 />
               )}
               <span
-                className={`relative w-5 h-5 flex items-center justify-center transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-500'}`}
+                className={`relative w-5 h-5 flex items-center justify-center transition-colors ${isActive ? 'text-[#7DFFBF]' : 'text-zinc-500'}`}
               >
                 {tab.icon}
               </span>
               <span
-                className={`relative text-[13px] font-semibold flex-1 text-left tracking-[0.005em] transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-300'}`}
+                className={`relative text-[13px] font-semibold flex-1 text-left tracking-[0.005em] transition-colors ${isActive ? 'text-[#7DFFBF]' : 'text-zinc-300'}`}
               >
                 {tab.label}
               </span>

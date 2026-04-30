@@ -684,7 +684,7 @@ function OrdersTable({
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.45)',
           }}
         >
-          <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+          <ShoppingBag className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.5} />
         </div>
         <p className="relative text-[14px] text-white font-normal">
           {tab === 'buying' ? 'No purchases match your filters' : 'No sales match your filters'}
@@ -862,7 +862,7 @@ function OrderRow({
         </div>
 
         {/* Amount */}
-        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#7DFFBF]">
           {ethAmount !== null ? formatEth(ethAmount) : '—'}
           <span className="text-zinc-600 ml-1 text-[10px]">ETH</span>
         </div>
@@ -889,7 +889,7 @@ function OrderRow({
               onClick={(e) => e.stopPropagation()}
               aria-label={`Message @${peer.username || 'user'}`}
               title={`Message @${peer.username || 'user'}`}
-              className="ml-auto w-5 h-5 rounded-md flex items-center justify-center text-zinc-500 hover:text-[#b4a7ff] hover:bg-white/10 transition flex-shrink-0"
+              className="ml-auto w-5 h-5 rounded-md flex items-center justify-center text-zinc-500 hover:text-[#7DFFBF] hover:bg-white/10 transition flex-shrink-0"
             >
               <MessageCircle className="w-3 h-3" strokeWidth={1.75} />
             </Link>
@@ -971,7 +971,7 @@ function NegotiationsTable({
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.45)',
           }}
         >
-          <Handshake className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+          <Handshake className="w-5 h-5 text-[#7DFFBF]" strokeWidth={1.5} />
         </div>
         <p className="relative text-[14px] text-white font-normal">No negotiations yet</p>
         <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-5 max-w-sm mx-auto font-semibold">

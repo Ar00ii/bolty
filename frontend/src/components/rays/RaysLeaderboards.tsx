@@ -29,7 +29,7 @@ const RANK_META: Record<string, { color: string; textColor: string }> = {
   BRONCE: { color: '180,83,9', textColor: '#fcd34d' },
   PLATA: { color: '148,163,184', textColor: '#e2e8f0' },
   ORO: { color: '234,179,8', textColor: '#fde047' },
-  PLATINO: { color: '131,110,249', textColor: '#b4a7ff' },
+  PLATINO: { color: '131,110,249', textColor: '#7DFFBF' },
   DIAMANTE: { color: '6,182,212', textColor: '#67e8f9' },
   MAESTRIA: { color: '59,130,246', textColor: '#93c5fd' },
   CAMPEON: { color: '239,68,68', textColor: '#fda4af' },
@@ -39,7 +39,7 @@ const getPositionMeta = (position: number) => {
   if (position === 1) return { color: '234,179,8', textColor: '#fde047', Icon: Crown };
   if (position === 2) return { color: '148,163,184', textColor: '#e2e8f0', Icon: Medal };
   if (position === 3) return { color: '180,83,9', textColor: '#fcd34d', Icon: Award };
-  return { color: '131,110,249', textColor: '#b4a7ff', Icon: null };
+  return { color: '131,110,249', textColor: '#7DFFBF', Icon: null };
 };
 
 export const RaysLeaderboards: React.FC = () => {
@@ -105,7 +105,7 @@ export const RaysLeaderboards: React.FC = () => {
             'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
         }}
       >
-        <Icon className="w-5 h-5 text-[#b4a7ff]" />
+        <Icon className="w-5 h-5 text-[#7DFFBF]" />
       </div>
       <p className="text-[13px] text-zinc-400 tracking-[0.005em]">{label}</p>
     </div>
@@ -142,7 +142,7 @@ export const RaysLeaderboards: React.FC = () => {
                 'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
             }}
           >
-            <TrendingUp className="w-4 h-4 text-[#b4a7ff]" />
+            <TrendingUp className="w-4 h-4 text-[#7DFFBF]" />
           </div>
           <h2 className="text-2xl font-semibold text-white tracking-[-0.01em]">Rays Leaderboards</h2>
         </div>
@@ -158,7 +158,7 @@ export const RaysLeaderboards: React.FC = () => {
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 420, damping: 26 }}
           className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-semibold tracking-[0.005em] ${
-            activeTab === 'rays' ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-zinc-200'
+            activeTab === 'rays' ? 'text-[#7DFFBF]' : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           {activeTab === 'rays' && (
@@ -182,7 +182,7 @@ export const RaysLeaderboards: React.FC = () => {
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 420, damping: 26 }}
           className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-semibold tracking-[0.005em] ${
-            activeTab === 'creators' ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-zinc-200'
+            activeTab === 'creators' ? 'text-[#7DFFBF]' : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           {activeTab === 'creators' && (
@@ -368,7 +368,7 @@ export const RaysLeaderboards: React.FC = () => {
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-lg font-semibold text-[#b4a7ff] tabular-nums tracking-[-0.005em]">
+                      <p className="text-lg font-semibold text-[#7DFFBF] tabular-nums tracking-[-0.005em]">
                         {entry.totalRays.toLocaleString()}
                       </p>
                       <p className="text-[11px] text-zinc-500 mt-0.5 tabular-nums tracking-[0.005em]">
