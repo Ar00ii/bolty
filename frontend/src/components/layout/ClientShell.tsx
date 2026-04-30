@@ -68,10 +68,10 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <RouteProgress />
       <CommandPalette />
       <ShortcutsModal />
-      {!isAuth && <LiveToastBridge />}
-      {!isAuth && <FloatingTopBar />}
-      {!isAuth && <BackToTop />}
-      {!isAuth && <UnifiedHeader />}
+      {!isAuth && !isHome && <LiveToastBridge />}
+      {!isAuth && !isHome && <FloatingTopBar />}
+      {!isAuth && !isHome && <BackToTop />}
+      {!isAuth && !isHome && <UnifiedHeader />}
 
       <div className={`flex ${!isHome && !isAuth && !isLegal ? 'pt-16' : ''}`}>
         <div className="flex-1 w-full min-w-0">
