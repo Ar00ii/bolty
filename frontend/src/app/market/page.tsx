@@ -464,6 +464,42 @@ function MarketScreener() {
         </div>
       </header>
 
+      {/* Intent chips — quick paths for first-time visitors */}
+      <section className="px-6 md:px-10 mb-3 mt-2">
+        <div className="mx-auto max-w-[1400px]">
+          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-500 mb-2">
+            What are you looking for?
+          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <IntentChip
+              label="🤖 AI agents"
+              active={typeFilter === 'AI_AGENT'}
+              onClick={() => setTypeFilter(typeFilter === 'AI_AGENT' ? 'ALL' : 'AI_AGENT')}
+            />
+            <IntentChip
+              label="📦 Code repos"
+              active={typeFilter === 'REPO'}
+              onClick={() => setTypeFilter(typeFilter === 'REPO' ? 'ALL' : 'REPO')}
+            />
+            <IntentChip
+              label="🤝 Bots & scripts"
+              active={typeFilter === 'BOT' || typeFilter === 'SCRIPT'}
+              onClick={() => setTypeFilter(typeFilter === 'BOT' ? 'ALL' : 'BOT')}
+            />
+            <IntentChip
+              label="🎁 Free"
+              active={false}
+              onClick={() => {
+                setSearch('');
+                setSort('recent');
+                setTypeFilter('ALL');
+              }}
+              hint="Browse no-cost listings"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Live community strip — last posts from #marketplace feed */}
       <section className="px-6 md:px-10 mb-3 mt-1">
         <div className="mx-auto max-w-[1400px]">
@@ -723,6 +759,34 @@ function TypeTabs({ value, onChange }: { value: TypeFilter; onChange: (v: TypeFi
         </button>
       ))}
     </div>
+  );
+}
+
+function IntentChip({
+  label,
+  active,
+  onClick,
+  hint,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  hint?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={hint}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-light transition-all hover:translate-y-[-1px]"
+      style={{
+        background: active ? 'rgba(131,110,249,0.16)' : 'rgba(255,255,255,0.03)',
+        color: active ? '#ede9fe' : '#a1a1aa',
+        boxShadow: `inset 0 0 0 1px ${active ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.08)'}`,
+      }}
+    >
+      {label}
+    </button>
   );
 }
 

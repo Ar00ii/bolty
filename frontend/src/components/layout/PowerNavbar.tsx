@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Copy, Github, LogOut, Menu, Search, Wallet, X } from 'lucide-react';
+import { Bell, Copy, Github, HelpCircle, LogOut, Menu, Search, Wallet, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
@@ -9,6 +9,7 @@ import { MarketTicker } from '@/components/layout/MarketTicker';
 import { NAV, isItemActive } from '@/components/layout/StandardSidebar';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { useHowItWorks } from '@/components/providers/HowItWorksProvider';
 import { API_URL, api } from '@/lib/api/client';
 import { type User, useAuth } from '@/lib/auth/AuthProvider';
 import { useNotificationsPoll } from '@/lib/hooks/useNotifications';
@@ -55,6 +56,7 @@ export function PowerNavbar() {
   const router = useRouter();
   const { user, logout, isAuthenticated, refresh } = useAuth();
   const { count: unreadCount } = useNotificationsPoll(isAuthenticated);
+  const howItWorks = useHowItWorks();
 
   const crumbs = useMemo(() => buildCrumbs(pathname), [pathname]);
 
@@ -214,6 +216,26 @@ export function PowerNavbar() {
 
         {/* Wallet + GitHub quick-connect chips */}
         {isAuthenticated && <NavConnectChips user={user} refresh={refresh} />}
+
+        {/* How it works — available to everyone, signed-in or not */}
+        <button
+          type="button"
+          onClick={howItWorks.open}
+          className="relative grid place-items-center rounded-lg transition-colors"
+          style={{ width: '32px', height: '32px', color: '#71717a' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#e4e4e7';
+            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#71717a';
+            e.currentTarget.style.background = 'transparent';
+          }}
+          title="How it works"
+          aria-label="How it works"
+        >
+          <HelpCircle className="w-[15px] h-[15px]" strokeWidth={1.6} />
+        </button>
 
         {/* Notification bell (signed-in only) */}
         {isAuthenticated && (

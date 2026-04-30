@@ -4,6 +4,7 @@ import React from 'react';
 
 import './globals.css';
 import { ClientShell } from '@/components/layout/ClientShell';
+import { HowItWorksProvider } from '@/components/providers/HowItWorksProvider';
 import { SolanaWalletProvider } from '@/components/providers/SolanaWalletProvider';
 import { ToastContainer } from '@/components/ui/Toast';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
@@ -160,7 +161,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ToastProvider>
             <SolanaWalletProvider>
               <AuthProvider>
-                <ClientShell>{children}</ClientShell>
+                <HowItWorksProvider>
+                  <ClientShell>{children}</ClientShell>
+                </HowItWorksProvider>
               </AuthProvider>
             </SolanaWalletProvider>
             <ToastContainer />
