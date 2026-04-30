@@ -70,7 +70,7 @@ function Toast({ toast, onClose }: { toast: ToastType; onClose: () => void }) {
         <Icon className="w-3.5 h-3.5" style={{ color: meta.textColor }} strokeWidth={1.75} />
       </div>
       <span
-        className="text-[13px] font-light tracking-[0.005em] flex-1"
+        className="text-[13px] font-semibold tracking-[0.005em] flex-1"
         style={{ color: meta.textColor }}
       >
         {toast.message}

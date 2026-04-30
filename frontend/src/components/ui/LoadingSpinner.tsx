@@ -36,7 +36,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         style={{
           borderTopColor: 'currentColor',
           borderRightColor: 'currentColor',
-          filter: color === 'purple' ? 'drop-shadow(0 0 6px rgba(131,110,249,0.55))' : undefined,
+          filter: color === 'purple' ? 'drop-shadow(0 0 6px rgba(20, 241, 149,0.55))' : undefined,
         }}
       />
     </div>

@@ -81,7 +81,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-light text-white">Activity Log</h2>
+          <h2 className="text-xl font-semibold text-white">Activity Log</h2>
           <p className="text-sm text-gray-400 mt-1">Your recent account activity</p>
         </div>
         {onExport && (
@@ -90,7 +90,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="px-4 py-2 rounded-lg text-[13px] font-light tracking-[0.005em] text-zinc-300 hover:text-white hover:brightness-110 transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-lg text-[13px] font-semibold tracking-[0.005em] text-zinc-300 hover:text-white hover:brightness-110 transition-colors flex items-center gap-2"
             style={{
               background: 'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
               boxShadow:
@@ -118,16 +118,16 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
               className="absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
               }}
             />
             <div
               className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
               }}
             >
               <FileText className="w-5 h-5 text-[#b4a7ff]" />
@@ -180,7 +180,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
                   <div className="flex-1 min-w-0 pt-1">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-[14px] font-light text-white tracking-[0.005em]">
+                        <h3 className="text-[14px] font-semibold text-white tracking-[0.005em]">
                           {event.title}
                         </h3>
                         <p className="text-[12px] text-zinc-400 mt-0.5 tracking-[0.005em]">
@@ -225,7 +225,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="text-[13px] font-light tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors"
+            className="text-[13px] font-semibold tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors"
           >
             Load more activity
           </motion.button>

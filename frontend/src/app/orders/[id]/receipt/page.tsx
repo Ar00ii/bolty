@@ -28,7 +28,7 @@ interface Order {
   seller: { id: string; username: string | null; avatarUrl: string | null };
 }
 
-const BRAND = '#836EF9';
+const BRAND = '#14F195';
 
 const WEI_PER_ETH = BigInt('1000000000000000000');
 const BIGINT_ZERO = BigInt(0);
@@ -186,12 +186,12 @@ export default function OrderReceiptPage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px no-print"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="flex items-start justify-between mb-8 pb-6 border-b border-zinc-800">
             <div>
-              <div className="text-xl font-light tracking-tight mb-1" style={{ color: BRAND }}>
+              <div className="text-xl font-semibold tracking-tight mb-1" style={{ color: BRAND }}>
                 Bolty
               </div>
               <div className="text-[11px] uppercase tracking-wider text-zinc-500">Receipt</div>
@@ -207,7 +207,7 @@ export default function OrderReceiptPage() {
               <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">
                 Issued
               </div>
-              <div className="text-sm text-white font-light">{formatDate(order.createdAt)}</div>
+              <div className="text-sm text-white font-semibold">{formatDate(order.createdAt)}</div>
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">
@@ -217,7 +217,7 @@ export default function OrderReceiptPage() {
                 {order.status === 'COMPLETED' ? (
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 ) : null}
-                <span className="text-sm font-light text-white">
+                <span className="text-sm font-semibold text-white">
                   {order.status.replace('_', ' ')}
                 </span>
               </div>
@@ -234,14 +234,14 @@ export default function OrderReceiptPage() {
               </div>
               <Link
                 href={`/market/sellers/${order.seller.username || ''}`}
-                className="text-sm text-white font-light hover:text-[#836EF9] transition-colors"
+                className="text-sm text-white font-semibold hover:text-[#14F195] transition-colors"
               >
                 @{order.seller.username || 'seller'}
               </Link>
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">Buyer</div>
-              <div className="text-sm font-light text-white">
+              <div className="text-sm font-semibold text-white">
                 @{order.buyer.username || 'buyer'}
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function OrderReceiptPage() {
                 <div className="min-w-0">
                   <Link
                     href={`/market/agents/${order.listing.id}`}
-                    className="text-sm font-light text-white hover:text-[#836EF9] transition-colors truncate block"
+                    className="text-sm font-semibold text-white hover:text-[#14F195] transition-colors truncate block"
                   >
                     {order.listing.title}
                   </Link>
@@ -270,17 +270,17 @@ export default function OrderReceiptPage() {
           <div className="border-t border-zinc-800 pt-6 mb-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-zinc-400 font-light">Subtotal</span>
+                <span className="text-zinc-400 font-semibold">Subtotal</span>
                 <span className="font-mono text-zinc-200">{amountLabel} ETH</span>
               </div>
               {order.platformFeeWei && order.platformFeeWei !== '0' && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-400 font-light">Platform fee</span>
+                  <span className="text-zinc-400 font-semibold">Platform fee</span>
                   <span className="font-mono text-zinc-200">{feeLabel} ETH</span>
                 </div>
               )}
               <div className="flex items-center justify-between text-sm pt-3 mt-3 border-t border-zinc-800/60">
-                <span className="font-light text-white">Total paid</span>
+                <span className="font-semibold text-white">Total paid</span>
                 <span className="font-mono text-white text-base">{totalPaid} ETH</span>
               </div>
             </div>
@@ -361,8 +361,8 @@ export default function OrderReceiptPage() {
               className="flex items-start gap-2.5 p-3 rounded-lg"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.04) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                  'linear-gradient(180deg, rgba(20, 241, 149,0.12) 0%, rgba(20, 241, 149,0.04) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
               }}
             >
               <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: BRAND }} />

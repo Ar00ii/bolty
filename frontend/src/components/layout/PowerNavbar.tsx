@@ -266,7 +266,7 @@ export function PowerNavbar() {
                   height: '15px',
                   padding: '0 4px',
                   borderRadius: '999px',
-                  background: '#836EF9',
+                  background: '#14F195',
                   color: 'white',
                   fontSize: '9.5px',
                   fontWeight: 600,
@@ -287,11 +287,11 @@ export function PowerNavbar() {
             className="text-[13px] transition-colors px-3 py-1.5 rounded-md"
             style={{
               color: '#e4e4e7',
-              background: 'rgba(131,110,249,0.15)',
-              border: '1px solid rgba(131,110,249,0.3)',
+              background: 'rgba(20, 241, 149,0.15)',
+              border: '1px solid rgba(20, 241, 149,0.3)',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.25)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.15)')}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(20, 241, 149,0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(20, 241, 149,0.15)')}
           >
             Sign in
           </Link>
@@ -371,7 +371,7 @@ export function PowerNavbar() {
                   style={{
                     borderBottom: '1px solid #1f1f23',
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.08) 0%, rgba(20, 241, 149,0) 100%)',
                   }}
                 >
                   <div
@@ -510,7 +510,7 @@ export function PowerNavbar() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
                 </div>
-                <span className="text-[15px] font-light text-white truncate">
+                <span className="text-[15px] font-semibold text-white truncate">
                   BoltyNetwork
                 </span>
               </Link>
@@ -552,7 +552,7 @@ export function PowerNavbar() {
                           className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors"
                           style={{
                             color: active ? '#e4e4e7' : '#a1a1aa',
-                            background: active ? 'rgba(131,110,249,0.10)' : 'transparent',
+                            background: active ? 'rgba(20, 241, 149,0.10)' : 'transparent',
                             fontSize: '14px',
                             fontWeight: 300,
                           }}
@@ -576,7 +576,7 @@ export function PowerNavbar() {
                               style={{
                                 color: childActive ? '#e4e4e7' : '#a1a1aa',
                                 background: childActive
-                                  ? 'rgba(131,110,249,0.10)'
+                                  ? 'rgba(20, 241, 149,0.10)'
                                   : 'transparent',
                                 fontSize: '13px',
                                 fontWeight: 300,
@@ -608,8 +608,8 @@ export function PowerNavbar() {
                   onClick={() => setNavDrawerOpen(false)}
                   className="block text-center rounded-md py-2.5 text-[13px] transition-colors"
                   style={{
-                    background: 'rgba(131,110,249,0.15)',
-                    border: '1px solid rgba(131,110,249,0.3)',
+                    background: 'rgba(20, 241, 149,0.15)',
+                    border: '1px solid rgba(20, 241, 149,0.3)',
                     color: '#e4e4e7',
                   }}
                 >
@@ -813,19 +813,19 @@ function NavConnectChips({
           className="flex items-center gap-1.5 rounded-lg transition-colors"
           style={{
             padding: '5px 9px',
-            background: 'rgba(131,110,249,0.07)',
-            border: `1px solid ${walletErr ? 'rgba(239,68,68,0.4)' : 'rgba(131,110,249,0.22)'}`,
+            background: 'rgba(20, 241, 149,0.07)',
+            border: `1px solid ${walletErr ? 'rgba(239,68,68,0.4)' : 'rgba(20, 241, 149,0.22)'}`,
             fontSize: '11.5px',
             color: walletErr ? '#f87171' : '#a594ff',
             opacity: walletLoading ? 0.7 : 1,
           }}
           onMouseEnter={(e) => {
             if (!walletErr)
-              e.currentTarget.style.background = 'rgba(131,110,249,0.14)';
+              e.currentTarget.style.background = 'rgba(20, 241, 149,0.14)';
           }}
           onMouseLeave={(e) => {
             if (!walletErr)
-              e.currentTarget.style.background = 'rgba(131,110,249,0.07)';
+              e.currentTarget.style.background = 'rgba(20, 241, 149,0.07)';
           }}
         >
           <Wallet className="w-[12px] h-[12px] shrink-0" strokeWidth={1.75} />

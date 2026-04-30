@@ -230,8 +230,8 @@ export default function BoltyGuardPage() {
             <div
               className="w-10 h-10 rounded-xl grid place-items-center"
               style={{
-                background: 'rgba(131,110,249,0.18)',
-                border: '1px solid rgba(131,110,249,0.5)',
+                background: 'rgba(20, 241, 149,0.18)',
+                border: '1px solid rgba(20, 241, 149,0.5)',
               }}
             >
               <Shield className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.8} />
@@ -240,14 +240,14 @@ export default function BoltyGuardPage() {
               <h1 className="text-[28px] text-white font-medium tracking-tight">
                 BoltyGuard
               </h1>
-              <p className="text-[13.5px] text-zinc-400 font-light mt-0.5">
+              <p className="text-[13.5px] text-zinc-400 font-semibold mt-0.5">
                 Static security scanner — paste source code or upload a zip.
                 Not a chat. Returns a 0–100 score, findings + fixes.
               </p>
             </div>
           </div>
           <div
-            className="rounded-xl p-3.5 text-[12.5px] text-zinc-300 font-light leading-relaxed"
+            className="rounded-xl p-3.5 text-[12.5px] text-zinc-300 font-semibold leading-relaxed"
             style={{
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -271,7 +271,7 @@ export default function BoltyGuardPage() {
             onClick={() => setMode('paste')}
             className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition"
             style={{
-              background: mode === 'paste' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              background: mode === 'paste' ? 'rgba(20, 241, 149,0.22)' : 'transparent',
               color: mode === 'paste' ? '#ffffff' : '#a1a1aa',
             }}
           >
@@ -282,7 +282,7 @@ export default function BoltyGuardPage() {
             onClick={() => setMode('zip')}
             className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition inline-flex items-center gap-1.5"
             style={{
-              background: mode === 'zip' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              background: mode === 'zip' ? 'rgba(20, 241, 149,0.22)' : 'transparent',
               color: mode === 'zip' ? '#ffffff' : '#a1a1aa',
             }}
           >
@@ -294,7 +294,7 @@ export default function BoltyGuardPage() {
             onClick={() => setMode('repo')}
             className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition inline-flex items-center gap-1.5"
             style={{
-              background: mode === 'repo' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              background: mode === 'repo' ? 'rgba(20, 241, 149,0.22)' : 'transparent',
               color: mode === 'repo' ? '#ffffff' : '#a1a1aa',
             }}
           >
@@ -318,7 +318,7 @@ export default function BoltyGuardPage() {
                   <select
                     value={fileExt}
                     onChange={(e) => setFileExt(e.target.value)}
-                    className="bg-black border border-white/10 rounded-lg px-2.5 py-1.5 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50"
+                    className="bg-black border border-white/10 rounded-lg px-2.5 py-1.5 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-[#14F195]/50"
                   >
                     {FILE_EXTENSIONS.map((f) => (
                       <option key={f.value} value={f.value}>
@@ -333,7 +333,7 @@ export default function BoltyGuardPage() {
                   type="checkbox"
                   checked={isAgent}
                   onChange={(e) => setIsAgent(e.target.checked)}
-                  className="accent-[#836EF9]"
+                  className="accent-[#14F195]"
                 />
                 Treat as AI agent (extra checks)
               </label>
@@ -364,7 +364,7 @@ export default function BoltyGuardPage() {
                   placeholder="Paste source code (Python, TS, JS, Go, Ruby, Java...). BoltyGuard is a security scanner — not a chat. Try one of the samples above to see findings."
                   rows={14}
                   spellCheck={false}
-                  className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all font-mono"
+                  className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#14F195]/50 transition-all font-mono"
                   style={{
                     background: '#000000',
                     border: '1px solid rgba(255,255,255,0.12)',
@@ -438,7 +438,7 @@ export default function BoltyGuardPage() {
                     <div className="text-[13px] text-white font-medium">
                       Drop a ZIP or click to upload
                     </div>
-                    <div className="text-[11px] font-light">
+                    <div className="text-[11px] font-semibold">
                       Up to 5MB · 100 files · 10MB uncompressed.
                       Bombs / traversal / symlinks are auto-rejected.
                     </div>
@@ -465,7 +465,7 @@ export default function BoltyGuardPage() {
                     className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-white placeholder-zinc-600 font-mono"
                   />
                 </div>
-                <div className="text-[11px] text-zinc-500 font-light">
+                <div className="text-[11px] text-zinc-500 font-semibold">
                   Public repos only · max 5MB zipball · scans every
                   source file with the same caps as ZIP uploads. Each
                   repo scan counts as one against your daily quota.
@@ -488,9 +488,9 @@ export default function BoltyGuardPage() {
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.4) 100%)',
-                  border: '1px solid rgba(131,110,249,0.55)',
-                  boxShadow: '0 4px 20px -8px rgba(131,110,249,0.7)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.6) 0%, rgba(20, 241, 149,0.4) 100%)',
+                  border: '1px solid rgba(20, 241, 149,0.55)',
+                  boxShadow: '0 4px 20px -8px rgba(20, 241, 149,0.7)',
                 }}
               >
                 {loading ? (
@@ -671,7 +671,7 @@ function ResultPanel({
                   </span>
                 )}
                 {' — '}
-                <span className="font-light">{f.message}</span>
+                <span className="font-semibold">{f.message}</span>
               </li>
             ))}
           </ol>
@@ -767,11 +767,11 @@ function ResultPanel({
                     </span>
                   )}
                 </div>
-                <p className="text-[13px] text-white/85 font-light leading-relaxed">
+                <p className="text-[13px] text-white/85 font-semibold leading-relaxed">
                   {f.message}
                 </p>
                 {f.fix && (
-                  <p className="mt-1 text-[12.5px] text-emerald-300/85 font-light leading-relaxed">
+                  <p className="mt-1 text-[12.5px] text-emerald-300/85 font-semibold leading-relaxed">
                     Fix: {f.fix}
                   </p>
                 )}

@@ -16,7 +16,7 @@ const FADE = [0.22, 0.61, 0.36, 1] as const;
  * page hanging around.
  *
  * Visual language matches the real `.mk-*` classes in globals.css —
- * dark cards with the brand purple #836EF9 ambient, shimmer animation
+ * dark cards with the brand purple #14F195 ambient, shimmer animation
  * via the `.skeleton` utility class.
  */
 

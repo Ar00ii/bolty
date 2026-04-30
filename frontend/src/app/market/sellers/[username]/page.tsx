@@ -76,7 +76,7 @@ const TYPE_META: Record<
   }
 > = {
   AI_AGENT: { label: 'AI Agent', color: '#a855f7', Icon: Bot },
-  BOT: { label: 'Bot', color: '#836EF9', Icon: Bot },
+  BOT: { label: 'Bot', color: '#14F195', Icon: Bot },
   SCRIPT: { label: 'Script', color: '#06B6D4', Icon: Zap },
   REPO: { label: 'Repo', color: '#3b82f6', Icon: GitBranch },
   OTHER: { label: 'Other', color: '#64748b', Icon: Package },
@@ -141,7 +141,7 @@ export default function SellerProfilePage() {
         <p className="text-zinc-400">Seller not found</p>
         <Link
           href="/market"
-          className="text-sm text-purple-300 hover:text-purple-200 inline-flex items-center gap-1.5"
+          className="text-sm text-bolty-300 hover:text-bolty-200 inline-flex items-center gap-1.5"
         >
           Back to marketplace
         </Link>
@@ -157,7 +157,7 @@ export default function SellerProfilePage() {
     <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
       <div
         className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
       />
 
       {/* Breadcrumb */}
@@ -196,7 +196,7 @@ export default function SellerProfilePage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="flex flex-col sm:flex-row gap-6 items-start">
@@ -204,9 +204,9 @@ export default function SellerProfilePage() {
               className="w-20 h-20 rounded-full overflow-hidden shrink-0 flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 32px -6px rgba(20, 241, 149,0.5)',
               }}
             >
               {seller.avatarUrl ? (
@@ -217,14 +217,14 @@ export default function SellerProfilePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl font-light" style={{ color: '#b4a7ff' }}>
+                <span className="text-2xl font-semibold" style={{ color: '#b4a7ff' }}>
                   {seller.username.slice(0, 1).toUpperCase()}
                 </span>
               )}
             </div>
 
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-[-0.01em] break-all">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-[-0.01em] break-all">
                 <GradientText gradient="purple">@{seller.username}</GradientText>
               </h1>
               {seller.bio && (
@@ -301,16 +301,16 @@ export default function SellerProfilePage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                 }}
               />
               <div
                 className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
                 style={{
                   background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                    'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.04) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 24px -6px rgba(131,110,249,0.5)',
+                    'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 24px -6px rgba(20, 241, 149,0.5)',
                 }}
               >
                 <Package className="w-5 h-5" style={{ color: '#b4a7ff' }} />
@@ -382,7 +382,7 @@ export default function SellerProfilePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="text-zinc-200 font-light">
+                      <span className="text-zinc-200 font-semibold">
                         @{r.author.username || 'anon'}
                       </span>
                       <span className="text-zinc-600">·</span>
@@ -461,7 +461,7 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  accent = '#836EF9',
+  accent = '#14F195',
 }: {
   label: string;
   value: string | number;
@@ -494,7 +494,7 @@ function StatCard({
           <Icon className="w-3 h-3" style={{ color: accent }} />
         </div>
       </div>
-      <div className="text-2xl font-light text-white relative tracking-[-0.01em]">{value}</div>
+      <div className="text-2xl font-semibold text-white relative tracking-[-0.01em]">{value}</div>
     </div>
   );
 }
@@ -588,7 +588,7 @@ function ListingsGrid({
                   <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
                 </div>
                 <div className="min-w-0 flex-1 pr-7">
-                  <div className="text-[13px] font-light text-white truncate tracking-[0.005em]">
+                  <div className="text-[13px] font-semibold text-white truncate tracking-[0.005em]">
                     {l.title}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-0.5">
@@ -597,7 +597,7 @@ function ListingsGrid({
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-white font-light">
+                <span className="text-sm text-white font-semibold">
                   {l.price} <span className="text-zinc-500 text-xs">{l.currency}</span>
                 </span>
                 {l.reviewAverage !== null &&

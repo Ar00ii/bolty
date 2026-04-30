@@ -322,7 +322,7 @@ function Alert({ type, msg }: { type: 'success' | 'error'; msg: string }) {
   if (!msg) return null;
   return (
     <div
-      className={`flex items-start gap-3 rounded-lg px-4 py-3 mb-6 text-sm font-light animate-[fade-in_0.3s_ease] ${
+      className={`flex items-start gap-3 rounded-lg px-4 py-3 mb-6 text-sm font-semibold animate-[fade-in_0.3s_ease] ${
         type === 'success'
           ? 'bg-green-500/10 border border-green-500/30 text-green-300'
           : 'bg-red-500/10 border border-red-500/30 text-red-300'
@@ -364,7 +364,7 @@ function Avatar({
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-8 mt-0">
-      <h2 className="text-lg font-light text-white tracking-tight">{title}</h2>
+      <h2 className="text-lg font-semibold text-white tracking-tight">{title}</h2>
       {subtitle && <p className="text-sm text-[var(--text-secondary)] mt-1">{subtitle}</p>}
     </div>
   );
@@ -373,7 +373,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-light text-[var(--text-secondary)] mb-2.5">
+      <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2.5">
         {label}
       </label>
       {children}
@@ -385,7 +385,7 @@ function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] font-light ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-bolty-500/60 focus:shadow-[0_0_0_3px_rgba(20, 241, 149,0.1)] placeholder:text-[var(--text-muted)] font-semibold ${props.className ?? ''}`}
     />
   );
 }
@@ -394,7 +394,7 @@ function Textarea({ ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return (
     <textarea
       {...props}
-      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] resize-none font-light ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-bolty-500/60 focus:shadow-[0_0_0_3px_rgba(20, 241, 149,0.1)] placeholder:text-[var(--text-muted)] resize-none font-semibold ${props.className ?? ''}`}
     />
   );
 }
@@ -404,7 +404,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-2xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-purple-600/20 hover:bg-purple-600/30 transition-all duration-200 border-2 border-purple-500/40 hover:border-purple-500/60 text-purple-200 hover:text-purple-100"
+      className="btn-primary w-full py-3 rounded-2xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-bolty-600/20 hover:bg-bolty-600/30 transition-all duration-200 border-2 border-bolty-500/40 hover:border-bolty-500/60 text-bolty-200 hover:text-bolty-100"
     >
       {loading ? (
         <>
@@ -1385,7 +1385,7 @@ export default function ProfilePage() {
       {/* App-style two-column shell.
        *  Left:  sticky sidebar with the user identity card on top + the
        *         section list below. Black panel, 1px purple-tinted border,
-       *         active row marked by a 2px left bar in #836EF9.
+       *         active row marked by a 2px left bar in #14F195.
        *  Right: section content. No ambient glows, no cyan accents, no
        *         heavy gradients — clean dark surface with a single brand
        *         accent so the data inside reads. */}
@@ -1403,8 +1403,8 @@ export default function ProfilePage() {
               <div
                 className="w-10 h-10 rounded-full overflow-hidden grid place-items-center shrink-0"
                 style={{
-                  background: 'rgba(131,110,249,0.12)',
-                  border: '1px solid rgba(131,110,249,0.3)',
+                  background: 'rgba(20, 241, 149,0.12)',
+                  border: '1px solid rgba(20, 241, 149,0.3)',
                 }}
               >
                 {user?.avatarUrl ? (
@@ -1455,22 +1455,22 @@ export default function ProfilePage() {
                   onClick={() => setTab(id)}
                   role="tab"
                   aria-selected={active}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-light transition-colors relative"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-semibold transition-colors relative"
                   style={{
                     color: active ? '#ffffff' : '#a1a1aa',
-                    background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
+                    background: active ? 'rgba(20, 241, 149,0.08)' : 'transparent',
                   }}
                 >
                   {active && (
                     <span
                       aria-hidden
                       className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r"
-                      style={{ background: '#836EF9' }}
+                      style={{ background: '#14F195' }}
                     />
                   )}
                   <span
                     className="inline-flex shrink-0"
-                    style={{ color: active ? '#836EF9' : '#71717a' }}
+                    style={{ color: active ? '#14F195' : '#71717a' }}
                   >
                     <Icon className="w-[15px] h-[15px]" />
                   </span>
@@ -1483,7 +1483,7 @@ export default function ProfilePage() {
 
         <main className="min-w-0">
           <div className="mb-5">
-            <h1 className="text-[22px] font-light tracking-tight">
+            <h1 className="text-[22px] font-semibold tracking-tight">
               {activeTab.label}
             </h1>
             <p className="text-[12.5px] text-zinc-500 mt-0.5">
@@ -1507,7 +1507,7 @@ export default function ProfilePage() {
               <Alert type="error" msg={genErr} />
 
               {/* Avatar upload */}
-              <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(168,85,247,0.15)] bg-gradient-to-r from-[rgba(168,85,247,0.05)] to-transparent mb-6">
+              <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(20, 241, 149,0.15)] bg-gradient-to-r from-[rgba(20, 241, 149,0.05)] to-transparent mb-6">
                 <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
                   <div
                     className="relative group cursor-pointer"
@@ -1596,7 +1596,7 @@ export default function ProfilePage() {
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-light text-[var(--text)] mb-0.5">Profile photo</div>
+                  <div className="text-sm font-semibold text-[var(--text)] mb-0.5">Profile photo</div>
                   <div className="text-xs text-[var(--text-muted)] mb-2">
                     PNG, JPG or WebP · max 3 MB
                   </div>
@@ -1633,7 +1633,7 @@ export default function ProfilePage() {
               <form onSubmit={handleSaveGeneral} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Username">
-                    <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                    <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(20, 241, 149,0.08)] transition-all duration-200">
                       <span className="px-3 text-bolty-400 font-mono text-sm select-none">@</span>
                       <input
                         type="text"
@@ -1678,7 +1678,7 @@ export default function ProfilePage() {
                       <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
                         User ID
                       </div>
-                      <div className="font-mono text-bolty-400 font-light">#{userTag}</div>
+                      <div className="font-mono text-bolty-400 font-semibold">#{userTag}</div>
                     </div>
                     <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
                       Others can find you
@@ -1697,7 +1697,7 @@ export default function ProfilePage() {
                   as a sibling subsection so the user sees both at once. */}
               <div className="mt-6 pt-5 border-t border-white/[0.06]">
                 <div className="mb-4">
-                  <h3 className="text-[14px] text-white font-light">Social links</h3>
+                  <h3 className="text-[14px] text-white font-semibold">Social links</h3>
                   <p className="text-[11.5px] text-zinc-500 mt-0.5">
                     Where else people can find you.
                   </p>
@@ -1757,14 +1757,14 @@ export default function ProfilePage() {
                     }>
                   ).map((item) => (
                     <Field key={item.key} label={item.label}>
-                      <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
+                      <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-bolty-500/60 focus-within:shadow-[0_0_0_3px_rgba(20, 241, 149,0.1)] transition-all duration-200">
                         {item.icon}
                         <input
                           type="url"
                           value={item.value}
                           onChange={(e) => item.setter(e.target.value)}
                           placeholder={item.placeholder}
-                          className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
+                          className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-semibold"
                         />
                         {item.value && (
                           <button
@@ -1837,7 +1837,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-1">
-                              <span className="text-sm font-light text-white/90">
+                              <span className="text-sm font-semibold text-white/90">
                                 {walletProviderLabel(w.provider)}
                               </span>
                               {w.isPrimary && (
@@ -1898,13 +1898,13 @@ export default function ProfilePage() {
                                     onChange={(e) => setWalletLabelDraft(e.target.value)}
                                     placeholder="Label (e.g. Trading, Cold storage)"
                                     maxLength={60}
-                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/90 placeholder-white/40 focus:outline-none focus:border-[#836EF9]/50"
+                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/90 placeholder-white/40 focus:outline-none focus:border-[#14F195]/50"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => handleSaveWalletLabel(w.id)}
                                     disabled={walletActionId === w.id}
-                                    className="text-xs px-3 py-1.5 rounded-lg bg-[#836EF9]/80 hover:bg-[#836EF9] text-white disabled:opacity-50"
+                                    className="text-xs px-3 py-1.5 rounded-lg bg-[#14F195]/80 hover:bg-[#14F195] text-white disabled:opacity-50"
                                   >
                                     Save
                                   </button>
@@ -2072,8 +2072,8 @@ export default function ProfilePage() {
               <div
                 className="rounded-xl p-4 space-y-3"
                 style={{
-                  background: 'rgba(131,110,249,0.06)',
-                  border: '1px solid rgba(131,110,249,0.18)',
+                  background: 'rgba(20, 241, 149,0.06)',
+                  border: '1px solid rgba(20, 241, 149,0.18)',
                 }}
               >
                 <div className="flex items-center gap-2">
@@ -2081,12 +2081,12 @@ export default function ProfilePage() {
                     What are API keys
                   </span>
                 </div>
-                <p className="text-[12px] text-zinc-300 font-light leading-relaxed">
+                <p className="text-[12px] text-zinc-300 font-semibold leading-relaxed">
                   API keys let your code, agents, or third-party tools call the Bolty API on
                   your behalf. Anyone who holds one of your keys can read your data and
                   publish on your account, so treat them like passwords.
                 </p>
-                <ul className="text-[11.5px] text-zinc-400 font-light leading-relaxed space-y-1 list-disc pl-4">
+                <ul className="text-[11.5px] text-zinc-400 font-semibold leading-relaxed space-y-1 list-disc pl-4">
                   <li>
                     <span className="text-zinc-200">Use in:</span> agent webhooks, marketplace
                     automations, internal scripts, CI/CD that pings Bolty.
@@ -2139,7 +2139,7 @@ export default function ProfilePage() {
                 />
                 <Alert type="success" msg={friendsMsg} />
                 <Alert type="error" msg={friendsErr} />
-                <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(20, 241, 149,0.08)] transition-all duration-200">
                   <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
                   <input
                     type="text"
@@ -2179,7 +2179,7 @@ export default function ProfilePage() {
                           size="sm"
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-light text-[var(--text)] truncate">
+                          <div className="text-sm font-semibold text-[var(--text)] truncate">
                             {u.displayName || u.username}
                           </div>
                           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
@@ -2240,7 +2240,7 @@ export default function ProfilePage() {
                               <div className="flex-1 min-w-0">
                                 <Link
                                   href={`/u/${req.from.username}`}
-                                  className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
+                                  className="text-sm font-semibold text-[var(--text)] hover:text-bolty-300 transition-colors"
                                 >
                                   {req.from.displayName || req.from.username}
                                 </Link>
@@ -2298,7 +2298,7 @@ export default function ProfilePage() {
                               <div className="flex-1 min-w-0">
                                 <Link
                                   href={`/u/${req.to.username}`}
-                                  className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
+                                  className="text-sm font-semibold text-[var(--text)] hover:text-bolty-300 transition-colors"
                                 >
                                   {req.to.displayName || req.to.username}
                                 </Link>
@@ -2353,7 +2353,7 @@ export default function ProfilePage() {
                               <div className="flex-1 min-w-0">
                                 <Link
                                   href={`/u/${f.friend.username}`}
-                                  className="text-xs font-light text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
+                                  className="text-xs font-semibold text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
                                 >
                                   {f.friend.displayName || f.friend.username}
                                 </Link>
@@ -2414,13 +2414,13 @@ export default function ProfilePage() {
                     <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
                       Current email
                     </div>
-                    <div className="text-sm font-light text-[var(--text)]">{userEmail || '—'}</div>
+                    <div className="text-sm font-semibold text-[var(--text)]">{userEmail || '—'}</div>
                   </div>
                   {emailStep === 'idle' && (
                     <button
                       type="button"
                       onClick={() => setEmailStep('form')}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-purple-500/40 text-[var(--text-muted)] hover:text-purple-400 transition-all"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-bolty-500/40 text-[var(--text-muted)] hover:text-bolty-400 transition-all"
                     >
                       Change
                     </button>
@@ -2451,12 +2451,12 @@ export default function ProfilePage() {
                       <button
                         type="submit"
                         disabled={emailLoading}
-                        className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                        className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 text-white transition-all"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                            'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }}
                       >
                         {emailLoading ? 'Sending...' : 'Send verification code'}
@@ -2468,7 +2468,7 @@ export default function ProfilePage() {
                           setNewEmail('');
                           setEmailPassword('');
                         }}
-                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        className="px-4 py-3 rounded-xl text-sm font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                       >
                         Cancel
                       </button>
@@ -2478,8 +2478,8 @@ export default function ProfilePage() {
 
                 {emailStep === 'otp' && (
                   <form onSubmit={handleConfirmEmailChange} className="space-y-4">
-                    <p className="text-sm text-[var(--text-secondary)] font-light">
-                      A 6-digit code was sent to <span className="text-purple-400">{newEmail}</span>
+                    <p className="text-sm text-[var(--text-secondary)] font-semibold">
+                      A 6-digit code was sent to <span className="text-bolty-400">{newEmail}</span>
                       .
                     </p>
                     <Field label="Verification Code">
@@ -2495,12 +2495,12 @@ export default function ProfilePage() {
                       <button
                         type="submit"
                         disabled={emailLoading || emailOtp.length !== 6}
-                        className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                        className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 text-white transition-all"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                            'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }}
                       >
                         {emailLoading ? 'Confirming...' : 'Confirm email change'}
@@ -2508,7 +2508,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setEmailStep('idle')}
-                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        className="px-4 py-3 rounded-xl text-sm font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                       >
                         Cancel
                       </button>
@@ -2530,7 +2530,7 @@ export default function ProfilePage() {
                       className={`w-2 h-2 rounded-full ${twoFAEnabled ? 'bg-emerald-400' : 'bg-zinc-500'}`}
                     />
                     <div>
-                      <div className="text-sm font-light text-[var(--text)]">
+                      <div className="text-sm font-semibold text-[var(--text)]">
                         {twoFAEnabled ? '2FA is enabled' : '2FA is disabled'}
                       </div>
                       <div className="text-xs text-[var(--text-muted)]">
@@ -2569,14 +2569,14 @@ export default function ProfilePage() {
 
                 {enable2FAStep === 'scan' && (
                   <div className="space-y-5 mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-bolty-500/20 bg-gradient-to-br from-bolty-500/5 to-transparent">
                       {twoFAQrCode ? (
                         <div className="flex justify-center md:justify-start">
                           <div
                             className="p-3 rounded-xl bg-white"
                             style={{
                               boxShadow:
-                                '0 0 0 1px rgba(131,110,249,0.3), 0 0 32px -8px rgba(131,110,249,0.45)',
+                                '0 0 0 1px rgba(20, 241, 149,0.3), 0 0 32px -8px rgba(20, 241, 149,0.45)',
                             }}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -2596,10 +2596,10 @@ export default function ProfilePage() {
                       )}
                       <div className="space-y-3 min-w-0">
                         <div>
-                          <div className="text-xs uppercase tracking-widest text-purple-300/80 mb-1">
+                          <div className="text-xs uppercase tracking-widest text-bolty-300/80 mb-1">
                             Step 1 · Scan
                           </div>
-                          <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                          <p className="text-sm text-[var(--text-secondary)] font-semibold leading-relaxed">
                             Open an authenticator app (Google Authenticator, 1Password, Authy…) and
                             scan this QR code.
                           </p>
@@ -2616,7 +2616,7 @@ export default function ProfilePage() {
                               <button
                                 type="button"
                                 onClick={handleCopy2FASecret}
-                                className="text-[11px] px-2 py-1 rounded-md border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 transition-all shrink-0"
+                                className="text-[11px] px-2 py-1 rounded-md border border-bolty-500/25 hover:border-bolty-400/50 text-bolty-300 hover:text-bolty-200 transition-all shrink-0"
                               >
                                 {twoFASecretCopied ? 'Copied' : 'Copy'}
                               </button>
@@ -2627,7 +2627,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="text-xs uppercase tracking-widest text-purple-300/80">
+                      <div className="text-xs uppercase tracking-widest text-bolty-300/80">
                         Step 2 · Verify
                       </div>
                       <Field label="6-digit code from your authenticator">
@@ -2650,12 +2650,12 @@ export default function ProfilePage() {
                         type="button"
                         onClick={handleEnable2FAConfirm}
                         disabled={toggling2FA || enable2FACode.length !== 6}
-                        className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                        className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 text-white transition-all"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                            'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }}
                       >
                         {toggling2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
@@ -2668,7 +2668,7 @@ export default function ProfilePage() {
                           setTwoFAQrCode(null);
                           setTwoFASecret(null);
                         }}
-                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        className="px-4 py-3 rounded-xl text-sm font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                       >
                         Cancel
                       </button>
@@ -2688,7 +2688,7 @@ export default function ProfilePage() {
 
                 <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
                   <div className="min-w-0">
-                    <div className="text-sm font-light text-[var(--text)] mb-0.5">
+                    <div className="text-sm font-semibold text-[var(--text)] mb-0.5">
                       {pwStep === 'sent' ? 'Reset link sent' : 'Password reset'}
                     </div>
                     <div className="text-xs text-[var(--text-muted)]">
@@ -2701,7 +2701,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={handleRequestPasswordReset}
                     disabled={pwLoading || !userEmail}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-purple-500/25 hover:border-purple-500/50 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10 transition-all disabled:opacity-50 shrink-0"
+                    className="text-xs px-3 py-1.5 rounded-lg border border-bolty-500/25 hover:border-bolty-500/50 text-bolty-300 hover:text-bolty-200 bg-bolty-500/5 hover:bg-bolty-500/10 transition-all disabled:opacity-50 shrink-0"
                   >
                     {pwLoading
                       ? 'Sending...'
@@ -2721,14 +2721,14 @@ export default function ProfilePage() {
 
                 {deleteStep === 'idle' && (
                   <div className="space-y-4">
-                    <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-light leading-relaxed">
+                    <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-semibold leading-relaxed">
                       This action is irreversible. All your data, agents, listings, and transaction
                       history will be permanently removed.
                     </div>
                     <button
                       type="button"
                       onClick={() => setDeleteStep('confirm')}
-                      className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200"
+                      className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-semibold transition-all duration-200"
                     >
                       Delete my account
                     </button>
@@ -2737,7 +2737,7 @@ export default function ProfilePage() {
 
                 {deleteStep === 'confirm' && (
                   <div className="space-y-4">
-                    <p className="text-sm text-[var(--text-secondary)] font-light">
+                    <p className="text-sm text-[var(--text-secondary)] font-semibold">
                       Are you sure? We will send a confirmation code to your email.
                     </p>
                     <div className="flex gap-2">
@@ -2745,14 +2745,14 @@ export default function ProfilePage() {
                         type="button"
                         onClick={handleRequestDeleteAccount}
                         disabled={requestingDelete}
-                        className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-light disabled:opacity-50 transition-all"
+                        className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold disabled:opacity-50 transition-all"
                       >
                         {requestingDelete ? 'Sending code...' : 'Yes, send confirmation code'}
                       </button>
                       <button
                         type="button"
                         onClick={() => setDeleteStep('idle')}
-                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        className="px-4 py-3 rounded-xl text-sm font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                       >
                         Cancel
                       </button>
@@ -2762,7 +2762,7 @@ export default function ProfilePage() {
 
                 {deleteStep === 'otp' && (
                   <form onSubmit={handleDeleteAccount} className="space-y-4">
-                    <p className="text-sm text-[var(--text-secondary)] font-light">
+                    <p className="text-sm text-[var(--text-secondary)] font-semibold">
                       Enter the confirmation code sent to your email to permanently delete your
                       account.
                     </p>
@@ -2782,7 +2782,7 @@ export default function ProfilePage() {
                       <button
                         type="submit"
                         disabled={deleting || deleteOtp.length !== 6}
-                        className="flex-1 py-3 rounded-xl border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-light disabled:opacity-50 transition-all"
+                        className="flex-1 py-3 rounded-xl border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold disabled:opacity-50 transition-all"
                       >
                         {deleting ? 'Deleting...' : 'Permanently delete account'}
                       </button>
@@ -2792,7 +2792,7 @@ export default function ProfilePage() {
                           setDeleteStep('idle');
                           setDeleteOtp('');
                         }}
-                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        className="px-4 py-3 rounded-xl text-sm font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                       >
                         Cancel
                       </button>
@@ -2869,7 +2869,7 @@ function RankProgressPanel({ points }: { points: number }) {
           <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
             {nextTier ? 'Current rank' : 'Max rank'}
           </div>
-          <div className="text-lg font-light text-white">{current.label}</div>
+          <div className="text-lg font-semibold text-white">{current.label}</div>
         </div>
       </div>
 
@@ -2877,7 +2877,7 @@ function RankProgressPanel({ points }: { points: number }) {
         <span className="font-mono tabular-nums text-xl text-white">
           {points.toLocaleString()}
         </span>
-        <span className="text-[11px] text-zinc-500 font-light">rays total</span>
+        <span className="text-[11px] text-zinc-500 font-semibold">rays total</span>
       </div>
 
       <div className="mt-2">
@@ -2890,20 +2890,20 @@ function RankProgressPanel({ points }: { points: number }) {
             style={{
               width: `${progress}%`,
               background:
-                'linear-gradient(90deg, #06B6D4 0%, #836EF9 50%, #EC4899 100%)',
-              boxShadow: '0 0 10px rgba(131,110,249,0.5)',
+                'linear-gradient(90deg, #06B6D4 0%, #14F195 50%, #EC4899 100%)',
+              boxShadow: '0 0 10px rgba(20, 241, 149,0.5)',
             }}
           />
         </div>
         {nextTier ? (
-          <div className="mt-1.5 flex items-center justify-between text-[11px] font-light text-zinc-500">
+          <div className="mt-1.5 flex items-center justify-between text-[11px] font-semibold text-zinc-500">
             <span className="text-zinc-400">{Math.floor(progress)}% to {nextTier.label}</span>
             <span className="font-mono tabular-nums">
               {(nextTier.threshold - points).toLocaleString()} rays to go
             </span>
           </div>
         ) : (
-          <div className="mt-1.5 text-[11px] font-light text-[#fbbf24]">
+          <div className="mt-1.5 text-[11px] font-semibold text-[#fbbf24]">
             You&apos;ve hit the top of the ladder.
           </div>
         )}
@@ -2936,7 +2936,7 @@ function RankProgressPanel({ points }: { points: number }) {
                 />
               </div>
               <span
-                className="text-[11.5px] font-light flex-1"
+                className="text-[11.5px] font-semibold flex-1"
                 style={{ color: isCurrent ? '#ffffff' : reached ? '#d4d4d8' : '#71717a' }}
               >
                 {tier.label}

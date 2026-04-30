@@ -264,8 +264,8 @@ function InventoryPageContent() {
           onClick={load}
           className="px-3 py-1.5 rounded-md text-[12px] text-white"
           style={{
-            background: 'rgba(131,110,249,0.2)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+            background: 'rgba(20, 241, 149,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.45)',
           }}
         >
           Retry
@@ -340,14 +340,14 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className="relative px-3 py-2 text-[12.5px] font-light transition-colors"
+      className="relative px-3 py-2 text-[12.5px] font-semibold transition-colors"
       style={{ color: active ? '#ffffff' : '#9ca3af' }}
     >
       {children}
       {active && (
         <span
           className="absolute left-0 right-0 -bottom-px h-[2px]"
-          style={{ background: 'linear-gradient(90deg, #06B6D4, #836EF9, #EC4899)' }}
+          style={{ background: 'linear-gradient(90deg, #06B6D4, #14F195, #EC4899)' }}
         />
       )}
     </button>
@@ -567,12 +567,12 @@ function PurchaseRow({
         />
         <div className="min-w-0 flex-1">
           <Link href={href} className="block">
-            <div className="text-[13px] text-white font-light truncate hover:text-[#b4a7ff] transition-colors">
+            <div className="text-[13px] text-white font-semibold truncate hover:text-[#b4a7ff] transition-colors">
               {title}
             </div>
-            <div className="text-[11px] text-zinc-500 font-light truncate">{subtitle}</div>
+            <div className="text-[11px] text-zinc-500 font-semibold truncate">{subtitle}</div>
           </Link>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[10.5px] text-zinc-400 font-light">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[10.5px] text-zinc-400 font-semibold">
             <span>
               from{' '}
               <Link
@@ -689,23 +689,23 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
     <div
       className="mb-5 rounded-xl p-4"
       style={{
-        background: 'linear-gradient(180deg, rgba(131,110,249,0.08), rgba(10,10,14,0.5))',
-        boxShadow: '0 0 0 1px rgba(131,110,249,0.3)',
+        background: 'linear-gradient(180deg, rgba(20, 241, 149,0.08), rgba(10,10,14,0.5))',
+        boxShadow: '0 0 0 1px rgba(20, 241, 149,0.3)',
       }}
     >
       <div className="flex items-start gap-3">
         <div
           className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.2)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+            background: 'rgba(20, 241, 149,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.45)',
           }}
         >
           <Shield className="w-4 h-4 text-[#b4a7ff]" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-[13px] font-light text-white">Missing a purchase?</h3>
-          <p className="text-[11.5px] text-zinc-400 font-light mt-0.5">
+          <h3 className="text-[13px] font-semibold text-white">Missing a purchase?</h3>
+          <p className="text-[11.5px] text-zinc-400 font-semibold mt-0.5">
             Paid on-chain but the repo didn&apos;t appear? Paste the transaction hash
             from MetaMask. We&apos;ll find the repo automatically.
           </p>
@@ -714,8 +714,8 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
               onClick={() => setOpen(true)}
               className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white transition-all hover:brightness-110"
               style={{
-                background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                background: 'linear-gradient(180deg, rgba(20, 241, 149,0.38), rgba(20, 241, 149,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)',
               }}
             >
               Recover stuck payment
@@ -749,7 +749,7 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
               />
               {msg && (
                 <p
-                  className="text-[11.5px] font-light"
+                  className="text-[11.5px] font-semibold"
                   style={{ color: msg.kind === 'ok' ? '#86efac' : '#fca5a5' }}
                 >
                   {msg.text}
@@ -775,8 +775,8 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
                   className="px-3 py-1.5 rounded-md text-[12px] text-white disabled:opacity-50"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.38), rgba(20, 241, 149,0.14))',
+                    boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)',
                   }}
                 >
                   {busy ? 'Verifying…' : 'Recover'}
@@ -847,7 +847,7 @@ function SavedTab({
   if (loading && listings.length === 0) {
     return (
       <div
-        className="rounded-xl px-6 py-12 text-center text-[12.5px] text-zinc-500 font-light"
+        className="rounded-xl px-6 py-12 text-center text-[12.5px] text-zinc-500 font-semibold"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.5), rgba(10,10,14,0.5))',
           boxShadow: '0 0 0 1px rgba(255,255,255,0.05)',
@@ -860,7 +860,7 @@ function SavedTab({
   return (
     <div className="space-y-3">
       {missing.length > 0 && (
-        <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-[11.5px] text-zinc-400 font-light"
+        <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-[11.5px] text-zinc-400 font-semibold"
           style={{
             background: 'rgba(245,158,11,0.06)',
             boxShadow: 'inset 0 0 0 1px rgba(245,158,11,0.25)',
@@ -946,7 +946,7 @@ function RaysTab({ events, total }: { events: ReputationEvent[]; total: number }
   }
   return (
     <div>
-      <div className="text-[12px] text-zinc-400 font-light mb-3">
+      <div className="text-[12px] text-zinc-400 font-semibold mb-3">
         Total:{' '}
         <span className="text-white tabular-nums">{total.toLocaleString()}</span> rays from{' '}
         {events.length} events.
@@ -964,10 +964,10 @@ function RaysTab({ events, total }: { events: ReputationEvent[]; total: number }
               <Sparkles className="w-3.5 h-3.5 text-[#EC4899]" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[12.5px] text-white font-light truncate">
+              <div className="text-[12.5px] text-white font-semibold truncate">
                 {REASON_LABEL[ev.reason] || ev.reason}
               </div>
-              <div className="text-[10.5px] text-zinc-500 font-light truncate">
+              <div className="text-[10.5px] text-zinc-500 font-semibold truncate">
                 {ev.note ?? '—'} · {formatDate(ev.createdAt)}
               </div>
             </div>
@@ -1004,8 +1004,8 @@ function Section({
         <div
           className="w-7 h-7 rounded-md flex items-center justify-center"
           style={{
-            background: 'rgba(131,110,249,0.12)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20, 241, 149,0.12)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
           }}
         >
           <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -1060,23 +1060,23 @@ function EmptyState({
       <div
         className="w-12 h-12 rounded-xl flex items-center justify-center"
         style={{
-          background: 'rgba(131,110,249,0.08)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+          background: 'rgba(20, 241, 149,0.08)',
+          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
         }}
       >
         <Icon className="w-5 h-5 text-[#b4a7ff]" />
       </div>
       <div>
-        <p className="text-sm text-white font-light">{title}</p>
-        <p className="text-xs text-zinc-500 font-light mt-1">{subtitle}</p>
+        <p className="text-sm text-white font-semibold">{title}</p>
+        <p className="text-xs text-zinc-500 font-semibold mt-1">{subtitle}</p>
       </div>
       {action && (
         <Link
           href={action.href}
           className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white"
           style={{
-            background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+            background: 'linear-gradient(180deg, rgba(20, 241, 149,0.38), rgba(20, 241, 149,0.14))',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)',
           }}
         >
           <Code2 className="w-3.5 h-3.5" />

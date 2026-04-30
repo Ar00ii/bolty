@@ -132,7 +132,7 @@ const DatabaseWithRestApi = ({
             />
           </mask>
           <radialGradient id="db-blue-grad" fx="1">
-            <stop offset="0%" stopColor={lightColor || '#836EF9'} />
+            <stop offset="0%" stopColor={lightColor || '#14F195'} />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
         </defs>
@@ -146,7 +146,7 @@ const DatabaseWithRestApi = ({
             {title ? title : 'Bolty Platform API'}
           </span>
         </div>
-        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t border-white/10 bg-[#141516] font-light text-xs text-bolty-400">
+        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t border-white/10 bg-[#141516] font-semibold text-xs text-bolty-400">
           {circleText ? circleText : 'ETH'}
         </div>
         <div className="relative z-10 flex h-[150px] w-full items-center justify-center overflow-hidden rounded-lg border border-white/08 bg-black/80 shadow-md">

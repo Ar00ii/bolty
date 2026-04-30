@@ -46,8 +46,8 @@ export function BentoHero() {
           transition={{ duration: 0.6 }}
           className="mb-16 space-y-4 max-w-3xl"
         >
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-white">
-            Build, ship, and earn <span className="text-purple-500">with AI agents</span>
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight text-white">
+            Build, ship, and earn <span className="text-bolty-500">with AI agents</span>
           </h1>
           <p className="text-lg text-gray-400">
             The developer platform for publishing code, deploying AI agents, and earning from your
@@ -67,7 +67,7 @@ export function BentoHero() {
                     AI Agent Deploy
                   </span>
                 </div>
-                <div className="text-sm text-green-400 font-light">Available</div>
+                <div className="text-sm text-green-400 font-semibold">Available</div>
               </div>
               <div className="h-16">
                 <AnimatedSparkline data={agentDeployData} color="#a855f7" width={200} height={60} />
@@ -79,7 +79,7 @@ export function BentoHero() {
           <BentoCard delay={0.1}>
             <div className="h-full flex flex-col justify-between">
               <span className="text-xs uppercase tracking-wider text-gray-500">CPU Usage</span>
-              <div className="text-3xl font-light text-white">28%</div>
+              <div className="text-3xl font-semibold text-white">28%</div>
               <div className="h-12">
                 <AnimatedSparkline
                   data={[0.2, 0.25, 0.28, 0.26, 0.32, 0.28, 0.3]}
@@ -101,7 +101,7 @@ export function BentoHero() {
                     ETH Payment Node
                   </span>
                 </div>
-                <div className="text-sm text-green-400 font-light">Available</div>
+                <div className="text-sm text-green-400 font-semibold">Available</div>
               </div>
               <div className="h-16">
                 <AnimatedSparkline data={paymentNodeData} color="#06b6d4" width={200} height={60} />
@@ -113,7 +113,7 @@ export function BentoHero() {
           <BentoCard delay={0.3}>
             <div className="h-full flex flex-col justify-between">
               <span className="text-xs uppercase tracking-wider text-gray-500">Memory</span>
-              <div className="text-3xl font-light text-white">42%</div>
+              <div className="text-3xl font-semibold text-white">42%</div>
               <div className="h-12">
                 <AnimatedSparkline
                   data={[0.4, 0.42, 0.45, 0.42, 0.48, 0.44, 0.46]}
@@ -166,7 +166,7 @@ export function BentoHero() {
               className="text-center p-4 rounded-lg border border-white/10"
               style={{ background: 'rgba(0, 0, 0, 0.3)' }}
             >
-              <div className="text-lg font-light text-white">{stat.value}</div>
+              <div className="text-lg font-semibold text-white">{stat.value}</div>
               <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
             </div>
           ))}

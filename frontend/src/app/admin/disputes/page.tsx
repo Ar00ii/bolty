@@ -111,7 +111,7 @@ export default function AdminDisputesPage() {
   if (!canView) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-zinc-400 font-light text-sm">Access denied.</div>
+        <div className="text-zinc-400 font-semibold text-sm">Access denied.</div>
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default function AdminDisputesPage() {
             <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
           </div>
         ) : loadError ? (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-6 text-sm text-red-300 font-light">
+          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-6 text-sm text-red-300 font-semibold">
             {loadError}
           </div>
         ) : disputes.length === 0 ? (
@@ -162,15 +162,15 @@ function Header({ count }: { count: number }) {
         <ShieldAlert className="w-3.5 h-3.5" strokeWidth={1.75} />
         Admin · Escrow
       </div>
-      <h1 className="text-3xl md:text-4xl font-light tracking-tight text-white">
+      <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white">
         Disputes
         {count > 0 && (
-          <span className="ml-3 text-[13px] font-normal text-[#836EF9] align-middle">
+          <span className="ml-3 text-[13px] font-normal text-[#14F195] align-middle">
             {count} open
           </span>
         )}
       </h1>
-      <p className="mt-3 text-sm font-light text-zinc-400 max-w-2xl">
+      <p className="mt-3 text-sm font-semibold text-zinc-400 max-w-2xl">
         Review disputed escrow orders. To resolve, call{' '}
         <code className="text-zinc-300">resolve()</code> on the escrow contract from the admin
         wallet, then confirm the decision here with the transaction hash.
@@ -189,8 +189,8 @@ function EmptyState() {
       }}
     >
       <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-[#22c55e]" strokeWidth={1.5} />
-      <div className="text-sm font-light text-zinc-300">No open disputes.</div>
-      <div className="text-xs font-light text-zinc-500 mt-1">All escrow orders are healthy.</div>
+      <div className="text-sm font-semibold text-zinc-300">No open disputes.</div>
+      <div className="text-xs font-semibold text-zinc-500 mt-1">All escrow orders are healthy.</div>
     </div>
   );
 }
@@ -252,7 +252,7 @@ function DisputeRow({
               Disputed
             </span>
           </div>
-          <div className="text-[11px] text-zinc-500 font-light">
+          <div className="text-[11px] text-zinc-500 font-semibold">
             Buyer <span className="text-zinc-300">@{order.buyer.username || 'unknown'}</span>
             <span className="mx-1 opacity-40">↔</span>
             Seller <span className="text-zinc-300">@{order.seller.username || 'unknown'}</span>
@@ -358,7 +358,7 @@ function ResolveModal({
             <div className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
               Resolve dispute
             </div>
-            <div className="text-sm font-light text-white">{order.listing.title}</div>
+            <div className="text-sm font-semibold text-white">{order.listing.title}</div>
           </div>
           <button
             type="button"
@@ -371,7 +371,7 @@ function ResolveModal({
           </button>
         </div>
 
-        <div className="p-5 space-y-4 text-[13px] font-light">
+        <div className="p-5 space-y-4 text-[13px] font-semibold">
           <DetailRow
             label="Order ID"
             value={<code className="text-zinc-300 text-[11px]">{order.id}</code>}
@@ -411,11 +411,11 @@ function ResolveModal({
           <DetailRow label="Disputed at" value={formatDate(order.escrowDisputedAt)} />
 
           {!isAdmin ? (
-            <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-3 py-2 text-[12px] text-yellow-200 font-light">
+            <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-3 py-2 text-[12px] text-yellow-200 font-semibold">
               Moderators can view disputes but only admins can resolve them.
             </div>
           ) : !escrowReady ? (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-[12px] text-red-300 font-light">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-[12px] text-red-300 font-semibold">
               Escrow contract address is not configured. Set{' '}
               <code>NEXT_PUBLIC_ESCROW_CONTRACT</code>.
             </div>
@@ -442,7 +442,7 @@ function ResolveModal({
                     icon={<Undo2 className="w-4 h-4" strokeWidth={1.75} />}
                     label="Refund buyer"
                     help="Buyer wins. Full refund, no fee."
-                    accent="#836EF9"
+                    accent="#14F195"
                   />
                 </div>
               </div>
@@ -462,22 +462,22 @@ function ResolveModal({
                   maxLength={1800}
                   rows={3}
                   placeholder="Rationale for your decision…"
-                  className="w-full rounded-lg px-3 py-2 text-[13px] font-light text-white bg-black/40 border border-white/10 focus:outline-none focus:border-[#836EF9]/50 resize-none"
+                  className="w-full rounded-lg px-3 py-2 text-[13px] font-semibold text-white bg-black/40 border border-white/10 focus:outline-none focus:border-[#14F195]/50 resize-none"
                 />
               </div>
 
               {error && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-[12px] text-red-300 font-light break-words">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-[12px] text-red-300 font-semibold break-words">
                   {error}
                 </div>
               )}
               {txHash && phase !== 'done' && (
-                <div className="rounded-lg border border-[#836EF9]/30 bg-[#836EF9]/5 px-3 py-2 text-[12px] text-zinc-300 font-light">
+                <div className="rounded-lg border border-[#14F195]/30 bg-[#14F195]/5 px-3 py-2 text-[12px] text-zinc-300 font-semibold">
                   Tx: <code className="text-[#b4a7ff] font-mono">{shortAddr(txHash)}</code>
                 </div>
               )}
               {phase === 'done' && (
-                <div className="rounded-lg border border-[#22c55e]/30 bg-[#22c55e]/5 px-3 py-2 text-[12px] text-[#86efac] font-light flex items-center gap-2">
+                <div className="rounded-lg border border-[#22c55e]/30 bg-[#22c55e]/5 px-3 py-2 text-[12px] text-[#86efac] font-semibold flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={1.75} />
                   Dispute resolved.
                 </div>
@@ -488,7 +488,7 @@ function ResolveModal({
                   type="button"
                   onClick={onClose}
                   disabled={busy}
-                  className="px-4 py-2 rounded-lg text-[12.5px] font-light text-zinc-300 hover:bg-white/5 transition disabled:opacity-40"
+                  className="px-4 py-2 rounded-lg text-[12.5px] font-semibold text-zinc-300 hover:bg-white/5 transition disabled:opacity-40"
                 >
                   Cancel
                 </button>
@@ -499,9 +499,9 @@ function ResolveModal({
                   className="px-4 py-2 rounded-lg text-[12.5px] font-normal text-white flex items-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.9) 0%, rgba(20, 241, 149,0.7) 100%)',
                     boxShadow:
-                      'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+                      'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20, 241, 149,0.5)',
                   }}
                 >
                   {phase === 'signing' ? (
@@ -572,7 +572,7 @@ function ChoiceButton({
         {icon}
         <span className="text-[12.5px] font-normal">{label}</span>
       </div>
-      <div className="text-[11px] text-zinc-500 font-light">{help}</div>
+      <div className="text-[11px] text-zinc-500 font-semibold">{help}</div>
     </button>
   );
 }

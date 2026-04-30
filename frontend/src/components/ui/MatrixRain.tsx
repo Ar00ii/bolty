@@ -5,9 +5,9 @@ import { useEffect, useRef } from 'react';
 
 const CHARS = '01001101 01011010 00110101 10110100 11010011 ABCDEF0123456789';
 const FONT_SIZE = 13;
-const PURPLE = '#836EF9';
+const PURPLE = '#14F195';
 const GREEN = '#28c840';
-const DIM_PURPLE = 'rgba(131,110,249,0.4)';
+const DIM_PURPLE = 'rgba(20, 241, 149,0.4)';
 const DIM_GREEN = 'rgba(40,200,64,0.3)';
 
 export function MatrixRain({ opacity = 0.12 }: { opacity?: number }) {

@@ -223,11 +223,11 @@ export function SecurityFindings({ listingId }: { listingId: string }) {
                   </span>
                 )}
               </div>
-              <p className="text-[12px] text-white/85 font-light leading-relaxed">
+              <p className="text-[12px] text-white/85 font-semibold leading-relaxed">
                 {f.message}
               </p>
               {f.fix && (
-                <p className="mt-1 text-[11.5px] text-emerald-300/80 font-light leading-relaxed">
+                <p className="mt-1 text-[11.5px] text-emerald-300/80 font-semibold leading-relaxed">
                   Fix: {f.fix}
                 </p>
               )}

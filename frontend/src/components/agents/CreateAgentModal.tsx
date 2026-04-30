@@ -106,14 +106,14 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.95) 0%, rgba(10,10,14,0.95) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
+                '0 0 0 1px rgba(20, 241, 149,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
             }}
           >
             <div
               className="absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
               }}
             />
             {/* Header */}
@@ -123,14 +123,14 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
                   className="w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                   }}
                 >
                   <Bot className="w-4 h-4 text-[#b4a7ff]" />
                 </div>
-                <h3 className="text-lg font-light text-white tracking-[-0.005em]">
+                <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                   Create New Agent
                 </h3>
               </div>
@@ -235,7 +235,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
                   whileHover={submitting ? undefined : { y: -1 }}
                   whileTap={submitting ? undefined : { scale: 0.97 }}
                   transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-zinc-300 hover:text-white disabled:opacity-50 transition-colors hover:brightness-110 font-light text-[13px] tracking-[0.005em]"
+                  className="flex-1 px-4 py-2.5 rounded-lg text-zinc-300 hover:text-white disabled:opacity-50 transition-colors hover:brightness-110 font-semibold text-[13px] tracking-[0.005em]"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
@@ -251,12 +251,12 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
                   whileHover={submitting ? undefined : { y: -1 }}
                   whileTap={submitting ? undefined : { scale: 0.97 }}
                   transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                  className="flex-1 px-4 py-2.5 rounded-lg disabled:opacity-50 text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 rounded-lg disabled:opacity-50 text-white font-semibold text-[13px] tracking-[0.005em] transition-all hover:brightness-110 flex items-center justify-center gap-2"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
                   }}
                 >
                   {submitting ? (

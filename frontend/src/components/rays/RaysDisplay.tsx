@@ -122,7 +122,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
                 Current Rank
               </p>
               <h3
-                className="text-3xl font-light mt-1 tracking-[-0.01em]"
+                className="text-3xl font-semibold mt-1 tracking-[-0.01em]"
                 style={{
                   color: rankMeta.textColor,
                   textShadow: `0 0 24px rgba(${rankMeta.color},0.4)`,
@@ -137,7 +137,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
               Trending Position
             </p>
             <p
-              className="text-3xl font-light mt-1 tabular-nums tracking-[-0.01em]"
+              className="text-3xl font-semibold mt-1 tabular-nums tracking-[-0.01em]"
               style={{ color: rankMeta.textColor }}
             >
               #{data.position}
@@ -153,7 +153,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
             <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
               Total Rays
             </p>
-            <p className="text-2xl font-light text-white mt-1 tabular-nums tracking-[-0.01em]">
+            <p className="text-2xl font-semibold text-white mt-1 tabular-nums tracking-[-0.01em]">
               {data.totalRaysAccumulated.toLocaleString()}
             </p>
           </div>
@@ -162,7 +162,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
               Visibility Multiplier
             </p>
             <p
-              className="text-2xl font-light mt-1 tabular-nums tracking-[-0.01em]"
+              className="text-2xl font-semibold mt-1 tabular-nums tracking-[-0.01em]"
               style={{ color: rankMeta.textColor }}
             >
               {getBoostMultiplier(data.currentRank)}x
@@ -189,7 +189,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-start gap-3 mb-4">
@@ -197,14 +197,14 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
             }}
           >
             <TrendingUp className="w-3.5 h-3.5 text-[#b4a7ff]" />
           </div>
-          <p className="text-[14px] font-light text-white tracking-[0.005em]">Ranking Benefits</p>
+          <p className="text-[14px] font-semibold text-white tracking-[0.005em]">Ranking Benefits</p>
         </div>
         <ul className="space-y-2 pl-11">
           {[
@@ -276,21 +276,21 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
         className="relative p-5 rounded-xl text-center overflow-hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+            'linear-gradient(180deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.4)',
+            '0 0 0 1px rgba(20, 241, 149,0.35), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(20, 241, 149,0.4)',
         }}
       >
         <div
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.6) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-center justify-center gap-2">
           <Trophy className="w-4 h-4 text-[#b4a7ff]" />
-          <p className="text-[14px] font-light text-[#b4a7ff] tracking-[0.005em]">
+          <p className="text-[14px] font-semibold text-[#b4a7ff] tracking-[0.005em]">
             You are at the highest rank
           </p>
         </div>
@@ -328,7 +328,7 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
             Next Rank
           </p>
           <span
-            className="text-[12px] font-light tracking-[0.005em]"
+            className="text-[12px] font-semibold tracking-[0.005em]"
             style={{ color: nextMeta.textColor }}
           >
             {nextRank}
@@ -360,7 +360,7 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
         <p className="text-[11px] text-zinc-500 tracking-[0.005em]">
           {raysNeeded > 0 ? `${raysNeeded.toLocaleString()} rays needed` : 'Ready to rank up'}
         </p>
-        <span className="text-[11px] font-light tabular-nums" style={{ color: nextMeta.textColor }}>
+        <span className="text-[11px] font-semibold tabular-nums" style={{ color: nextMeta.textColor }}>
           {progress.toFixed(1)}%
         </span>
       </div>

@@ -20,7 +20,7 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
       className="relative group rounded-xl overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
-        boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+        boxShadow: '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
       <span
@@ -28,14 +28,14 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <div
         className="flex items-center justify-between px-4 py-2"
         style={{
-          borderBottom: '1px solid rgba(131,110,249,0.1)',
-          background: 'rgba(131,110,249,0.04)',
+          borderBottom: '1px solid rgba(20, 241, 149,0.1)',
+          background: 'rgba(20, 241, 149,0.04)',
         }}
       >
         <span
@@ -52,8 +52,8 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
               ? {
                   color: '#b4a7ff',
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                 }
               : {
                   color: 'rgba(161,161,170,0.6)',
@@ -99,7 +99,7 @@ function Section({
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <div className="section-divider pt-6">
-        <h2 className="group text-lg font-light text-white tracking-tight flex items-center gap-2">
+        <h2 className="group text-lg font-semibold text-white tracking-tight flex items-center gap-2">
           <button
             onClick={copyLink}
             aria-label={`Copy link to ${title}`}
@@ -155,7 +155,7 @@ export default function AgentProtocolPage() {
             <span>/</span>
             <span className="text-zinc-500">docs</span>
             <span>/</span>
-            <span className="text-zinc-300 font-light">agent-protocol</span>
+            <span className="text-zinc-300 font-semibold">agent-protocol</span>
           </div>
           <Link href="/profile?tab=agent" className="btn-primary text-xs px-4 py-2">
             Configure my agent →
@@ -167,7 +167,7 @@ export default function AgentProtocolPage() {
         {/* Sidebar nav */}
         <aside className="hidden lg:block w-48 flex-shrink-0">
           <div className="sticky top-10">
-            <div className="text-[10px] font-light uppercase tracking-wider text-zinc-600 mb-4">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600 mb-4">
               On this page
             </div>
             <div className="space-y-0.5">
@@ -195,8 +195,8 @@ export default function AgentProtocolPage() {
                         transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                         className="absolute inset-0 rounded-md"
                         style={{
-                          background: 'rgba(131,110,249,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                          background: 'rgba(20, 241, 149,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.18)',
                         }}
                       />
                     )}
@@ -213,7 +213,7 @@ export default function AgentProtocolPage() {
           {/* Hero */}
           <div className="space-y-4">
             <div className="badge text-xs">Bolty Agent Protocol v1</div>
-            <h1 className="text-3xl font-light text-white tracking-tight">
+            <h1 className="text-3xl font-semibold text-white tracking-tight">
               Agent-to-Agent Negotiation
             </h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
@@ -234,11 +234,11 @@ export default function AgentProtocolPage() {
             <div
               className="card p-5 space-y-3"
               style={{
-                borderColor: 'rgba(131,110,249,0.15)',
-                background: 'rgba(131,110,249,0.03)',
+                borderColor: 'rgba(20, 241, 149,0.15)',
+                background: 'rgba(20, 241, 149,0.03)',
               }}
             >
-              <div className="text-[10px] font-light text-zinc-500 uppercase tracking-wider mb-2">
+              <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
                 Negotiation flow
               </div>
               {[
@@ -262,8 +262,8 @@ export default function AgentProtocolPage() {
               ].map(([n, title, desc]) => (
                 <div key={n} className="flex gap-3">
                   <span
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-light flex-shrink-0 mt-0.5"
-                    style={{ background: 'rgba(131,110,249,0.2)', color: '#c4b5fd' }}
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-semibold flex-shrink-0 mt-0.5"
+                    style={{ background: 'rgba(20, 241, 149,0.2)', color: '#B3FFD9' }}
                   >
                     {n}
                   </span>
@@ -309,9 +309,9 @@ export default function AgentProtocolPage() {
                 <div
                   key={label}
                   className="card p-4 space-y-1.5"
-                  style={{ borderColor: 'rgba(131,110,249,0.12)' }}
+                  style={{ borderColor: 'rgba(20, 241, 149,0.12)' }}
                 >
-                  <div className="text-xs font-mono font-light text-bolty-300">{label}</div>
+                  <div className="text-xs font-mono font-semibold text-bolty-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
@@ -376,7 +376,7 @@ export default function AgentProtocolPage() {
               }}
             >
               <p className="text-xs text-yellow-300 font-mono">
-                <span className="font-light">X-Bolty-Event</span> header is also set to the event
+                <span className="font-semibold">X-Bolty-Event</span> header is also set to the event
                 name — useful for routing in a single endpoint.
               </p>
             </div>
@@ -397,9 +397,9 @@ export default function AgentProtocolPage() {
               {[
                 {
                   action: 'counter',
-                  color: '#836EF9',
-                  bg: 'rgba(131,110,249,0.06)',
-                  border: 'rgba(131,110,249,0.2)',
+                  color: '#14F195',
+                  bg: 'rgba(20, 241, 149,0.06)',
+                  border: 'rgba(20, 241, 149,0.2)',
                   desc: 'Submit a new price offer. Must include proposedPrice. The platform will reject counter-offers below listing.minPrice.',
                 },
                 {
@@ -427,7 +427,7 @@ export default function AgentProtocolPage() {
                   }}
                 >
                   <div
-                    className="font-mono text-sm font-light"
+                    className="font-mono text-sm font-semibold"
                     style={{ color }}
                   >{`"${action}"`}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
@@ -667,14 +667,14 @@ app.listen(3000);`}
           <div
             className="card-elevated text-center px-8 py-8"
             style={{
-              borderColor: 'rgba(131,110,249,0.2)',
-              background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)',
+              borderColor: 'rgba(20, 241, 149,0.2)',
+              background: 'linear-gradient(145deg, rgba(20, 241, 149,0.06) 0%, var(--bg-card) 100%)',
             }}
           >
-            <p className="text-xs font-light text-bolty-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-semibold text-bolty-400 uppercase tracking-wider mb-3">
               Ready to connect?
             </p>
-            <h3 className="text-xl font-light text-white mb-3">
+            <h3 className="text-xl font-semibold text-white mb-3">
               Deploy your agent endpoint and go live
             </h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">

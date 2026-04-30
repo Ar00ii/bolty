@@ -172,10 +172,10 @@ export default function LeaderboardPage() {
                 <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Hall of Fame</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
                 Rays Leaderboard
               </h1>
-              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+              <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
                 The most trusted builders in Bolty — ranked by rays earned.
               </p>
             </div>
@@ -204,7 +204,7 @@ export default function LeaderboardPage() {
             label="Ranked builders"
             value={formatNumber(annotated.length)}
             sub="in the top 50"
-            accent="#836EF9"
+            accent="#14F195"
           />
           <StatTile
             label="Top rays"
@@ -242,7 +242,7 @@ export default function LeaderboardPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
               }}
             />
             <div className="flex items-center gap-4 overflow-x-auto whitespace-nowrap">
@@ -259,7 +259,7 @@ export default function LeaderboardPage() {
                       style={{ color: r.color }}
                       aria-hidden="true"
                     />
-                    <span className="text-[11px] font-light" style={{ color: r.color }}>
+                    <span className="text-[11px] font-semibold" style={{ color: r.color }}>
                       {r.label}
                     </span>
                     <span className="text-[10px] font-mono text-zinc-600">
@@ -310,7 +310,7 @@ export default function LeaderboardPage() {
                       boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
                     }}
                   >
-                    <span className="text-[12px] text-zinc-400 font-light">{p.label}</span>
+                    <span className="text-[12px] text-zinc-400 font-semibold">{p.label}</span>
                     <span className="text-[11.5px] font-mono tabular-nums text-[#b4a7ff] ml-4 flex-shrink-0">
                       +{p.rays}
                     </span>
@@ -325,7 +325,7 @@ export default function LeaderboardPage() {
       {/* Tab switcher: developers vs agents */}
       <section className="px-6 md:px-10 mb-3">
         <div className="mx-auto max-w-[1200px] flex items-center gap-2">
-          <TabButton active={tab === 'devs'} onClick={() => setTab('devs')} accent="#836EF9">
+          <TabButton active={tab === 'devs'} onClick={() => setTab('devs')} accent="#14F195">
             <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
             Top Developers
             <span className="ml-1 text-[10.5px] font-mono opacity-70">{annotated.length}</span>
@@ -351,7 +351,7 @@ export default function LeaderboardPage() {
           <div className="mx-auto max-w-[1200px]">
             {loading ? (
               <div
-                className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
+                className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-semibold"
                 style={{
                   background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
                   boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
@@ -369,7 +369,7 @@ export default function LeaderboardPage() {
                 }}
               >
                 <Package className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
-                <p className="text-[13px] text-zinc-300 font-light">
+                <p className="text-[13px] text-zinc-300 font-semibold">
                   No agent sales yet. Be the first to publish & sell.
                 </p>
               </div>
@@ -402,7 +402,7 @@ export default function LeaderboardPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search developers, roles…"
-                className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+                className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-semibold text-white placeholder-zinc-600"
               />
               {query ? (
                 <button
@@ -453,7 +453,7 @@ export default function LeaderboardPage() {
           <div className="mx-auto max-w-[1200px]">
             {loading ? (
               <div
-                className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
+                className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-semibold"
                 style={{
                   background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
                   boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
@@ -471,7 +471,7 @@ export default function LeaderboardPage() {
                 }}
               >
                 <Trophy className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
-                <p className="text-[13px] text-zinc-300 font-light">
+                <p className="text-[13px] text-zinc-300 font-semibold">
                   {annotated.length === 0
                     ? 'No rankings yet. Be the first to earn rays.'
                     : 'No developers match your filters.'}
@@ -524,7 +524,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12.5px] font-light transition-all"
+      className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12.5px] font-semibold transition-all"
       style={{
         color: active ? '#ffffff' : '#a1a1aa',
         background: active ? `${accent}1f` : 'rgba(255,255,255,0.02)',
@@ -587,7 +587,7 @@ function TopAgentCard({ entry, position }: { entry: TopAgentEntry; position: num
             )}
             <span className="text-[13px] text-white font-normal truncate">{entry.title}</span>
           </div>
-          <div className="text-[10.5px] text-zinc-500 font-light mt-0.5 flex items-center gap-2 min-w-0">
+          <div className="text-[10.5px] text-zinc-500 font-semibold mt-0.5 flex items-center gap-2 min-w-0">
             <span className="truncate">@{entry.sellerUsername || 'anon'}</span>
             <span className="text-zinc-700">·</span>
             <span className="font-mono tabular-nums" style={{ color: '#22c55e' }}>
@@ -637,10 +637,10 @@ function StatTile({
       <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
         {label}
       </div>
-      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums truncate">
+      <div className="font-mono text-xl md:text-2xl font-semibold text-white tabular-nums truncate">
         {value}
       </div>
-      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5 truncate">{sub}</div>
+      <div className="text-[10.5px] text-zinc-500 font-semibold mt-0.5 truncate">{sub}</div>
     </div>
   );
 }
@@ -658,12 +658,12 @@ function RankChip({
   onClick: () => void;
   accent?: string;
 }) {
-  const c = accent || '#836EF9';
+  const c = accent || '#14F195';
   return (
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold transition"
       style={{
         color: active ? '#ffffff' : '#a1a1aa',
         background: active ? `${c}22` : 'rgba(255,255,255,0.02)',
@@ -738,7 +738,7 @@ function LeaderboardRow({
             <div className="text-[13px] font-normal text-white truncate">
               {entry.displayName || entry.username || 'Unknown'}
             </div>
-            <div className="text-[10.5px] text-zinc-500 font-light truncate">
+            <div className="text-[10.5px] text-zinc-500 font-semibold truncate">
               @{entry.username || 'anon'}
               {entry.occupation && (
                 <>
@@ -776,7 +776,7 @@ function LeaderboardRow({
 
         <div className="text-right">
           <div
-            className="font-mono tabular-nums text-[13px] font-light"
+            className="font-mono tabular-nums text-[13px] font-semibold"
             style={{ color: entry.rankColor }}
           >
             {entry.reputationPoints.toLocaleString()}

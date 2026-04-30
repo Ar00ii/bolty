@@ -70,21 +70,21 @@ export const Modal: React.FC<ModalProps> = ({
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.95) 0%, rgba(10,10,14,0.95) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
+                '0 0 0 1px rgba(20, 241, 149,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
             }}
           >
             <div
               className="absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
               }}
             />
             {/* Header */}
             {title && (
               <div className="flex items-start justify-between mb-5">
                 <div>
-                  <h2 className="text-lg font-light text-white tracking-[-0.005em]">{title}</h2>
+                  <h2 className="text-lg font-semibold text-white tracking-[-0.005em]">{title}</h2>
                   {subtitle && (
                     <p className="text-[13px] text-zinc-400 mt-1 tracking-[0.005em]">{subtitle}</p>
                   )}

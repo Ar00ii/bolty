@@ -93,7 +93,7 @@ export function SearchFilter({
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query && setShowSuggestions(true)}
             placeholder={placeholder}
-            className="w-full pl-9 pr-9 py-2.5 rounded-lg text-white placeholder-zinc-600 font-light text-[13px] tracking-[0.005em] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+            className="w-full pl-9 pr-9 py-2.5 rounded-lg text-white placeholder-zinc-600 font-semibold text-[13px] tracking-[0.005em] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(20, 241, 149,0.12)]"
             style={inputStyle}
           />
           <AnimatePresence>
@@ -132,7 +132,7 @@ export function SearchFilter({
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
+                  '0 0 0 1px rgba(20, 241, 149,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
                 backdropFilter: 'blur(8px)',
               }}
             >
@@ -143,7 +143,7 @@ export function SearchFilter({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.18, delay: idx * 0.03 }}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-3.5 py-2.5 text-[13px] text-zinc-300 font-light hover:text-white hover:bg-white/[0.03] transition-colors border-b border-white/[0.04] last:border-0 flex items-center gap-2.5 tracking-[0.005em]"
+                  className="w-full text-left px-3.5 py-2.5 text-[13px] text-zinc-300 font-semibold hover:text-white hover:bg-white/[0.03] transition-colors border-b border-white/[0.04] last:border-0 flex items-center gap-2.5 tracking-[0.005em]"
                 >
                   <Search className="w-3 h-3 text-zinc-500 flex-shrink-0" strokeWidth={1.75} />
                   {suggestion}
@@ -187,9 +187,9 @@ export function SearchFilter({
                     active
                       ? {
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                            'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.08) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
+                            'inset 0 0 0 1px rgba(20, 241, 149,0.4), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                         }
                       : {
                           background:

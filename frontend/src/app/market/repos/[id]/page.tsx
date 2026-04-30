@@ -358,7 +358,7 @@ export default function RepoDetailPage() {
         <p className="text-zinc-400">Repository not found</p>
         <Link
           href="/market/repos"
-          className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:text-purple-200"
+          className="inline-flex items-center gap-1.5 text-sm text-bolty-300 hover:text-bolty-200"
         >
           <ArrowLeft className="w-4 h-4" /> Back to repositories
         </Link>
@@ -419,7 +419,7 @@ export default function RepoDetailPage() {
                 {repo.isLocked ? (
                   <>
                     <span className="text-zinc-700">·</span>
-                    <span className="inline-flex items-center gap-1.5 text-[#c4b5fd]">
+                    <span className="inline-flex items-center gap-1.5 text-[#B3FFD9]">
                       <Lock className="w-3 h-3" /> Paid
                     </span>
                   </>
@@ -554,8 +554,8 @@ export default function RepoDetailPage() {
                           className="w-9 h-9 rounded-full flex items-center justify-center text-sm text-zinc-200"
                           style={{
                             background:
-                              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
-                            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.32)',
+                              'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.04) 100%)',
+                            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.32)',
                           }}
                         >
                           {c.name.charAt(0).toUpperCase()}
@@ -572,7 +572,7 @@ export default function RepoDetailPage() {
                           href={c.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-zinc-500 hover:text-purple-300 transition-colors"
+                          className="text-zinc-500 hover:text-bolty-300 transition-colors"
                           aria-label="Open collaborator link"
                         >
                           <ArrowUpRight className="w-4 h-4" />
@@ -633,8 +633,8 @@ export default function RepoDetailPage() {
               boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)',
             }}
           >
-            <h3 className="text-base font-light text-white mb-2">Verify an existing payment</h3>
-            <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
+            <h3 className="text-base font-semibold text-white mb-2">Verify an existing payment</h3>
+            <p className="text-xs text-zinc-400 font-semibold leading-relaxed mb-4">
               Paste the transaction hash of the payment you already sent on Base. We&apos;ll
               re-run on-chain verification against the seller&apos;s wallet — no new payment
               is required.
@@ -652,7 +652,7 @@ export default function RepoDetailPage() {
               }}
             />
             {recoverMsg && (
-              <p className="mt-3 text-[11.5px] font-light text-[#b4a7ff]">{recoverMsg}</p>
+              <p className="mt-3 text-[11.5px] font-semibold text-[#b4a7ff]">{recoverMsg}</p>
             )}
             <div className="mt-5 flex items-center justify-end gap-2">
               <button
@@ -673,8 +673,8 @@ export default function RepoDetailPage() {
                 className="px-3 py-1.5 rounded-md text-[12px] text-white disabled:opacity-50"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)',
                 }}
               >
                 {recoverBusy ? 'Verifying…' : 'Verify'}
@@ -705,8 +705,8 @@ function Section({
           className="w-6 h-6 rounded-md flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28)',
+              'linear-gradient(135deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.28)',
           }}
         >
           <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -755,7 +755,7 @@ function ActionsCard({
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
@@ -763,25 +763,25 @@ function ActionsCard({
       </p>
       {locked ? (
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
+          <p className="text-3xl font-semibold text-white tabular-nums tracking-[-0.01em]">
             ${repo.lockedPriceUsd}
           </p>
           <p className="text-sm text-zinc-500">USD</p>
         </div>
       ) : (
-        <p className="text-3xl font-light text-emerald-400 tracking-[-0.01em]">Free</p>
+        <p className="text-3xl font-semibold text-emerald-400 tracking-[-0.01em]">Free</p>
       )}
 
       {locked ? (
         <>
           <button
             onClick={onUnlock}
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-semibold tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
             }}
           >
             <Lock className="w-4 h-4" />
@@ -797,12 +797,12 @@ function ActionsCard({
       ) : (
         <button
           onClick={onDownload}
-          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-semibold tracking-[0.005em] transition-all hover:brightness-110"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+              'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
           }}
         >
           <Download className="w-4 h-4" />
@@ -814,9 +814,9 @@ function ActionsCard({
         onClick={onCopy}
         className="w-full mt-2 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11.5px] font-mono transition-all"
         style={{
-          background: 'rgba(131,110,249,0.07)',
-          border: '1px solid rgba(131,110,249,0.15)',
-          color: copied ? '#a78bfa' : '#8b8b95',
+          background: 'rgba(20, 241, 149,0.07)',
+          border: '1px solid rgba(20, 241, 149,0.15)',
+          color: copied ? '#7DFFBF' : '#8b8b95',
         }}
       >
         {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
@@ -881,7 +881,7 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
             className="w-10 h-10 rounded-full object-cover"
             style={{
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.32), 0 0 16px -4px rgba(20, 241, 149,0.4)',
             }}
           />
         ) : (
@@ -889,9 +889,9 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
             className="w-10 h-10 rounded-full flex items-center justify-center text-sm text-zinc-200"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.04) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.32), 0 0 16px -4px rgba(20, 241, 149,0.4)',
             }}
           >
             {(user.username || 'A').charAt(0).toUpperCase()}
@@ -902,7 +902,7 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
           <div className="flex items-center gap-3 mt-0.5">
             <Link
               href={`/u/${user.username || user.id}`}
-              className="text-xs text-purple-300 hover:text-purple-200 inline-flex items-center gap-1"
+              className="text-xs text-bolty-300 hover:text-bolty-200 inline-flex items-center gap-1"
             >
               Profile <ArrowUpRight className="w-3 h-3" />
             </Link>
@@ -965,7 +965,7 @@ function StatsCard({ repo }: { repo: RepositoryDetail }) {
               <s.icon className="w-3 h-3 text-zinc-600" />
               {s.label}
             </dt>
-            <dd className="text-lg font-light text-white tabular-nums mt-0.5">{s.value}</dd>
+            <dd className="text-lg font-semibold text-white tabular-nums mt-0.5">{s.value}</dd>
           </div>
         ))}
       </dl>
@@ -992,7 +992,7 @@ function LinksCard({ repo }: { repo: RepositoryDetail }) {
               href={repo.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-bolty-300 transition-colors"
             >
               <Globe className="w-3.5 h-3.5 text-zinc-500" />
               <span className="truncate">{repo.websiteUrl.replace(/^https?:\/\//, '')}</span>
@@ -1006,7 +1006,7 @@ function LinksCard({ repo }: { repo: RepositoryDetail }) {
               href={repo.twitterUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-bolty-300 transition-colors"
             >
               <ExternalLink className="w-3.5 h-3.5 text-zinc-500" />
               <span className="truncate">{repo.twitterUrl.replace(/^https?:\/\//, '')}</span>

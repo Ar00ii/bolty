@@ -18,7 +18,7 @@ export function AnimatedHeading({
   children,
   as: Component = 'h1',
   gradient = true,
-  gradientFrom = '#a78bfa',
+  gradientFrom = '#7DFFBF',
   gradientTo = '#06b6d4',
   delay = 0,
   className = '',
@@ -38,7 +38,7 @@ export function AnimatedHeading({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
-      <Component className={`font-light ${className}`} style={gradientStyle}>
+      <Component className={`font-semibold ${className}`} style={gradientStyle}>
         {children}
       </Component>
     </motion.div>
@@ -85,7 +85,7 @@ export function WordReveal({
             }}
             className={
               isHighlight
-                ? 'font-light text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400'
+                ? 'font-semibold text-transparent bg-clip-text bg-gradient-to-r from-bolty-400 to-cyan-400'
                 : ''
             }
           >

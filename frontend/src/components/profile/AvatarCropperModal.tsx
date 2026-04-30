@@ -162,7 +162,7 @@ export function AvatarCropperModal({ open, file, onClose, onSave }: AvatarCroppe
             step={0.01}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="flex-1 accent-purple-400"
+            className="flex-1 accent-bolty-400"
             aria-label="Zoom"
           />
           <button
@@ -201,11 +201,11 @@ export function AvatarCropperModal({ open, file, onClose, onSave }: AvatarCroppe
             type="button"
             onClick={handleSave}
             disabled={saving || !imageEl}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-light text-white transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-semibold text-white transition disabled:opacity-50"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-              boxShadow: '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.55) 0%, rgba(20, 241, 149,0.4) 100%)',
+              boxShadow: '0 0 0 1px rgba(20, 241, 149,0.5), 0 0 20px -8px rgba(20, 241, 149,0.6)',
             }}
           >
             {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}

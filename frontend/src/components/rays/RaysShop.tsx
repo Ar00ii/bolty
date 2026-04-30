@@ -122,14 +122,14 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
             className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
             }}
           >
             <Zap className="w-4 h-4 text-[#b4a7ff]" />
           </div>
-          <h3 className="text-2xl font-light text-white tracking-[-0.01em]">Purchase Rays</h3>
+          <h3 className="text-2xl font-semibold text-white tracking-[-0.01em]">Purchase Rays</h3>
         </div>
         <p className="text-sm text-zinc-400 tracking-[0.005em]">
           Boost your agent in trending rankings. Rays accumulate permanently forever.
@@ -211,9 +211,9 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                 isSelected
                   ? {
                       background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                        'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.5), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 22px -4px rgba(131,110,249,0.55)',
+                        'inset 0 0 0 1px rgba(20, 241, 149,0.5), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 22px -4px rgba(20, 241, 149,0.55)',
                     }
                   : surfaceStyle
               }
@@ -223,13 +223,13 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                   className="absolute inset-x-0 top-0 h-px"
                   style={{
                     background:
-                      'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+                      'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.6) 50%, transparent 100%)',
                   }}
                 />
               )}
               <div className="flex items-center justify-between mb-3">
                 <p
-                  className={`text-[14px] font-light tracking-[0.005em] ${
+                  className={`text-[14px] font-semibold tracking-[0.005em] ${
                     isSelected ? 'text-[#b4a7ff]' : 'text-white'
                   }`}
                 >
@@ -245,9 +245,9 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                       className="w-6 h-6 rounded-full flex items-center justify-center"
                       style={{
                         background:
-                          'linear-gradient(135deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                          'linear-gradient(135deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                         boxShadow:
-                          'inset 0 0 0 1px rgba(131,110,249,0.6), 0 0 12px -2px rgba(131,110,249,0.5)',
+                          'inset 0 0 0 1px rgba(20, 241, 149,0.6), 0 0 12px -2px rgba(20, 241, 149,0.5)',
                       }}
                     >
                       <CheckCircle className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -256,7 +256,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                 </AnimatePresence>
               </div>
               <div className="flex items-baseline gap-1.5">
-                <p className="text-2xl font-light text-white tabular-nums tracking-[-0.01em]">
+                <p className="text-2xl font-semibold text-white tabular-nums tracking-[-0.01em]">
                   {pack.boltyPrice.toLocaleString()}
                 </p>
                 <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
@@ -283,27 +283,27 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
             className="relative p-5 rounded-xl overflow-hidden"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.12) 0%, rgba(20, 241, 149,0.02) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.35)',
+                '0 0 0 1px rgba(20, 241, 149,0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(20, 241, 149,0.35)',
             }}
           >
             <div
               className="absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
               }}
             />
             <div
               className="grid grid-cols-2 gap-4 pb-4"
-              style={{ borderBottom: '1px solid rgba(131,110,249,0.15)' }}
+              style={{ borderBottom: '1px solid rgba(20, 241, 149,0.15)' }}
             >
               <div>
                 <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
                   Rays
                 </p>
-                <p className="text-2xl font-light text-white mt-1 tabular-nums tracking-[-0.01em]">
+                <p className="text-2xl font-semibold text-white mt-1 tabular-nums tracking-[-0.01em]">
                   {selectedPackData.rays.toLocaleString()}
                 </p>
               </div>
@@ -311,7 +311,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                 <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
                   Price
                 </p>
-                <p className="text-2xl font-light text-[#b4a7ff] mt-1 tabular-nums tracking-[-0.01em]">
+                <p className="text-2xl font-semibold text-[#b4a7ff] mt-1 tabular-nums tracking-[-0.01em]">
                   {selectedPackData.boltyPrice.toLocaleString()} BOLTY
                 </p>
               </div>
@@ -382,12 +382,12 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
         whileHover={!selectedPack || purchasing ? undefined : { y: -1 }}
         whileTap={!selectedPack || purchasing ? undefined : { scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-        className="w-full py-3 rounded-lg font-light text-[13px] text-white tracking-[0.005em] transition-colors hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-3 rounded-lg font-semibold text-[13px] text-white tracking-[0.005em] transition-colors hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+            'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+            'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
         }}
       >
         {purchasing ? (
@@ -411,7 +411,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
           }}
         />
         <p className="text-[12px] text-zinc-400 tracking-[0.005em] leading-relaxed">

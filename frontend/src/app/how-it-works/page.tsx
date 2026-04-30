@@ -87,7 +87,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(131,110,249,0.14), transparent 70%)',
+            'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20, 241, 149,0.14), transparent 70%)',
         }}
       />
       <div className="mx-auto max-w-[1400px] relative">
@@ -96,12 +96,12 @@ function Hero({ stats }: { stats: PulseStats | null }) {
           Product overview
         </div>
 
-        <h1 className="text-3xl md:text-5xl font-light tracking-tight text-white leading-[1.08]">
+        <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-white leading-[1.08]">
           The marketplace for
           <br />
           <span style={{ color: '#b4a7ff' }}>AI agents, bots & code.</span>
         </h1>
-        <p className="mt-4 max-w-2xl text-sm md:text-[15px] font-light text-zinc-400 leading-relaxed">
+        <p className="mt-4 max-w-2xl text-sm md:text-[15px] font-semibold text-zinc-400 leading-relaxed">
           Publish a repo, deploy an agent, or list a script — Bolty handles escrow, reputation,
           delivery and payments on chain so you can focus on building.
         </p>
@@ -112,9 +112,9 @@ function Hero({ stats }: { stats: PulseStats | null }) {
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.9) 0%, rgba(20, 241, 149,0.7) 100%)',
               boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+                'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20, 241, 149,0.5)',
             }}
           >
             Browse marketplace
@@ -132,7 +132,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
           </Link>
           <Link
             href="/docs/agent-protocol"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-zinc-400 hover:text-zinc-200 transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-semibold text-zinc-400 hover:text-zinc-200 transition"
           >
             Developer docs
             <ArrowUpRight className="w-3 h-3" strokeWidth={1.75} />
@@ -149,7 +149,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
           <HeroStat
             label="All-time sales"
             value={formatNumber(stats?.totalSales)}
-            accent="#836EF9"
+            accent="#14F195"
           />
           <HeroStat
             label="24h volume"
@@ -183,7 +183,7 @@ function HeroStat({ label, value, accent }: { label: string; value: string; acce
       <div className="text-[10px] uppercase tracking-[0.16em] text-zinc-500 font-medium mb-1">
         {label}
       </div>
-      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+      <div className="font-mono text-xl md:text-2xl font-semibold text-white tabular-nums">
         {value}
       </div>
     </div>
@@ -195,7 +195,7 @@ function HeroStat({ label, value, accent }: { label: string; value: string; acce
 function Flow() {
   const nodes: { icon: LucideIcon; label: string; sub: string; accent: string }[] = [
     { icon: FileCode, label: 'List', sub: 'Repo · Bot · Agent · Script', accent: '#06B6D4' },
-    { icon: MessageSquare, label: 'Buy', sub: 'One-click direct purchase', accent: '#836EF9' },
+    { icon: MessageSquare, label: 'Buy', sub: 'One-click direct purchase', accent: '#14F195' },
     { icon: Lock, label: 'Escrow', sub: 'Funds locked on chain', accent: '#f59e0b' },
     { icon: CheckCircle2, label: 'Deliver', sub: 'Buyer confirms', accent: '#22c55e' },
     { icon: Coins, label: 'Release', sub: 'Seller paid automatically', accent: '#EC4899' },
@@ -255,7 +255,7 @@ function FlowNode({
         <Icon className="w-5 h-5" strokeWidth={1.6} style={{ color: node.accent }} />
       </div>
       <div className="mt-3 text-[12.5px] font-normal text-white">{node.label}</div>
-      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{node.sub}</div>
+      <div className="text-[10.5px] text-zinc-500 font-semibold mt-0.5">{node.sub}</div>
 
       {!last && (
         <span
@@ -285,7 +285,7 @@ function Features() {
       icon: Bot,
       title: 'Autonomous agents',
       body: 'Register an HTTPS endpoint, and buyers can invoke your agent live from the listing. Bolty handles sandboxing and rate limiting.',
-      accent: '#836EF9',
+      accent: '#14F195',
       href: '/docs/agent-protocol',
     },
     {
@@ -368,9 +368,9 @@ function FeatureCard({
         <Icon className="w-4 h-4" strokeWidth={1.6} style={{ color: feature.accent }} />
       </div>
       <div className="text-[14px] font-normal text-white mb-1.5">{feature.title}</div>
-      <div className="text-[12.5px] font-light text-zinc-400 leading-relaxed">{feature.body}</div>
+      <div className="text-[12.5px] font-semibold text-zinc-400 leading-relaxed">{feature.body}</div>
       {feature.href && (
-        <div className="mt-3 inline-flex items-center gap-1 text-[11.5px] font-light text-zinc-400 group-hover:text-white transition">
+        <div className="mt-3 inline-flex items-center gap-1 text-[11.5px] font-semibold text-zinc-400 group-hover:text-white transition">
           Learn more
           <ArrowUpRight className="w-3 h-3" strokeWidth={1.75} />
         </div>
@@ -484,11 +484,11 @@ function Changelog() {
                   <span className="font-mono text-[11px] text-zinc-500 tabular-nums">
                     {entry.version}
                   </span>
-                  <span className="text-[11px] text-zinc-600 font-light">{entry.date}</span>
+                  <span className="text-[11px] text-zinc-600 font-semibold">{entry.date}</span>
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <div className="text-[13.5px] font-normal text-white">{entry.title}</div>
-                  <div className="text-[12px] font-light text-zinc-400 mt-1 leading-relaxed">
+                  <div className="text-[12px] font-semibold text-zinc-400 mt-1 leading-relaxed">
                     {entry.body}
                   </div>
                 </div>
@@ -502,7 +502,7 @@ function Changelog() {
 }
 
 function ChangelogTag({ tag }: { tag: ChangelogEntry['tag'] }) {
-  const color = tag === 'NEW' ? '#22c55e' : tag === 'FIX' ? '#f59e0b' : '#836EF9';
+  const color = tag === 'NEW' ? '#22c55e' : tag === 'FIX' ? '#f59e0b' : '#14F195';
   return (
     <span
       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-medium uppercase tracking-[0.14em]"
@@ -533,8 +533,8 @@ function CtaFooter() {
         className="mx-auto max-w-[1400px] rounded-2xl p-8 md:p-10 relative overflow-hidden"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.08), rgba(6,182,212,0.05) 50%, rgba(236,72,153,0.06))',
-          boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
+            'linear-gradient(135deg, rgba(20, 241, 149,0.08), rgba(6,182,212,0.05) 50%, rgba(236,72,153,0.06))',
+          boxShadow: '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
         <div className="relative flex items-center justify-between gap-6 flex-wrap">
@@ -543,17 +543,17 @@ function CtaFooter() {
               <Zap className="w-3 h-3" strokeWidth={2} />
               Ready to ship
             </div>
-            <h3 className="text-xl md:text-2xl font-light tracking-tight text-white">
+            <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-white">
               Connect your wallet. Publish your first listing.
             </h3>
-            <p className="text-[13px] font-light text-zinc-400 mt-1 max-w-xl">
+            <p className="text-[13px] font-semibold text-zinc-400 mt-1 max-w-xl">
               It takes under two minutes and costs nothing until someone buys.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Link
               href="/profile?tab=wallet"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-zinc-200 transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-semibold text-zinc-200 transition"
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
@@ -567,9 +567,9 @@ function CtaFooter() {
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                  'linear-gradient(180deg, rgba(20, 241, 149,0.9) 0%, rgba(20, 241, 149,0.7) 100%)',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20, 241, 149,0.5)',
               }}
             >
               Publish listing
@@ -599,11 +599,11 @@ function SectionHeader({
         <ChevronRight className="w-3 h-3" strokeWidth={2} />
         {kicker}
       </div>
-      <h2 className="text-xl md:text-2xl font-light tracking-tight text-white max-w-2xl">
+      <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-white max-w-2xl">
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-2 text-[13px] font-light text-zinc-400 max-w-2xl leading-relaxed">
+        <p className="mt-2 text-[13px] font-semibold text-zinc-400 max-w-2xl leading-relaxed">
           {subtitle}
         </p>
       )}

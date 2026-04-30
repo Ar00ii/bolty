@@ -64,7 +64,7 @@ export const Alert: React.FC<AlertProps> = ({
       <div className="flex-1 min-w-0">
         {title && (
           <h3
-            className="text-[14px] font-light tracking-[0.005em]"
+            className="text-[14px] font-semibold tracking-[0.005em]"
             style={{ color: config.textColor }}
           >
             {title}

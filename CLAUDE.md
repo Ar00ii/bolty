@@ -20,13 +20,14 @@ Monorepo with:
 ## Frontend design language
 
 When modifying pages, match the landing page style (`frontend/src/app/page.tsx`):
-- Font weight 300 (`font-light`) by default.
-- Primary brand color `#836EF9` (purple); accents `#06B6D4` (cyan), `#EC4899` (magenta).
+- **Font weight 500 (`font-medium`) by default; 600–700 for emphasis.** Avoid `font-light`/`font-thin` — the project deliberately uses bolder weights for app feel.
+- **Primary brand color `#14F195` (Solana green)**, secondary `#00FFA3` (mint), cyan accent `#03E1FF`, magenta accent `#EC4899`. Use Tailwind `bolty-*` (which resolves to the green ramp) instead of raw hex.
 - Reuse shared primitives from `frontend/src/components/ui/`:
   - `GradientText` for headings / highlighted numbers.
   - `ShimmerButton` for primary CTAs.
   - Corner brackets (`border-t-2 border-l-2 border-white/20` etc.) on hero containers.
   - Radial ambient glows as absolute-positioned background layers.
+- Single source of truth for navigation: `frontend/src/lib/nav-config.ts`. Sidebar, top bar, mobile tab bar, and unified header all consume this. Add new destinations there.
 - Always render a friendly empty state when lists are empty — never leave a section visually blank.
 
 ## Checks before committing

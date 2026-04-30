@@ -1,9 +1,9 @@
 /*
  * Branded prose styles for the docs surface.
  *
- * Default body weight is 300 (font-light) per the project's design
+ * Default body weight is 300 (font-semibold) per the project's design
  * language; <strong> ramps to 400 so emphasis still reads without
- * screaming. The only chromatic accent is the brand purple #836EF9
+ * screaming. The only chromatic accent is the brand purple #14F195
  * — used for the H-link bullet markers, ordered-list numerals,
  * blockquote rail, code background tint, and table-header tint.
  *
@@ -86,13 +86,13 @@
   width: 4px;
   height: 4px;
   border-radius: 9999px;
-  background: #836ef9;
+  background: #14f195;
 }
 .docs-prose ol > li {
   margin: 0.4em 0;
 }
 .docs-prose ol > li::marker {
-  color: #836ef9;
+  color: #14f195;
   font-weight: 400;
 }
 .docs-prose li ul,
@@ -101,7 +101,7 @@
 }
 
 .docs-prose blockquote {
-  border-left: 2px solid #836ef9;
+  border-left: 2px solid #14f195;
   margin: 1.4em 0;
   padding: 0.2em 0 0.2em 1em;
   color: #d4d4d8;
@@ -109,13 +109,13 @@
 }
 
 .docs-prose code {
-  background: rgba(131, 110, 249, 0.08);
+  background: rgba(20, 241, 149, 0.08);
   color: #e4e4e7;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12.5px;
   padding: 0.12em 0.4em;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.18);
 }
 .docs-prose pre {
   background: #0a0a0c;
@@ -148,7 +148,7 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .docs-prose thead {
-  background: rgba(131, 110, 249, 0.08);
+  background: rgba(20, 241, 149, 0.08);
 }
 .docs-prose th,
 .docs-prose td {

@@ -48,7 +48,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         {/* Hero Text Group */}
         <div className="flex flex-col gap-5 sm:gap-6">
           <h1
-            className="text-white font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]"
+            className="text-white font-semibold text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
             The on-chain
@@ -64,9 +64,9 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                 className="absolute left-0 top-0 inline-flex items-baseline gap-1.5"
               >
                 <span
-                  className="font-light text-[clamp(36px,9vw,80px)] leading-[1.15] tracking-[-0.03em] pb-[0.08em]"
+                  className="font-semibold text-[clamp(36px,9vw,80px)] leading-[1.15] tracking-[-0.03em] pb-[0.08em]"
                   style={{
-                    background: 'linear-gradient(to right, #c4b5fd, #836EF9)',
+                    background: 'linear-gradient(to right, #B3FFD9, #14F195)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -81,7 +81,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   style={{
                     height: '1em',
                     width: '0.6ch',
-                    background: 'linear-gradient(to top, #a78bfa, rgba(167,139,250,0.5))',
+                    background: 'linear-gradient(to top, #7DFFBF, rgba(167,139,250,0.5))',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -113,9 +113,9 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             href="/market"
             className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl text-white whitespace-nowrap transition-all hover:brightness-110"
             style={{
-              background: 'rgba(131,110,249,0.08)',
+              background: 'rgba(20, 241, 149,0.08)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 22px -6px rgba(131,110,249,0.4)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.32), 0 0 22px -6px rgba(20, 241, 149,0.4)',
             }}
           >
             Browse the market
@@ -134,7 +134,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           className="absolute top-0 right-0 w-full"
           style={{
             aspectRatio: '630 / 591',
-            background: 'radial-gradient(circle at 60% 45%, #836EF9 0%, transparent 72%)',
+            background: 'radial-gradient(circle at 60% 45%, #14F195 0%, transparent 72%)',
             filter: 'blur(90px)',
             opacity: 0.18,
           }}
@@ -143,7 +143,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           className="absolute bottom-0 right-0 w-2/3"
           style={{
             aspectRatio: '1 / 1',
-            background: 'radial-gradient(circle at 50% 50%, #a78bfa 0%, transparent 72%)',
+            background: 'radial-gradient(circle at 50% 50%, #7DFFBF 0%, transparent 72%)',
             filter: 'blur(110px)',
             opacity: 0.1,
           }}

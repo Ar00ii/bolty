@@ -31,7 +31,7 @@ const TYPE_META: Record<NotificationType, { icon: LucideIcon; color: string; lab
   MARKET_NEW_SALE: { icon: DollarSign, color: '#22c55e', label: 'Sale' },
   MARKET_NEW_REVIEW: { icon: Star, color: '#f59e0b', label: 'Review' },
   MARKET_ORDER_DELIVERED: { icon: Package, color: '#06B6D4', label: 'Delivery' },
-  MARKET_ORDER_COMPLETED: { icon: PartyPopper, color: '#836EF9', label: 'Completed' },
+  MARKET_ORDER_COMPLETED: { icon: PartyPopper, color: '#14F195', label: 'Completed' },
   MARKET_NEGOTIATION_MESSAGE: { icon: MessageSquare, color: '#EC4899', label: 'Message' },
   SYSTEM: { icon: Bell, color: '#94a3b8', label: 'System' },
 };
@@ -155,10 +155,10 @@ export default function NotificationsPage() {
                 <span>Activity feed</span>
                 {unread > 0 && <LiveDot />}
               </div>
-              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
                 Notifications
               </h1>
-              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+              <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
                 {unread > 0 ? `${unread} unread · ${items.length} total` : 'You are all caught up.'}
               </p>
             </div>
@@ -188,7 +188,7 @@ export default function NotificationsPage() {
             label="Unread"
             value={formatNumber(unread)}
             sub={unread > 0 ? 'waiting for you' : 'inbox zero'}
-            accent="#836EF9"
+            accent="#14F195"
           />
           <StatTile
             label="Today"
@@ -232,11 +232,11 @@ export default function NotificationsPage() {
                   key={f}
                   type="button"
                   onClick={() => setFilter(f)}
-                  className="px-3 py-1.5 text-[12px] font-light rounded-md transition"
+                  className="px-3 py-1.5 text-[12px] font-semibold rounded-md transition"
                   style={{
                     color: active ? '#ffffff' : '#a1a1aa',
-                    background: active ? 'rgba(131,110,249,0.2)' : 'transparent',
-                    boxShadow: active ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+                    background: active ? 'rgba(20, 241, 149,0.2)' : 'transparent',
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(20, 241, 149,0.35)' : 'none',
                   }}
                 >
                   {f === 'all' ? 'All' : 'Unread'}
@@ -259,7 +259,7 @@ export default function NotificationsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search notifications…"
-              className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+              className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-semibold text-white placeholder-zinc-600"
             />
             {query ? (
               <button
@@ -283,14 +283,14 @@ export default function NotificationsPage() {
               const active = typeFilter === t.value;
               const color =
                 t.value === 'ALL'
-                  ? '#836EF9'
-                  : TYPE_META[t.value as NotificationType]?.color || '#836EF9';
+                  ? '#14F195'
+                  : TYPE_META[t.value as NotificationType]?.color || '#14F195';
               return (
                 <button
                   key={t.value}
                   type="button"
                   onClick={() => setTypeFilter(t.value)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold transition"
                   style={{
                     color: active ? '#ffffff' : '#a1a1aa',
                     background: active ? `${color}22` : 'rgba(255,255,255,0.02)',
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
         <div className="mx-auto max-w-[1200px]">
           {loading && items.length === 0 ? (
             <div
-              className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
+              className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-semibold"
               style={{
                 background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
                 boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
@@ -361,9 +361,9 @@ function LiveDot() {
     <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
       <span
         className="absolute inset-0 rounded-full animate-ping"
-        style={{ background: '#836EF9' }}
+        style={{ background: '#14F195' }}
       />
-      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#836EF9]" />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#14F195]" />
     </span>
   );
 }
@@ -397,10 +397,10 @@ function StatTile({
       <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
         {label}
       </div>
-      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+      <div className="font-mono text-xl md:text-2xl font-semibold text-white tabular-nums">
         {value}
       </div>
-      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
+      <div className="text-[10.5px] text-zinc-500 font-semibold mt-0.5">{sub}</div>
     </div>
   );
 }
@@ -467,9 +467,9 @@ function NotifRow({
               <span
                 className="text-[9px] uppercase tracking-[0.12em] px-1 py-px rounded font-medium"
                 style={{
-                  color: '#836EF9',
-                  background: 'rgba(131,110,249,0.12)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                  color: '#14F195',
+                  background: 'rgba(20, 241, 149,0.12)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                 }}
               >
                 NEW
@@ -477,7 +477,7 @@ function NotifRow({
             )}
           </div>
           {item.body && (
-            <div className="text-[10.5px] text-zinc-500 font-light truncate">{item.body}</div>
+            <div className="text-[10.5px] text-zinc-500 font-semibold truncate">{item.body}</div>
           )}
         </div>
       </div>
@@ -535,16 +535,16 @@ function EmptyState({ query, typeFilter }: { query: string; typeFilter: string }
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <div
         className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-          border: '1px solid rgba(131,110,249,0.35)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+            'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
+          border: '1px solid rgba(20, 241, 149,0.35)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.45)',
         }}
       >
         <Bell className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
@@ -556,7 +556,7 @@ function EmptyState({ query, typeFilter }: { query: string; typeFilter: string }
             ? 'Nothing here yet'
             : 'No notifications of that type'}
       </p>
-      <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto font-light">
+      <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto font-semibold">
         {query
           ? 'Try a different keyword or clear the search to see everything.'
           : 'Sales, reviews, deliveries and marketplace messages show up here in real time.'}

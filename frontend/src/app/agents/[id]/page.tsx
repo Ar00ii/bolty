@@ -95,7 +95,7 @@ function PostCard({ post }: { post: AgentPost }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.3) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.3) 50%, transparent 100%)',
         }}
       />
       <div className="flex items-center justify-between mb-2 gap-2">
@@ -111,7 +111,7 @@ function PostCard({ post }: { post: AgentPost }) {
       <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-200">{post.content}</p>
       {post.postType === 'PRICE_UPDATE' && post.price != null && (
         <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(250,204,21,0.18)' }}>
-          <span className="text-yellow-400 font-mono font-light text-sm">
+          <span className="text-yellow-400 font-mono font-semibold text-sm">
             {post.price} {post.currency || ''}
           </span>
         </div>
@@ -258,7 +258,7 @@ export default function AgentDetailPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-start justify-between flex-wrap gap-4 relative">
@@ -277,7 +277,7 @@ export default function AgentDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h1 className="text-xl font-light" style={{ color: 'var(--text)' }}>
+                <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
                   {agent.title}
                 </h1>
                 <span
@@ -303,7 +303,7 @@ export default function AgentDetailPage() {
 
           {/* Price + action */}
           <div className="flex flex-col items-end gap-2">
-            <div className="text-lg font-mono font-light">
+            <div className="text-lg font-mono font-semibold">
               {agent.price === 0 ? (
                 <span className="text-green-400">Free</span>
               ) : (
@@ -354,7 +354,7 @@ export default function AgentDetailPage() {
               onClick={() => setActiveTab(tab as typeof activeTab)}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-              className={`relative flex-1 py-2 text-[13px] font-light rounded-lg transition-colors capitalize ${
+              className={`relative flex-1 py-2 text-[13px] font-semibold rounded-lg transition-colors capitalize ${
                 active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -365,9 +365,9 @@ export default function AgentDetailPage() {
                   className="absolute inset-0 rounded-lg"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                   }}
                 />
               )}
@@ -386,11 +386,11 @@ export default function AgentDetailPage() {
             <>
               <button
                 onClick={() => setShowPost(!showPost)}
-                className="w-full py-3 rounded-xl text-[13px] font-light transition-all"
+                className="w-full py-3 rounded-xl text-[13px] font-semibold transition-all"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.12) 0%, rgba(20, 241, 149,0.02) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
                   color: '#b4a7ff',
                 }}
               >
@@ -412,7 +412,7 @@ export default function AgentDetailPage() {
                     className="pointer-events-none absolute inset-x-0 top-0 h-px"
                     style={{
                       background:
-                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                        'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                     }}
                   />
                   <div className="flex gap-2 flex-wrap">
@@ -436,7 +436,7 @@ export default function AgentDetailPage() {
                     rows={3}
                     maxLength={2000}
                     placeholder="What does your agent want to say?"
-                    className="w-full px-4 py-2.5 rounded-xl text-[13px] resize-none outline-none text-zinc-100 placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+                    className="w-full px-4 py-2.5 rounded-xl text-[13px] resize-none outline-none text-zinc-100 placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(20, 241, 149,0.45),_0_0_0_4px_rgba(20, 241, 149,0.12)]"
                     style={{
                       background:
                         'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -535,7 +535,7 @@ export default function AgentDetailPage() {
             className="rounded-xl p-5"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           >
-            <h3 className="text-sm font-light mb-3" style={{ color: 'var(--text)' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
               Description
             </h3>
             <p
@@ -616,7 +616,7 @@ export default function AgentDetailPage() {
             className="rounded-xl p-4 text-sm"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
           >
-            <p className="font-light mb-1" style={{ color: 'var(--text)' }}>
+            <p className="font-semibold mb-1" style={{ color: 'var(--text)' }}>
               API Keys for automated posting
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
@@ -656,7 +656,7 @@ export default function AgentDetailPage() {
                 background: 'rgba(74,222,128,0.05)',
               }}
             >
-              <p className="text-green-400 text-xs font-light mb-2">
+              <p className="text-green-400 text-xs font-semibold mb-2">
                 API key generated — save it now, it won&apos;t be shown again:
               </p>
               <code className="text-sm font-mono text-green-300 break-all">{newKey}</code>
@@ -702,7 +702,7 @@ export default function AgentDetailPage() {
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 >
                   <div>
-                    <p className="text-sm font-light" style={{ color: 'var(--text)' }}>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
                       {k.label || 'Unnamed key'}
                     </p>
                     <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>

@@ -332,7 +332,7 @@ export function CommandPalette() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.5) 50%, transparent 100%)',
               }}
             />
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
@@ -411,16 +411,16 @@ export function CommandPalette() {
                             borderColor: 'rgba(255,255,255,0.08)',
                             background:
                               cmd.kind === 'listing'
-                                ? 'rgba(131,110,249,0.08)'
+                                ? 'rgba(20, 241, 149,0.08)'
                                 : 'rgba(255,255,255,0.03)',
                           }}
                         >
                           <Icon
-                            className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#836EF9]' : 'text-zinc-300'}`}
+                            className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#14F195]' : 'text-zinc-300'}`}
                           />
                         </div>
                         <div className="relative flex-1 min-w-0">
-                          <p className="text-sm font-light text-white truncate">{cmd.title}</p>
+                          <p className="text-sm font-semibold text-white truncate">{cmd.title}</p>
                           <p className="text-[11px] text-zinc-500 truncate">{cmd.hint}</p>
                         </div>
                         {cmd.kind === 'listing' && (

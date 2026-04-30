@@ -25,7 +25,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         <div className="relative">
           <input
             ref={ref}
-            className={`w-full px-3 py-2.5 ${error ? 'pr-9' : ''} rounded-lg text-[13px] font-light text-white placeholder-zinc-600 outline-none transition-all focus:brightness-110 tracking-[0.005em] ${className}`}
+            className={`w-full px-3 py-2.5 ${error ? 'pr-9' : ''} rounded-lg text-[13px] font-semibold text-white placeholder-zinc-600 outline-none transition-all focus:brightness-110 tracking-[0.005em] ${className}`}
             style={{
               background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
               boxShadow: error

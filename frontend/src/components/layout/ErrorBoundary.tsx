@@ -82,7 +82,7 @@ export class ErrorBoundary extends React.Component<
                 alignItems: 'center',
                 gap: 6,
                 padding: '8px 14px',
-                background: '#836ef9',
+                background: '#14f195',
                 color: '#fff',
                 border: 'none',
                 borderRadius: 8,

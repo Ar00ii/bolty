@@ -50,7 +50,7 @@ const TOPICS: Topic[] = [
     id: 'getting-started',
     title: 'Getting started',
     icon: Sparkles,
-    accent: '#836EF9',
+    accent: '#14F195',
     description: 'Create an account, connect your wallet, and make your first purchase.',
     href: '/how-it-works',
   },
@@ -220,7 +220,7 @@ const CATEGORY_LABELS: Record<FaqEntry['category'], string> = {
 };
 
 const CATEGORY_COLORS: Record<FaqEntry['category'], string> = {
-  general: '#836EF9',
+  general: '#14F195',
   buying: '#06B6D4',
   selling: '#EC4899',
   escrow: '#22c55e',
@@ -243,7 +243,7 @@ const CONTACT_CHANNELS: {
     cta: 'Open docs',
     href: '/docs/agent-protocol',
     icon: BookOpen,
-    accent: '#836EF9',
+    accent: '#14F195',
   },
   {
     id: 'chat',
@@ -298,10 +298,10 @@ export default function HelpPage() {
                 <LifeBuoy className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Help center</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
                 How can we help?
               </h1>
-              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+              <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
                 Guides, FAQs and direct channels to reach the team.
               </p>
             </div>
@@ -324,7 +324,7 @@ export default function HelpPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
               }}
             />
             <Search className="w-4 h-4 text-zinc-500" strokeWidth={1.75} />
@@ -333,7 +333,7 @@ export default function HelpPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search help articles, topics, keywords…"
-              className="flex-1 bg-transparent border-none outline-none text-[13.5px] font-light text-white placeholder-zinc-600"
+              className="flex-1 bg-transparent border-none outline-none text-[13.5px] font-semibold text-white placeholder-zinc-600"
             />
             {query ? (
               <button
@@ -411,10 +411,10 @@ export default function HelpPage() {
             {filteredFaqs.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <HelpCircle className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
-                <p className="text-[13px] text-zinc-300 font-light">
+                <p className="text-[13px] text-zinc-300 font-semibold">
                   No articles match {q ? `"${query}"` : 'this filter'}.
                 </p>
-                <p className="text-[11.5px] text-zinc-500 font-light mt-1">
+                <p className="text-[11.5px] text-zinc-500 font-semibold mt-1">
                   Try a different keyword or{' '}
                   <Link href="mailto:support@bolty.run" className="text-[#b4a7ff] hover:text-white">
                     reach out to support
@@ -493,7 +493,7 @@ function TopicTile({ topic }: { topic: Topic }) {
               strokeWidth={1.75}
             />
           </div>
-          <p className="text-[11px] text-zinc-500 font-light mt-1 leading-relaxed">
+          <p className="text-[11px] text-zinc-500 font-semibold mt-1 leading-relaxed">
             {topic.description}
           </p>
         </div>
@@ -515,12 +515,12 @@ function CategoryChip({
   onClick: () => void;
   accent?: string;
 }) {
-  const c = accent || '#836EF9';
+  const c = accent || '#14F195';
   return (
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] font-light transition"
+      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] font-semibold transition"
       style={{
         color: active ? '#ffffff' : '#a1a1aa',
         background: active ? `${c}22` : 'transparent',
@@ -561,7 +561,7 @@ function FaqRow({ entry, index }: { entry: FaqEntry; index: number }) {
         <div className="min-w-0">
           <div className="text-[13px] font-normal text-white">{entry.question}</div>
           {!open && (
-            <div className="text-[11px] text-zinc-500 font-light mt-0.5 truncate">
+            <div className="text-[11px] text-zinc-500 font-semibold mt-0.5 truncate">
               {entry.answer}
             </div>
           )}
@@ -584,7 +584,7 @@ function FaqRow({ entry, index }: { entry: FaqEntry; index: number }) {
       </button>
       {open && (
         <div className="px-3 pb-4 pl-[56px] pr-12">
-          <p className="text-[12.5px] text-zinc-300 font-light leading-relaxed">{entry.answer}</p>
+          <p className="text-[12.5px] text-zinc-300 font-semibold leading-relaxed">{entry.answer}</p>
           {entry.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2.5">
               {entry.tags.map((t) => (
@@ -652,7 +652,7 @@ function ContactCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-[13px] font-normal text-white">{channel.title}</div>
-          <p className="text-[11px] text-zinc-500 font-light mt-0.5 leading-relaxed">
+          <p className="text-[11px] text-zinc-500 font-semibold mt-0.5 leading-relaxed">
             {channel.description}
           </p>
           <div

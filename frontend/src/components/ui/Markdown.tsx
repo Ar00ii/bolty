@@ -111,7 +111,7 @@ function renderInline(text: string): React.ReactNode[] {
           className="px-1.5 py-0.5 rounded-md text-[#b4a7ff] text-[0.85em] font-mono"
           style={{
             background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.2)',
           }}
         >
           {token.slice(1, -1)}
@@ -153,9 +153,9 @@ export function Markdown({ source, className }: { source: string; className?: st
       {blocks.map((b, i) => {
         if (b.kind === 'heading') {
           const sizes = {
-            1: 'text-xl font-light text-white mt-6 mb-3 tracking-[-0.01em]',
-            2: 'text-lg font-light text-white mt-5 mb-2 tracking-[-0.005em]',
-            3: 'text-base font-light text-zinc-100 mt-4 mb-2',
+            1: 'text-xl font-semibold text-white mt-6 mb-3 tracking-[-0.01em]',
+            2: 'text-lg font-semibold text-white mt-5 mb-2 tracking-[-0.005em]',
+            3: 'text-base font-semibold text-zinc-100 mt-4 mb-2',
           } as const;
           return (
             <div key={i} className={sizes[b.level]}>

@@ -142,8 +142,8 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
           <Twitter className="w-4 h-4 text-zinc-300" strokeWidth={1.75} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] text-white font-light">X (Twitter)</div>
-          <div className="text-[11.5px] text-zinc-500 font-light">
+          <div className="text-[13px] text-white font-semibold">X (Twitter)</div>
+          <div className="text-[11.5px] text-zinc-500 font-semibold">
             Let your AI agents post launch announcements and milestones from your account.
           </div>
         </div>
@@ -155,7 +155,7 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
             type="button"
             onClick={handleDisconnect}
             disabled={busy}
-            className="text-[12px] font-light px-3 py-1.5 rounded-md transition disabled:opacity-50"
+            className="text-[12px] font-semibold px-3 py-1.5 rounded-md transition disabled:opacity-50"
             style={{
               background: 'rgba(239,68,68,0.08)',
               color: '#fca5a5',
@@ -171,9 +171,9 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
             disabled={busy}
             className="text-[12px] font-medium px-3 py-1.5 rounded-md transition disabled:opacity-50"
             style={{
-              background: 'rgba(131,110,249,0.15)',
+              background: 'rgba(20, 241, 149,0.15)',
               color: '#e4d8ff',
-              border: '1px solid rgba(131,110,249,0.3)',
+              border: '1px solid rgba(20, 241, 149,0.3)',
             }}
           >
             {busy ? 'Redirecting…' : 'Connect X'}
@@ -188,7 +188,7 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
           session first + adds force_login=true so they land on the
           login screen and can pick the right one. */}
       {status?.connected === false && (
-        <div className="mt-2 text-[10.5px] text-zinc-500 font-light leading-relaxed">
+        <div className="mt-2 text-[10.5px] text-zinc-500 font-semibold leading-relaxed">
           Will connect whichever X account you&apos;re currently signed into.{' '}
           <button
             type="button"

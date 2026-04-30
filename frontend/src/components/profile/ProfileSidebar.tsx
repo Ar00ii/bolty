@@ -24,7 +24,7 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
               className="absolute -inset-1 rounded-full opacity-70"
               style={{
                 background:
-                  'radial-gradient(circle at center, rgba(131,110,249,0.45) 0%, transparent 70%)',
+                  'radial-gradient(circle at center, rgba(20, 241, 149,0.45) 0%, transparent 70%)',
                 filter: 'blur(8px)',
               }}
             />
@@ -39,7 +39,7 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
             </div>
           </div>
           <div className="text-center">
-            <p className="text-base font-light text-white tracking-[-0.005em]">
+            <p className="text-base font-semibold text-white tracking-[-0.005em]">
               {user?.displayName || user?.username || 'User'}
             </p>
             <p className="text-[12px] text-zinc-500 font-mono tracking-[0.005em] mt-0.5">
@@ -73,9 +73,9 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
                   className="pointer-events-none absolute inset-0 rounded-lg"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.06) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                   }}
                   transition={{ type: 'spring', stiffness: 360, damping: 32 }}
                 />
@@ -86,7 +86,7 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
                 {tab.icon}
               </span>
               <span
-                className={`relative text-[13px] font-light flex-1 text-left tracking-[0.005em] transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-300'}`}
+                className={`relative text-[13px] font-semibold flex-1 text-left tracking-[0.005em] transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-300'}`}
               >
                 {tab.label}
               </span>

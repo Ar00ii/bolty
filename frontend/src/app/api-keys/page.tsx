@@ -95,7 +95,7 @@ function KeyStatCard({ icon, label, value, accent }: KeyStat) {
           {label}
         </span>
       </div>
-      <p className="text-xl font-light text-white tracking-[-0.01em]">{value}</p>
+      <p className="text-xl font-semibold text-white tracking-[-0.01em]">{value}</p>
     </div>
   );
 }
@@ -125,7 +125,7 @@ function KeyCreationBanner({ keyValue, onDismiss }: { keyValue: string; onDismis
       <div className="flex items-start gap-3">
         <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
-          <p className="text-sm font-light text-emerald-400 mb-1">API key created successfully</p>
+          <p className="text-sm font-semibold text-emerald-400 mb-1">API key created successfully</p>
           <p className="text-xs text-zinc-400 mb-4">
             Copy this key now. You won&apos;t be able to see it again.
           </p>
@@ -211,10 +211,10 @@ function CreateKeyForm({
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
-      <h3 className="text-sm font-light text-white mb-4">Create new API key</h3>
+      <h3 className="text-sm font-semibold text-white mb-4">Create new API key</h3>
       <div className="flex items-end gap-3">
         <div className="flex-1">
           <label className="text-[10.5px] text-zinc-500 mb-1.5 block uppercase tracking-[0.18em] font-medium">
@@ -225,7 +225,7 @@ function CreateKeyForm({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="e.g., Production, CI/CD, Bot #3"
-            className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+            className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_1px_rgba(20, 241, 149,0.45),_0_0_0_4px_rgba(20, 241, 149,0.12)]"
             style={{
               background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
               boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
@@ -239,12 +239,12 @@ function CreateKeyForm({
         <button
           onClick={handleCreate}
           disabled={isLoading}
-          className="px-4 py-2 rounded-lg text-sm font-light flex items-center gap-1.5 transition-all hover:scale-[1.02] disabled:opacity-60"
+          className="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-all hover:scale-[1.02] disabled:opacity-60"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+              'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
             color: '#fff',
           }}
         >
@@ -257,7 +257,7 @@ function CreateKeyForm({
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2 rounded-lg text-sm font-light transition-all"
+          className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{
             background: 'rgba(255,255,255,0.04)',
             boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
@@ -361,7 +361,7 @@ function KeyListItem({
             </div>
           ) : (
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-sm font-light text-white">{keyInfo.label || 'Unnamed key'}</h3>
+              <h3 className="text-sm font-semibold text-white">{keyInfo.label || 'Unnamed key'}</h3>
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-1 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/10 transition-colors"
@@ -387,7 +387,7 @@ function KeyListItem({
           </div>
         </div>
         <div
-          className="px-2 py-1 rounded-md text-[10px] uppercase tracking-wide font-light"
+          className="px-2 py-1 rounded-md text-[10px] uppercase tracking-wide font-semibold"
           style={{
             background: `${statusColor}20`,
             color: statusColor,
@@ -414,7 +414,7 @@ function KeyListItem({
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="px-3 py-1.5 rounded-lg text-xs font-light transition-all text-red-400 hover:bg-red-500/10"
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-red-400 hover:bg-red-500/10"
           style={{ border: '1px solid rgba(239,68,68,0.2)' }}
         >
           {isDeleting ? (
@@ -478,7 +478,7 @@ result = bolty.agents.invoke(
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         background:
-          'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, rgba(6,182,212,0.04) 100%), rgba(0,0,0,0.4)',
+          'linear-gradient(135deg, rgba(20, 241, 149,0.06) 0%, rgba(6,182,212,0.04) 100%), rgba(0,0,0,0.4)',
         backdropFilter: 'blur(6px)',
       }}
     >
@@ -488,25 +488,25 @@ result = bolty.agents.invoke(
             <span
               className="w-7 h-7 rounded-md flex items-center justify-center"
               style={{
-                background: 'rgba(131,110,249,0.12)',
-                border: '1px solid rgba(131,110,249,0.3)',
+                background: 'rgba(20, 241, 149,0.12)',
+                border: '1px solid rgba(20, 241, 149,0.3)',
               }}
             >
-              <Code2 className="w-3.5 h-3.5 text-purple-300" />
+              <Code2 className="w-3.5 h-3.5 text-bolty-300" />
             </span>
-            <span className="text-[11px] uppercase tracking-[0.25em] text-purple-300/80 font-light">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-bolty-300/80 font-semibold">
               Quick integration
             </span>
           </div>
-          <h3 className="text-lg text-white font-light mb-2">Use your API key</h3>
-          <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
+          <h3 className="text-lg text-white font-semibold mb-2">Use your API key</h3>
+          <p className="text-xs text-zinc-400 font-semibold leading-relaxed mb-4">
             Include your key in the Authorization header as <code>Bearer YOUR_KEY</code>. All
             requests are signed and auditable on-chain.
           </p>
           <div className="flex items-center gap-2">
             <a
               href="/docs/agent-api"
-              className="inline-flex items-center gap-1.5 text-[11px] text-purple-300 hover:text-purple-200 transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] text-bolty-300 hover:text-bolty-200 transition-colors"
             >
               <Terminal className="w-3 h-3" /> Read API docs
               <ArrowUpRight className="w-3 h-3" />
@@ -526,7 +526,7 @@ result = bolty.agents.invoke(
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                     className={`relative text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
-                      active ? 'text-purple-200' : 'text-zinc-500 hover:text-zinc-300'
+                      active ? 'text-bolty-200' : 'text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     {active && (
@@ -536,8 +536,8 @@ result = bolty.agents.invoke(
                         aria-hidden="true"
                         className="absolute inset-0 rounded"
                         style={{
-                          background: 'rgba(131,110,249,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                          background: 'rgba(20, 241, 149,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                         }}
                       />
                     )}
@@ -658,7 +658,7 @@ export default function ApiKeysPage() {
       <div className="max-w-5xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-light text-white mb-2">
+          <h1 className="text-4xl font-semibold text-white mb-2">
             <GradientText gradient="purple">API Keys</GradientText>
           </h1>
           <p className="text-sm text-zinc-400">
@@ -673,7 +673,7 @@ export default function ApiKeysPage() {
             icon={<Key className="w-3.5 h-3.5" />}
             label="Total keys"
             value={keys.length.toString()}
-            accent="#836EF9"
+            accent="#14F195"
           />
           <KeyStatCard
             icon={<Activity className="w-3.5 h-3.5" />}
@@ -761,7 +761,7 @@ export default function ApiKeysPage() {
             }}
           >
             <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-            <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
+            <h3 className="text-base font-semibold text-white mb-2">No API keys yet</h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">
               Create your first API key to start building with Bolty&apos;s agents and repositories
               programmatically.
@@ -799,10 +799,10 @@ export default function ApiKeysPage() {
             background: 'rgba(0,0,0,0.25)',
           }}
         >
-          <h3 className="text-sm font-light text-white mb-3 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-purple-400" /> Security best practices
+          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-bolty-400" /> Security best practices
           </h3>
-          <ul className="space-y-2 text-xs text-zinc-400 font-light">
+          <ul className="space-y-2 text-xs text-zinc-400 font-semibold">
             <li>• Never expose API keys in client-side code or public repositories</li>
             <li>• Store keys securely as environment variables (use dotenv or secrets manager)</li>
             <li>• Rotate keys regularly and revoke unused ones</li>

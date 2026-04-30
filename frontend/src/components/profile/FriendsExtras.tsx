@@ -119,7 +119,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
       {/* Privacy */}
       <div className="profile-content-card">
         <div className="mb-3">
-          <h3 className="text-[14px] text-white font-light">Privacy</h3>
+          <h3 className="text-[14px] text-white font-semibold">Privacy</h3>
           <p className="text-[11.5px] text-zinc-500 mt-0.5">
             Control who can reach out to you on Bolty.
           </p>
@@ -170,7 +170,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
       <div className="profile-content-card">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h3 className="text-[14px] text-white font-light">Suggested</h3>
+            <h3 className="text-[14px] text-white font-semibold">Suggested</h3>
             <p className="text-[11.5px] text-zinc-500 mt-0.5">
               People worth meeting on Bolty: top reputation, recently active, fresh joiners.
             </p>
@@ -227,8 +227,8 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                     href={u.username ? `/u/${u.username}` : '#'}
                     className="w-9 h-9 rounded-full overflow-hidden grid place-items-center shrink-0"
                     style={{
-                      background: 'rgba(131,110,249,0.12)',
-                      border: '1px solid rgba(131,110,249,0.25)',
+                      background: 'rgba(20, 241, 149,0.12)',
+                      border: '1px solid rgba(20, 241, 149,0.25)',
                     }}
                   >
                     {u.avatarUrl ? (
@@ -243,7 +243,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                   <div className="flex-1 min-w-0">
                     <Link
                       href={u.username ? `/u/${u.username}` : '#'}
-                      className="text-[13px] text-white font-light truncate hover:text-[#b4a7ff] transition block"
+                      className="text-[13px] text-white font-semibold truncate hover:text-[#b4a7ff] transition block"
                     >
                       {u.displayName || u.username || 'Anonymous'}
                     </Link>
@@ -275,9 +275,9 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                       disabled={busy}
                       className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md transition disabled:opacity-50"
                       style={{
-                        background: 'rgba(131,110,249,0.18)',
+                        background: 'rgba(20, 241, 149,0.18)',
                         color: '#e4d8ff',
-                        border: '1px solid rgba(131,110,249,0.4)',
+                        border: '1px solid rgba(20, 241, 149,0.4)',
                       }}
                     >
                       {busy ? (
@@ -338,8 +338,8 @@ function PrivacyRow({
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[12.5px] text-white font-light">{title}</div>
-        <div className="text-[10.5px] text-zinc-500 font-light">{subtitle}</div>
+        <div className="text-[12.5px] text-white font-semibold">{title}</div>
+        <div className="text-[10.5px] text-zinc-500 font-semibold">{subtitle}</div>
       </div>
       <button
         type="button"
@@ -349,7 +349,7 @@ function PrivacyRow({
         disabled={busy}
         className="relative w-9 h-5 rounded-full transition disabled:opacity-50"
         style={{
-          background: value ? '#836EF9' : 'rgba(255,255,255,0.08)',
+          background: value ? '#14F195' : 'rgba(255,255,255,0.08)',
         }}
       >
         <span

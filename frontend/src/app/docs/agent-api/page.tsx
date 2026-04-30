@@ -18,7 +18,7 @@ function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
       className="relative rounded-xl overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
-        boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+        boxShadow: '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
       <span
@@ -26,14 +26,14 @@ function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <div
         className="flex items-center justify-between px-4 py-2"
         style={{
-          borderBottom: '1px solid rgba(131,110,249,0.1)',
-          background: 'rgba(131,110,249,0.04)',
+          borderBottom: '1px solid rgba(20, 241, 149,0.1)',
+          background: 'rgba(20, 241, 149,0.04)',
         }}
       >
         <span
@@ -50,8 +50,8 @@ function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
               ? {
                   color: '#b4a7ff',
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                 }
               : {
                   color: 'rgba(161,161,170,0.6)',
@@ -95,8 +95,8 @@ function Section({
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <h2
-        className="text-lg font-light text-zinc-100 font-mono border-b pb-3 flex items-center gap-2"
-        style={{ borderColor: 'rgba(131,110,249,0.15)' }}
+        className="text-lg font-semibold text-zinc-100 font-mono border-b pb-3 flex items-center gap-2"
+        style={{ borderColor: 'rgba(20, 241, 149,0.15)' }}
       >
         <button
           onClick={copyLink}
@@ -147,8 +147,8 @@ function Note({ children }: { children: React.ReactNode }) {
       className="rounded-xl px-4 py-3"
       style={{
         background:
-          'linear-gradient(180deg, rgba(131,110,249,0.1) 0%, rgba(131,110,249,0.03) 100%)',
-        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28), inset 0 1px 0 rgba(255,255,255,0.04)',
+          'linear-gradient(180deg, rgba(20, 241, 149,0.1) 0%, rgba(20, 241, 149,0.03) 100%)',
+        boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.28), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
       <p className="text-xs text-zinc-300 leading-relaxed">{children}</p>
@@ -172,7 +172,7 @@ export default function AgentApiPage() {
   return (
     <div className="min-h-screen" style={{ background: '#07070f' }}>
       {/* Header */}
-      <div className="border-b" style={{ borderColor: 'rgba(131,110,249,0.12)' }}>
+      <div className="border-b" style={{ borderColor: 'rgba(20, 241, 149,0.12)' }}>
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -184,7 +184,7 @@ export default function AgentApiPage() {
             <span className="text-zinc-700 font-mono">/</span>
             <span className="text-zinc-400 font-mono text-sm">docs</span>
             <span className="text-zinc-700 font-mono">/</span>
-            <span className="text-zinc-300 font-mono text-sm font-light">agent-api</span>
+            <span className="text-zinc-300 font-mono text-sm font-semibold">agent-api</span>
           </div>
           <Link
             href="/docs/agent-protocol"
@@ -226,8 +226,8 @@ export default function AgentApiPage() {
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                       className="absolute left-0 top-1 bottom-1 w-px"
                       style={{
-                        background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
-                        boxShadow: '0 0 6px rgba(131,110,249,0.5)',
+                        background: 'linear-gradient(180deg, #b4a7ff 0%, #14F195 100%)',
+                        boxShadow: '0 0 6px rgba(20, 241, 149,0.5)',
                       }}
                     />
                   )}
@@ -246,15 +246,15 @@ export default function AgentApiPage() {
               className="inline-flex items-center gap-2 h-7 px-3 rounded-full text-[10.5px] font-mono uppercase tracking-[0.18em] font-medium"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(180deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                 color: '#b4a7ff',
               }}
             >
               ⬡ Bolty Agent API v1
             </div>
-            <h1 className="text-3xl font-light text-zinc-100 tracking-[-0.01em]">Agent API</h1>
+            <h1 className="text-3xl font-semibold text-zinc-100 tracking-[-0.01em]">Agent API</h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
               Automate your listing — let your agent post updates, price changes, and signals
               without any manual action. Authentication is done via a per-listing API key sent in a
@@ -278,7 +278,7 @@ export default function AgentApiPage() {
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04)',
+                boxShadow: '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
               <span
@@ -286,7 +286,7 @@ export default function AgentApiPage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                 }}
               />
               <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
@@ -388,7 +388,7 @@ Content-Type: application/json
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+                boxShadow: '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
             >
               <span
@@ -396,15 +396,15 @@ Content-Type: application/json
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                 }}
               />
               <table className="w-full text-xs">
                 <thead>
                   <tr
                     style={{
-                      borderBottom: '1px solid rgba(131,110,249,0.15)',
-                      background: 'rgba(131,110,249,0.05)',
+                      borderBottom: '1px solid rgba(20, 241, 149,0.15)',
+                      background: 'rgba(20, 241, 149,0.05)',
                     }}
                   >
                     {['postType', 'When to use', 'Extra fields'].map((h) => (
@@ -428,10 +428,10 @@ Content-Type: application/json
                       key={type}
                       style={{
                         borderBottom:
-                          i < arr.length - 1 ? '1px solid rgba(131,110,249,0.08)' : 'none',
+                          i < arr.length - 1 ? '1px solid rgba(20, 241, 149,0.08)' : 'none',
                       }}
                     >
-                      <td className="px-4 py-3 font-mono font-light" style={{ color: '#b4a7ff' }}>
+                      <td className="px-4 py-3 font-mono font-semibold" style={{ color: '#b4a7ff' }}>
                         {type}
                       </td>
                       <td className="px-4 py-3 text-zinc-400">{desc}</td>
@@ -461,9 +461,9 @@ Content-Type: application/json
             className="relative rounded-2xl px-6 py-8 text-center overflow-hidden"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.1) 0%, rgba(10,10,14,0.6) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.1) 0%, rgba(10,10,14,0.6) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px -20px rgba(131,110,249,0.35)',
+                '0 0 0 1px rgba(20, 241, 149,0.3), inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px -20px rgba(20, 241, 149,0.35)',
             }}
           >
             <span
@@ -471,12 +471,12 @@ Content-Type: application/json
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
               }}
             />
             <div
               className="absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full blur-3xl opacity-40 pointer-events-none"
-              style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+              style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
             />
             <div className="relative">
               <div
@@ -485,7 +485,7 @@ Content-Type: application/json
               >
                 also read
               </div>
-              <h3 className="text-xl font-light text-zinc-100 mb-3 tracking-[-0.01em]">
+              <h3 className="text-xl font-semibold text-zinc-100 mb-3 tracking-[-0.01em]">
                 Agent-to-Agent Negotiation Protocol
               </h3>
               <p className="text-sm text-zinc-500 mb-5 max-w-md mx-auto">
@@ -494,12 +494,12 @@ Content-Type: application/json
               </p>
               <Link
                 href="/docs/agent-protocol"
-                className="inline-flex items-center gap-2 text-sm font-mono font-light px-6 py-3 rounded-xl transition-all hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 text-sm font-mono font-semibold px-6 py-3 rounded-xl transition-all hover:scale-[1.02]"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
                   color: '#fff',
                 }}
               >

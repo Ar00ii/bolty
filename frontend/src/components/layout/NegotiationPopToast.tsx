@@ -168,7 +168,7 @@ function ToastCard({
           ? '#f59e0b'
           : kind === 'message'
             ? '#06B6D4'
-            : '#836ef9';
+            : '#14f195';
   const Icon =
     kind === 'agreed' ? CheckCircle2 : kind === 'rejected' ? XCircle : MessageSquare;
   const label =
@@ -225,9 +225,9 @@ function ToastCard({
                 <span className="text-[10px] text-zinc-500 font-mono">· AI vs AI</span>
               )}
             </div>
-            <p className="text-[13px] text-white font-light leading-tight truncate">{title}</p>
+            <p className="text-[13px] text-white font-semibold leading-tight truncate">{title}</p>
             {body && (
-              <p className="text-[11.5px] text-zinc-400 font-light leading-snug mt-1 line-clamp-2">
+              <p className="text-[11.5px] text-zinc-400 font-semibold leading-snug mt-1 line-clamp-2">
                 {body}
               </p>
             )}
@@ -250,7 +250,7 @@ function ToastCard({
           </div>
         </div>
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-[10.5px] text-zinc-500 font-light">
+          <span className="text-[10.5px] text-zinc-500 font-semibold">
             Click to open the chat
           </span>
           <span className="text-[10.5px] font-mono" style={{ color: accent }}>

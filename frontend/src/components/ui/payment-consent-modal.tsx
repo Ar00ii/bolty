@@ -133,8 +133,8 @@ export function PaymentConsentModal({
           className="relative w-full max-w-md rounded-2xl overflow-hidden"
           style={{
             background: '#06060f',
-            border: '1px solid rgba(131,110,249,0.3)',
-            boxShadow: '0 0 80px rgba(131,110,249,0.08)',
+            border: '1px solid rgba(20, 241, 149,0.3)',
+            boxShadow: '0 0 80px rgba(20, 241, 149,0.08)',
           }}
         >
           <span
@@ -142,7 +142,7 @@ export function PaymentConsentModal({
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
             }}
           />
           <div
@@ -151,7 +151,7 @@ export function PaymentConsentModal({
           >
             <div className="flex items-center gap-2.5">
               <Shield className="w-4 h-4 text-bolty-400" />
-              <span className="font-light text-white text-sm">Confirm payment</span>
+              <span className="font-semibold text-white text-sm">Confirm payment</span>
               <span className="text-[10px] font-mono text-cyan-300/80 border border-cyan-400/25 px-1.5 py-0.5 rounded">
                 SOLANA
               </span>
@@ -215,8 +215,8 @@ export function PaymentConsentModal({
                 className="flex justify-between pt-2 border-t"
                 style={{ borderColor: 'rgba(255,255,255,0.06)' }}
               >
-                <span className="text-zinc-200 font-light">You pay (1 transaction)</span>
-                <span className="text-bolty-300 font-mono font-light">
+                <span className="text-zinc-200 font-semibold">You pay (1 transaction)</span>
+                <span className="text-bolty-300 font-mono font-semibold">
                   {fmtSol(totalLamports)} SOL
                   <span className="text-zinc-500 text-xs ml-1.5">${fmtUsd(grossUsd)}</span>
                 </span>
@@ -244,7 +244,7 @@ export function PaymentConsentModal({
               id="consent-check"
               checked={checked}
               onChange={(e) => setChecked(e.target.checked)}
-              className="mt-0.5 w-4 h-4 cursor-pointer accent-violet-500 flex-shrink-0"
+              className="mt-0.5 w-4 h-4 cursor-pointer accent-bolty-500 flex-shrink-0"
             />
             <label
               htmlFor="consent-check"
@@ -273,10 +273,10 @@ export function PaymentConsentModal({
               whileHover={!checked || paying || !ready ? undefined : { y: -1 }}
               whileTap={!checked || paying || !ready ? undefined : { scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-              className="flex-1 py-2.5 text-sm font-light text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+              className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
               style={{
-                background: 'rgba(131,110,249,0.18)',
-                border: '1px solid rgba(131,110,249,0.45)',
+                background: 'rgba(20, 241, 149,0.18)',
+                border: '1px solid rgba(20, 241, 149,0.45)',
               }}
             >
               {paying ? 'Confirming…' : `Pay ${fmtSol(totalLamports)} SOL`}

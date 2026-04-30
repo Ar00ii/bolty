@@ -42,7 +42,7 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
   };
 
   const logo = logoMap[id];
-  if (!logo) return <span className="text-xl font-light">?</span>;
+  if (!logo) return <span className="text-xl font-semibold">?</span>;
 
   return (
     <div className="relative w-7 h-7">
@@ -178,7 +178,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     <div className="profile-content-card space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-light text-white">Integrations</h2>
+        <h2 className="text-xl font-semibold text-white">Integrations</h2>
         <p className="text-sm text-gray-400 mt-1 tabular-nums">
           {connectedCount} of {integrations.length} connected
         </p>
@@ -234,14 +234,14 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.95) 0%, rgba(10,10,14,0.95) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
+                  '0 0 0 1px rgba(20, 241, 149,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
               }}
             >
               <div
                 className="absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
                 }}
               />
               <div className="flex items-center justify-between mb-6">
@@ -250,14 +250,14 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                     className="w-9 h-9 rounded-lg flex items-center justify-center"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                        'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                        'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                     }}
                   >
                     <Shield className="w-4 h-4 text-[#b4a7ff]" />
                   </div>
-                  <h3 className="text-lg font-light text-white tracking-[-0.005em]">
+                  <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                     Set up Google Authenticator
                   </h3>
                 </div>
@@ -332,12 +332,12 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                     loading === 'two-factor' || twoFACode.length !== 6 ? undefined : { scale: 0.97 }
                   }
                   transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                  className="w-full px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-2.5 text-white rounded-lg font-semibold text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
                   }}
                 >
                   {loading === 'two-factor' ? 'Verifying...' : 'Verify and Enable'}
@@ -444,7 +444,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                     </div>
 
                     {/* Name */}
-                    <h4 className="text-[14px] font-light text-white mb-1 tracking-[0.005em]">
+                    <h4 className="text-[14px] font-semibold text-white mb-1 tracking-[0.005em]">
                       {integration.name}
                     </h4>
 
@@ -482,7 +482,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                       whileHover={loading === integration.id ? undefined : { y: -1 }}
                       whileTap={loading === integration.id ? undefined : { scale: 0.96 }}
                       transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                      className="w-full py-2 px-3 rounded-lg text-[12px] font-light tracking-[0.005em] transition-colors hover:brightness-110 flex items-center justify-center gap-1.5 mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-2 px-3 rounded-lg text-[12px] font-semibold tracking-[0.005em] transition-colors hover:brightness-110 flex items-center justify-center gap-1.5 mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         background: integration.connected
                           ? `linear-gradient(180deg, rgba(${catColor},0.22) 0%, rgba(${catColor},0.06) 100%)`
@@ -523,15 +523,15 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
         className="relative p-4 rounded-xl overflow-hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0.02) 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28), inset 0 1px 0 rgba(255,255,255,0.04)',
+            'linear-gradient(180deg, rgba(20, 241, 149,0.08) 0%, rgba(20, 241, 149,0.02) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.28), inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       >
         <div
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-start gap-3">
@@ -539,9 +539,9 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
             className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
             }}
           >
             <Shield className="w-3.5 h-3.5 text-[#b4a7ff]" />

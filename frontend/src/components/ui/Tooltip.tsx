@@ -25,7 +25,7 @@ export function Tooltip({ content, children, side = 'top', showIcon = true }: To
   const tooltipStyle = {
     background: 'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
     boxShadow:
-      '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.6)',
+      '0 0 0 1px rgba(20, 241, 149,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.6)',
     backdropFilter: 'blur(8px)',
   };
 
@@ -53,7 +53,7 @@ export function Tooltip({ content, children, side = 'top', showIcon = true }: To
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={`absolute z-50 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-[12px] text-zinc-200 font-light pointer-events-none tracking-[0.005em] ${positionClasses[side]}`}
+            className={`absolute z-50 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-[12px] text-zinc-200 font-semibold pointer-events-none tracking-[0.005em] ${positionClasses[side]}`}
             style={tooltipStyle}
           >
             {content}

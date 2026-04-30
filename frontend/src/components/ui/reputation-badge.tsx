@@ -95,7 +95,7 @@ export const RANK_TIERS: RankDefinition[] = [
     rank: 'CAMPEON',
     label: 'Champion',
     icon: Trophy,
-    color: '#836ef9',
+    color: '#14f195',
     threshold: 2000,
     description: 'Champion — reserved for the top 5 of the ecosystem',
   },

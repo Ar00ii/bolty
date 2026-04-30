@@ -21,7 +21,7 @@ export function IntegrationsShowcase({ title, integrations }: IntegrationsShowca
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl md:text-4xl font-light text-white"
+        className="text-3xl md:text-4xl font-semibold text-white"
       >
         {title}
       </motion.h2>
@@ -42,13 +42,13 @@ export function IntegrationsShowcase({ title, integrations }: IntegrationsShowca
               transition={{ delay: i * 0.05, duration: 0.4 }}
               className="group relative"
             >
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-purple-600/30 to-purple-700/20 border border-purple-500/20 flex items-center justify-center transition-all duration-300 hover:border-purple-500/40 hover:from-purple-600/40 hover:to-purple-700/30">
+              <div className="aspect-square rounded-lg bg-gradient-to-br from-bolty-600/30 to-bolty-700/20 border border-bolty-500/20 flex items-center justify-center transition-all duration-300 hover:border-bolty-500/40 hover:from-bolty-600/40 hover:to-bolty-700/30">
                 <Icon
-                  className="w-6 h-6 text-purple-300 group-hover:text-purple-200 transition-colors"
+                  className="w-6 h-6 text-bolty-300 group-hover:text-bolty-200 transition-colors"
                   strokeWidth={1.5}
                 />
               </div>
-              <div className="absolute inset-0 rounded-lg bg-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg -z-10" />
+              <div className="absolute inset-0 rounded-lg bg-bolty-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg -z-10" />
             </motion.div>
           );
         })}

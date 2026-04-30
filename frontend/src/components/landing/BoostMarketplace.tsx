@@ -95,9 +95,9 @@ export const BoostMarketplace = () => {
       name: 'Platinum',
       boost: '250',
       multiplier: '10x',
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-bolty-500 to-bolty-600',
       icon: Gem,
-      iconColor: 'text-purple-400',
+      iconColor: 'text-bolty-400',
     },
     {
       name: 'Diamond',
@@ -148,13 +148,13 @@ export const BoostMarketplace = () => {
           viewport={{ once: true }}
         >
           <motion.div variants={itemVariants} className="mb-4">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs font-light">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-bolty-500/30 bg-bolty-500/10 text-bolty-300 text-xs font-semibold">
               <Zap className="w-3 h-3" />
               Agent Visibility System
             </span>
           </motion.div>
 
-          <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-light mb-4">
+          <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-semibold mb-4">
             Boost: Dominate the <GradientText>Trending Market</GradientText>
           </motion.h2>
 
@@ -178,10 +178,10 @@ export const BoostMarketplace = () => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-purple-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
+                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-bolty-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-bolty-500/10 transition-all duration-300"
               >
-                <Icon className="w-8 h-8 text-purple-400 mb-3" />
-                <h3 className="text-lg font-light text-white mb-2">{feature.title}</h3>
+                <Icon className="w-8 h-8 text-bolty-400 mb-3" />
+                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
                 <p className="text-sm text-gray-400">{feature.description}</p>
               </motion.div>
             );
@@ -198,7 +198,7 @@ export const BoostMarketplace = () => {
         >
           <motion.h3
             variants={itemVariants}
-            className="text-2xl font-light text-white mb-8 text-center"
+            className="text-2xl font-semibold text-white mb-8 text-center"
           >
             8 Elite Tiers
           </motion.h3>
@@ -213,12 +213,12 @@ export const BoostMarketplace = () => {
                   className={`p-4 rounded-lg border border-gray-700 bg-gradient-to-br ${rank.color} bg-opacity-80 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 group cursor-pointer flex flex-col items-center hover:scale-105`}
                 >
                   <RankIcon className={`w-6 h-6 ${rank.iconColor} mb-2`} />
-                  <div className="text-xs font-light text-white/90 group-hover:text-white transition-colors text-center">
+                  <div className="text-xs font-semibold text-white/90 group-hover:text-white transition-colors text-center">
                     {rank.name}
                   </div>
                   <div className="text-xs text-white/70 mt-2 leading-tight text-center">
                     <div>{rank.boost} Boost</div>
-                    <div className="font-light text-white/90 mt-1">{rank.multiplier}</div>
+                    <div className="font-semibold text-white/90 mt-1">{rank.multiplier}</div>
                   </div>
                 </motion.div>
               );
@@ -241,7 +241,7 @@ export const BoostMarketplace = () => {
         >
           <motion.h3
             variants={itemVariants}
-            className="text-2xl font-light text-white mb-8 text-center"
+            className="text-2xl font-semibold text-white mb-8 text-center"
           >
             Boost Packages
           </motion.h3>
@@ -251,15 +251,15 @@ export const BoostMarketplace = () => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-purple-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
+                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-bolty-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-bolty-500/10 transition-all duration-300"
               >
-                <h4 className="font-light text-white mb-3">{pack.name}</h4>
+                <h4 className="font-semibold text-white mb-3">{pack.name}</h4>
                 <div className="mb-4">
-                  <div className="text-3xl font-light text-purple-400">{pack.boost}</div>
+                  <div className="text-3xl font-semibold text-bolty-400">{pack.boost}</div>
                   <div className="text-xs text-gray-400">Boost</div>
                 </div>
                 <div className="pt-4 border-t border-gray-800">
-                  <div className="text-2xl font-light text-white">{pack.price}</div>
+                  <div className="text-2xl font-semibold text-white">{pack.price}</div>
                   <div className="text-xs text-gray-400">BOLTY</div>
                 </div>
               </motion.div>
@@ -294,7 +294,7 @@ export const BoostMarketplace = () => {
               </ShimmerButton>
             </Link>
             <Link href="/chat">
-              <button className="px-8 py-3 rounded-lg border border-purple-500/30 text-purple-400 hover:bg-purple-500/10 transition-colors font-light">
+              <button className="px-8 py-3 rounded-lg border border-bolty-500/30 text-bolty-400 hover:bg-bolty-500/10 transition-colors font-semibold">
                 Explore Features
               </button>
             </Link>

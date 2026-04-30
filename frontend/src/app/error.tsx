@@ -35,10 +35,10 @@ export default function Error({
             <AlertTriangle className="w-4 h-4 text-pink-400" />
             <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Unexpected error</p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-light text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4">
             Something <GradientText>went wrong</GradientText>
           </h1>
-          <p className="text-zinc-400 font-light mb-6 max-w-sm">
+          <p className="text-zinc-400 font-semibold mb-6 max-w-sm">
             We hit an unexpected error rendering this page. Try again — if it keeps failing, let us
             know.
           </p>
@@ -54,7 +54,7 @@ export default function Error({
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => reset()}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-100 hover:bg-purple-500/20 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg border border-bolty-500/30 bg-bolty-500/10 text-bolty-100 hover:bg-bolty-500/20 transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Try again

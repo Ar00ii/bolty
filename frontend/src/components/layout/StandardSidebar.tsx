@@ -225,7 +225,7 @@ export function StandardSidebar() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
-        <span className="text-xl font-light text-white truncate">
+        <span className="text-xl font-semibold text-white truncate">
           BoltyNetwork
         </span>
       </Link>
@@ -284,7 +284,7 @@ export function StandardSidebar() {
       <div
         className="p-3"
         style={{
-          background: 'linear-gradient(180deg, transparent, rgba(131,110,249,0.04))',
+          background: 'linear-gradient(180deg, transparent, rgba(20, 241, 149,0.04))',
         }}
       >
         {isAuthenticated ? (
@@ -317,12 +317,12 @@ export function StandardSidebar() {
             href="/auth"
             className="block text-center rounded-md py-2 text-[12px] transition-colors"
             style={{
-              background: 'rgba(131,110,249,0.15)',
-              border: '1px solid rgba(131,110,249,0.3)',
+              background: 'rgba(20, 241, 149,0.15)',
+              border: '1px solid rgba(20, 241, 149,0.3)',
               color: '#e4e4e7',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.25)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.15)')}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(20, 241, 149,0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(20, 241, 149,0.15)')}
           >
             Sign in
           </Link>
@@ -384,7 +384,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
   const rowStyle: React.CSSProperties = {
     gridTemplateColumns: '10px 16px 1fr auto',
     color: active ? '#ffffff' : '#ffffff',
-    background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
+    background: active ? 'rgba(20, 241, 149,0.08)' : 'transparent',
     fontSize: '13px',
     fontWeight: 300,
   };
@@ -421,7 +421,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     <>
       <span
         className="font-mono leading-none"
-        style={{ fontSize: '13px', color: '#836EF9', width: '10px' }}
+        style={{ fontSize: '13px', color: '#14F195', width: '10px' }}
       >
         {active ? '›' : ''}
       </span>
@@ -488,7 +488,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                     className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-md transition-colors"
                     style={{
                       color: '#ffffff',
-                      background: isActive ? 'rgba(131,110,249,0.08)' : 'transparent',
+                      background: isActive ? 'rgba(20, 241, 149,0.08)' : 'transparent',
                       fontSize: '12.5px',
                       fontWeight: 300,
                     }}
@@ -569,7 +569,7 @@ function SidebarItemMeta({ item, open }: { item: NavItem; open?: boolean }) {
           fontSize: '10.5px',
           padding: '1px 6px',
           borderRadius: '999px',
-          background: item.dot ? '#836EF9' : '#18181b',
+          background: item.dot ? '#14F195' : '#18181b',
           border: item.dot ? 'none' : '1px solid #1f1f23',
           color: item.dot ? 'white' : '#52525b',
         }}

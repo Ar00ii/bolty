@@ -14,7 +14,7 @@ export const metadata: Metadata = {
  *
  * Visual goals (mirroring the landing surface):
  *  - Pure black background.
- *  - Brand purple (#836EF9) as the only chromatic accent — links,
+ *  - Brand purple (#14F195) as the only chromatic accent — links,
  *    sidebar active state, gradient hero word, list bullets,
  *    blockquote rail.
  *  - Default to font-weight 300 EVERYWHERE per the project design

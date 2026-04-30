@@ -19,7 +19,7 @@ const MotionLink = motion.create(Link);
 
 export const MenuVertical = ({
   menuItems = [],
-  color = '#836ef9',
+  color = '#14f195',
   skew = 0,
 }: MenuVerticalProps) => {
   return (
@@ -48,7 +48,7 @@ export const MenuVertical = ({
               hover: { x: 0, color, skewX: skew },
             }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="font-light text-3xl no-underline"
+            className="font-semibold text-3xl no-underline"
           >
             {item.label}
           </MotionLink>

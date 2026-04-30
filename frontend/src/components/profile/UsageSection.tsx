@@ -69,7 +69,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
     <div className="profile-content-card space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-light text-white">Usage &amp; Activity</h2>
+        <h2 className="text-xl font-semibold text-white">Usage &amp; Activity</h2>
         <p className="text-sm text-white/50 mt-1">
           Live activity on your account. Resets monthly on the{' '}
           <span className="tabular-nums text-white/70">
@@ -97,7 +97,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -105,7 +105,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-white/50 mb-2">
               Activity this month
             </p>
-            <p className="text-3xl sm:text-4xl font-light text-white tabular-nums tracking-[-0.01em]">
+            <p className="text-3xl sm:text-4xl font-semibold text-white tabular-nums tracking-[-0.01em]">
               {totalThisMonth.toLocaleString()}
             </p>
             <p className="text-xs text-white/50 mt-1">
@@ -143,7 +143,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
         />
         <StatCard
           delay={0.12}
-          accent="#836EF9"
+          accent="#14F195"
           label="Purchases"
           value={purchases}
           sub="AI agents / tools"
@@ -256,7 +256,7 @@ function StatCard({
           <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
         </div>
       </div>
-      <p className="text-2xl sm:text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
+      <p className="text-2xl sm:text-3xl font-semibold text-white tabular-nums tracking-[-0.01em]">
         {value.toLocaleString()}
       </p>
       <p className="text-[11px] sm:text-xs text-white/50 mt-1.5 sm:mt-2 truncate">{sub}</p>

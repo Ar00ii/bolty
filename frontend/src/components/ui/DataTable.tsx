@@ -95,7 +95,7 @@ export function DataTable<T extends Record<string, any>>({
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.5) 50%, transparent 100%)',
           }}
         />
         <motion.div
@@ -104,13 +104,13 @@ export function DataTable<T extends Record<string, any>>({
           transition={{ type: 'spring', stiffness: 360, damping: 22, delay: 0.08 }}
           className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center"
           style={{
-            background: 'rgba(131,110,249,0.08)',
-            border: '1px solid rgba(131,110,249,0.18)',
+            background: 'rgba(20, 241, 149,0.08)',
+            border: '1px solid rgba(20, 241, 149,0.18)',
           }}
         >
           <Inbox className="w-4 h-4 text-[#a89dff]" strokeWidth={1.75} />
         </motion.div>
-        <p className="text-[13px] text-zinc-300 font-light tracking-[0.005em]">{emptyMessage}</p>
+        <p className="text-[13px] text-zinc-300 font-semibold tracking-[0.005em]">{emptyMessage}</p>
       </motion.div>
     );
   }
@@ -128,7 +128,7 @@ export function DataTable<T extends Record<string, any>>({
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
         }}
       />
       <table className="w-full">
@@ -200,7 +200,7 @@ export function DataTable<T extends Record<string, any>>({
               {columns.map((col) => (
                 <td
                   key={String(col.key)}
-                  className={`px-4 py-3 text-[13px] text-zinc-300 font-light tracking-[0.005em] ${col.className || ''}`}
+                  className={`px-4 py-3 text-[13px] text-zinc-300 font-semibold tracking-[0.005em] ${col.className || ''}`}
                 >
                   {col.render ? col.render(row[col.key], row) : row[col.key]}
                 </td>

@@ -72,12 +72,12 @@ export function RanksPanel({ points }: { points: number }) {
               Current rank
             </div>
             <div className="flex items-baseline gap-3 mt-0.5">
-              <h2 className="text-[22px] text-white font-light">{current.label}</h2>
+              <h2 className="text-[22px] text-white font-semibold">{current.label}</h2>
               <span className="text-[12px] font-mono text-zinc-500 tabular-nums">
                 {points.toLocaleString()} rays
               </span>
             </div>
-            <p className="text-[12px] text-zinc-400 font-light mt-0.5">{current.description}</p>
+            <p className="text-[12px] text-zinc-400 font-semibold mt-0.5">{current.description}</p>
           </div>
         </div>
 
@@ -105,7 +105,7 @@ export function RanksPanel({ points }: { points: number }) {
             </div>
           </div>
         ) : (
-          <div className="mt-4 text-[11.5px] text-zinc-400 font-light">
+          <div className="mt-4 text-[11.5px] text-zinc-400 font-semibold">
             You&apos;ve reached the top tier. Stay active to keep your standing.
           </div>
         )}
@@ -114,7 +114,7 @@ export function RanksPanel({ points }: { points: number }) {
       {/* Ladder */}
       <div className="profile-content-card">
         <div className="mb-3">
-          <h3 className="text-[14px] text-white font-light">Tier ladder</h3>
+          <h3 className="text-[14px] text-white font-semibold">Tier ladder</h3>
           <p className="text-[11.5px] text-zinc-500 mt-0.5">
             Every rank, the rays it takes to reach it, and what it unlocks. Tap a tier to
             see its perks.
@@ -167,7 +167,7 @@ export function RanksPanel({ points }: { points: number }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
                       <span
-                        className="text-[13px] font-light"
+                        className="text-[13px] font-semibold"
                         style={{ color: reached ? '#ffffff' : '#a1a1aa' }}
                       >
                         {tier.label}
@@ -195,7 +195,7 @@ export function RanksPanel({ points }: { points: number }) {
                 </button>
                 {open && (
                   <div
-                    className="px-3 pb-3 pt-1 text-[11.5px] font-light text-zinc-400 leading-relaxed"
+                    className="px-3 pb-3 pt-1 text-[11.5px] font-semibold text-zinc-400 leading-relaxed"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
                   >
                     <p className="mt-2">{tier.description}.</p>
@@ -217,7 +217,7 @@ export function RanksPanel({ points }: { points: number }) {
         </ul>
       </div>
 
-      <p className="text-[11px] text-zinc-600 text-center font-light">
+      <p className="text-[11px] text-zinc-600 text-center font-semibold">
         See where everyone else stands on the{' '}
         <a
           href="/reputation/leaderboard"

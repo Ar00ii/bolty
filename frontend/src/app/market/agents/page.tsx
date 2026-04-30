@@ -742,14 +742,14 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
   return (
     <div
       className="mt-3 rounded-xl border"
-      style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}
+      style={{ borderColor: 'rgba(20, 241, 149,0.15)', background: 'rgba(20, 241, 149,0.03)' }}
     >
       <div
         className="flex items-center gap-2 px-3 py-2 border-b"
-        style={{ borderColor: 'rgba(131,110,249,0.1)' }}
+        style={{ borderColor: 'rgba(20, 241, 149,0.1)' }}
       >
         <Key className="w-3 h-3 text-bolty-400" />
-        <span className="text-bolty-400 font-mono text-xs font-light">API Keys</span>
+        <span className="text-bolty-400 font-mono text-xs font-semibold">API Keys</span>
         <span className="text-zinc-600 font-mono text-xs ml-auto">{keys.length}/3</span>
       </div>
 
@@ -759,7 +759,7 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
           className="mx-3 mt-3 rounded-lg p-3"
           style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}
         >
-          <p className="text-green-400 font-mono text-xs font-light mb-1">
+          <p className="text-green-400 font-mono text-xs font-semibold mb-1">
             ✓ New key generated — save it now, it won&apos;t be shown again
           </p>
           <div className="flex items-center gap-2 mt-1">
@@ -798,7 +798,7 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
             style={{ borderColor: 'rgba(255,255,255,0.04)' }}
           >
             <div className="flex-1 min-w-0">
-              <p className="text-zinc-300 font-mono text-xs font-light">
+              <p className="text-zinc-300 font-mono text-xs font-semibold">
                 {k.label || 'unnamed key'}
               </p>
               <p className="text-zinc-600 font-mono text-xs">
@@ -863,9 +863,9 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
             disabled={generating}
             className="text-xs font-mono px-3 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-40 transition-all"
             style={{
-              background: 'rgba(131,110,249,0.15)',
-              border: '1px solid rgba(131,110,249,0.3)',
-              color: '#c4b5fd',
+              background: 'rgba(20, 241, 149,0.15)',
+              border: '1px solid rgba(20, 241, 149,0.3)',
+              color: '#B3FFD9',
             }}
           >
             {generating ? (
@@ -914,7 +914,7 @@ function MyAgentCard({
     <div
       className="rounded-xl border transition-colors"
       style={{
-        borderColor: expanded ? 'rgba(131,110,249,0.25)' : 'rgba(255,255,255,0.07)',
+        borderColor: expanded ? 'rgba(20, 241, 149,0.25)' : 'rgba(255,255,255,0.07)',
         background: '#0a0a12',
       }}
     >
@@ -922,13 +922,13 @@ function MyAgentCard({
         {/* Type icon */}
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}
+          style={{ background: 'rgba(20, 241, 149,0.1)', border: '1px solid rgba(20, 241, 149,0.2)' }}
         >
           <Bot className="w-4 h-4 text-bolty-400" strokeWidth={1.5} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-light text-zinc-100 truncate">{listing.title}</h3>
+            <h3 className="text-sm font-semibold text-zinc-100 truncate">{listing.title}</h3>
             <Badge
               className={`rounded-full border border-dashed px-2 py-0 text-xs font-mono ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}
             >
@@ -983,7 +983,7 @@ function MyAgentCard({
             )}
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
-            <span className="font-mono font-light text-bolty-300">
+            <span className="font-mono font-semibold text-bolty-300">
               {listing.price} {listing.currency}
             </span>
             {listing.minPrice != null && (
@@ -1003,9 +1003,9 @@ function MyAgentCard({
             onClick={() => setExpanded((p) => !p)}
             className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all"
             style={{
-              background: expanded ? 'rgba(131,110,249,0.15)' : 'transparent',
-              border: `1px solid ${expanded ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.08)'}`,
-              color: expanded ? '#c4b5fd' : '#71717a',
+              background: expanded ? 'rgba(20, 241, 149,0.15)' : 'transparent',
+              border: `1px solid ${expanded ? 'rgba(20, 241, 149,0.3)' : 'rgba(255,255,255,0.08)'}`,
+              color: expanded ? '#B3FFD9' : '#71717a',
             }}
           >
             {expanded ? 'collapse' : 'manage'}
@@ -1465,7 +1465,7 @@ function AgentsPageContent() {
               }}
             >
               <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500/30 text-[10px] font-mono">!</span>
-              <span className="flex-1 font-light">{error}</span>
+              <span className="flex-1 font-semibold">{error}</span>
               <button
                 onClick={() => fetchListings()}
                 className="rounded-md bg-rose-500/20 px-2 py-0.5 text-[11px] text-rose-100 transition hover:bg-rose-500/30"
@@ -1612,7 +1612,7 @@ function AgentsPageContent() {
       {/* Loading overlay while we route to the detail page */}
       {buyPaying && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#836EF9] animate-spin" />
+          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#14F195] animate-spin" />
         </div>
       )}
 
@@ -1632,20 +1632,20 @@ function AgentsPageContent() {
       {buySuccess && buyingListing && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
-            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}>
+            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(20, 241, 149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)' }}>
               <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" />
             </div>
-            <h3 className="text-base font-light text-white mb-2">
+            <h3 className="text-base font-semibold text-white mb-2">
               {buyingListing.price === 0 ? 'Claimed!' : 'Payment sent!'}
             </h3>
-            <p className="text-[12.5px] text-zinc-400 font-light leading-relaxed mb-5">
+            <p className="text-[12.5px] text-zinc-400 font-semibold leading-relaxed mb-5">
               <span className="text-white">{buyingListing.title}</span> has been added to your orders.
             </p>
             <div className="flex gap-2 justify-center">
               <Link
                 href="/orders"
                 className="px-4 py-2 rounded-md text-[12.5px] text-white"
-                style={{ background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)' }}
+                style={{ background: 'linear-gradient(180deg, rgba(20, 241, 149,0.38), rgba(20, 241, 149,0.14))', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)' }}
               >
                 View Orders
               </Link>
@@ -1677,16 +1677,16 @@ function AgentsPageContent() {
             <div
               className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3"
               style={{
-                background: 'rgba(131,110,249,0.15)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+                background: 'rgba(20, 241, 149,0.15)',
+                boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)',
               }}
             >
               <Plus className="w-5 h-5 text-[#b4a7ff]" />
             </div>
-            <h3 className="text-base font-light text-white mb-2">
+            <h3 className="text-base font-semibold text-white mb-2">
               Deploy from desktop
             </h3>
-            <p className="text-[12.5px] text-zinc-400 font-light leading-relaxed mb-5">
+            <p className="text-[12.5px] text-zinc-400 font-semibold leading-relaxed mb-5">
               The agent deploy wizard needs a wider screen for sandbox testing,
               file uploads and the review step. Open Bolty on a desktop or
               laptop to deploy your agent.
@@ -1697,8 +1697,8 @@ function AgentsPageContent() {
               className="px-4 py-2 rounded-md text-[12.5px] text-white"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                  'linear-gradient(180deg, rgba(20, 241, 149,0.38), rgba(20, 241, 149,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)',
               }}
             >
               Got it
@@ -1750,10 +1750,10 @@ function AgentsPageContent() {
                       className="text-xs px-3 py-1.5 rounded-lg transition"
                       style={{
                         background: active
-                          ? 'linear-gradient(180deg, rgba(131,110,249,0.22), rgba(131,110,249,0.06))'
+                          ? 'linear-gradient(180deg, rgba(20, 241, 149,0.22), rgba(20, 241, 149,0.06))'
                           : 'rgba(255,255,255,0.04)',
                         boxShadow: active
-                          ? 'inset 0 0 0 1px rgba(131,110,249,0.5)'
+                          ? 'inset 0 0 0 1px rgba(20, 241, 149,0.5)'
                           : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
                         color: active ? '#C9BEFF' : '#a1a1aa',
                       }}
@@ -1786,7 +1786,7 @@ function AgentsPageContent() {
             </div>
             <button
               onClick={() => setMobileFilterOpen(false)}
-              className="w-full rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] py-2.5 text-sm text-white"
+              className="w-full rounded-xl bg-gradient-to-r from-[#14F195] to-[#6B4FE8] py-2.5 text-sm text-white"
             >
               Apply
             </button>

@@ -85,7 +85,7 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
             style={{
               background: '#06060f',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.3), 0 24px 80px rgba(131,110,249,0.18)',
+                '0 0 0 1px rgba(20, 241, 149,0.3), 0 24px 80px rgba(20, 241, 149,0.18)',
             }}
           >
             <span
@@ -93,7 +93,7 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.6) 50%, transparent 100%)',
               }}
             />
 
@@ -113,13 +113,13 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{
-                    background: 'linear-gradient(135deg, #836EF9 0%, #6b21a8 100%)',
-                    boxShadow: '0 4px 14px rgba(131,110,249,0.25)',
+                    background: 'linear-gradient(135deg, #14F195 0%, #6b21a8 100%)',
+                    boxShadow: '0 4px 14px rgba(20, 241, 149,0.25)',
                   }}
                 >
                   <current.icon className="w-4 h-4 text-white" />
                 </div>
-                <h2 className="text-[20px] font-light text-white tracking-[-0.3px]">
+                <h2 className="text-[20px] font-semibold text-white tracking-[-0.3px]">
                   {current.title}
                 </h2>
               </div>
@@ -134,14 +134,14 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                   exit={{ opacity: 0, x: -16 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <p className="text-[13.5px] font-light text-zinc-400 leading-relaxed">
+                  <p className="text-[13.5px] font-semibold text-zinc-400 leading-relaxed">
                     {current.body}
                   </p>
                   <div
                     className="mt-5 rounded-xl p-5 min-h-[180px] flex items-center justify-center"
                     style={{
-                      background: 'rgba(131,110,249,0.04)',
-                      boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                      background: 'rgba(20, 241, 149,0.04)',
+                      boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.18)',
                     }}
                   >
                     {current.visual}
@@ -163,7 +163,7 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                       height: 6,
                       background:
                         i === step
-                          ? 'linear-gradient(90deg, #836EF9, #b4a7ff)'
+                          ? 'linear-gradient(90deg, #14F195, #b4a7ff)'
                           : 'rgba(255,255,255,0.12)',
                     }}
                   />
@@ -173,7 +173,7 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                 {step > 0 && (
                   <button
                     onClick={() => setStep((s) => Math.max(s - 1, 0))}
-                    className="px-3 py-2 text-xs font-light text-zinc-400 hover:text-white transition-colors"
+                    className="px-3 py-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
                   >
                     Back
                   </button>
@@ -188,11 +188,11 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                       setStep((s) => s + 1);
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-light text-white rounded-lg"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold text-white rounded-lg"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.12) 100%)',
-                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+                      'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.12) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.45)',
                   }}
                 >
                   {isLast ? "Got it" : "Next"}
@@ -224,7 +224,7 @@ function ConnectVisual() {
       >
         <span className="text-2xl">👻</span>
         <div className="text-left">
-          <div className="text-[12.5px] font-light text-white">Phantom</div>
+          <div className="text-[12.5px] font-semibold text-white">Phantom</div>
           <div className="text-[10.5px] font-mono text-zinc-500">5XJ4…7nQa</div>
         </div>
         <motion.div
@@ -270,7 +270,7 @@ function BrowseVisual() {
               style={{
                 background:
                   item.kind === 'AGENT'
-                    ? 'rgba(131,110,249,0.16)'
+                    ? 'rgba(20, 241, 149,0.16)'
                     : 'rgba(6,182,212,0.16)',
                 color: item.kind === 'AGENT' ? '#b4a7ff' : '#67e8f9',
               }}
@@ -278,7 +278,7 @@ function BrowseVisual() {
               {item.kind}
             </span>
           </div>
-          <div className="text-[11.5px] font-light text-white truncate">
+          <div className="text-[11.5px] font-semibold text-white truncate">
             {item.title}
           </div>
           <div className="text-[10.5px] font-mono text-zinc-400 mt-0.5">

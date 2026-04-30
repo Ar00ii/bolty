@@ -34,11 +34,11 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         >
           {idx > 0 && <ChevronRight className="w-3 h-3 opacity-60" />}
           {item.href && !item.active ? (
-            <Link href={item.href} className="hover:text-zinc-300 transition-colors font-light">
+            <Link href={item.href} className="hover:text-zinc-300 transition-colors font-semibold">
               {item.label}
             </Link>
           ) : (
-            <span className={item.active ? 'text-zinc-300 font-light' : 'font-light'}>
+            <span className={item.active ? 'text-zinc-300 font-semibold' : 'font-semibold'}>
               {item.label}
             </span>
           )}

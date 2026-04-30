@@ -51,7 +51,7 @@ export function BentoCard({ children, colSpan = 1, rowSpan = 1, delay = 0 }: Ben
             className="absolute inset-0 rounded-lg pointer-events-none"
             style={{
               boxShadow:
-                'inset 0 0 30px rgba(168, 85, 247, 0.1), 0 0 30px rgba(168, 85, 247, 0.05)',
+                'inset 0 0 30px rgba(20, 241, 149, 0.1), 0 0 30px rgba(20, 241, 149, 0.05)',
             }}
           />
         )}

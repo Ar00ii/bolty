@@ -138,7 +138,7 @@ const TYPE_META: Record<
   }
 > = {
   AI_AGENT: { label: 'AI Agent', color: '#a855f7', Icon: Bot },
-  BOT: { label: 'Bot', color: '#836EF9', Icon: Bot },
+  BOT: { label: 'Bot', color: '#14F195', Icon: Bot },
   SCRIPT: { label: 'Script', color: '#06B6D4', Icon: Zap },
   REPO: { label: 'Repo', color: '#3b82f6', Icon: GitBranch },
   OTHER: { label: 'Other', color: '#64748b', Icon: Package },
@@ -147,7 +147,7 @@ const TYPE_META: Record<
 const POST_META: Record<AgentPost['postType'], { label: string; tone: string }> = {
   GENERAL: { label: 'Update', tone: 'text-zinc-400 bg-zinc-800/60' },
   PRICE_UPDATE: { label: 'Price', tone: 'text-amber-300 bg-amber-400/10' },
-  ANNOUNCEMENT: { label: 'Announcement', tone: 'text-violet-300 bg-violet-400/10' },
+  ANNOUNCEMENT: { label: 'Announcement', tone: 'text-bolty-300 bg-bolty-400/10' },
   DEAL: { label: 'Deal', tone: 'text-emerald-300 bg-emerald-400/10' },
 };
 
@@ -180,7 +180,7 @@ function FavoriteButton({ listingId }: { listingId: string }) {
       onClick={() => toggle(listingId)}
       aria-label={saved ? 'Remove from favorites' : 'Save to favorites'}
       aria-pressed={saved}
-      className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[13px] font-light tracking-[0.005em] transition-all"
+      className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[13px] font-semibold tracking-[0.005em] transition-all"
       style={
         saved
           ? {
@@ -428,7 +428,7 @@ export default function AgentDetailPage() {
         <p className="text-zinc-400">Listing not found</p>
         <Link
           href="/market"
-          className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:text-purple-200"
+          className="inline-flex items-center gap-1.5 text-sm text-bolty-300 hover:text-bolty-200"
         >
           <ArrowLeft className="w-4 h-4" /> Back to marketplace
         </Link>
@@ -471,7 +471,7 @@ export default function AgentDetailPage() {
               <div className="text-[13px] text-red-200 font-medium">
                 This agent is currently offline
               </div>
-              <div className="text-[11.5px] text-zinc-400 mt-0.5 font-light">
+              <div className="text-[11.5px] text-zinc-400 mt-0.5 font-semibold">
                 The webhook isn&apos;t responding to health pings, so buying
                 and trying the agent are paused until it&apos;s back. The
                 seller has been notified automatically.
@@ -549,7 +549,7 @@ export default function AgentDetailPage() {
               {isOwner ? (
                 <Link
                   href="/market/seller"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-zinc-200 text-[13px] font-light tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-zinc-200 text-[13px] font-semibold tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
@@ -562,7 +562,7 @@ export default function AgentDetailPage() {
               ) : alreadyOwned ? (
                 <Link
                   href={ownership?.orderId ? `/orders/${ownership.orderId}` : '/inventory'}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-semibold tracking-[0.005em] transition-all hover:brightness-110"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(34,197,94,0.32) 0%, rgba(34,197,94,0.10) 100%)',
@@ -579,12 +579,12 @@ export default function AgentDetailPage() {
                 onClick={handleBuy}
                 disabled={buyPaying || agentOffline}
                 title={agentOffline ? 'Agent is offline — buying paused' : undefined}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-semibold tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
                 }}
               >
                 <ShoppingBag className="w-4 h-4" />
@@ -639,7 +639,7 @@ export default function AgentDetailPage() {
                   <div className="text-[13px] text-red-300 font-medium">
                     Agent is offline
                   </div>
-                  <div className="text-[11.5px] text-zinc-400 mt-1 font-light">
+                  <div className="text-[11.5px] text-zinc-400 mt-1 font-semibold">
                     The webhook isn&apos;t responding. The seller has been
                     notified — try again later.
                   </div>
@@ -660,14 +660,14 @@ export default function AgentDetailPage() {
                     className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                        'linear-gradient(135deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.28), 0 0 18px -6px rgba(131,110,249,0.4)',
+                        'inset 0 0 0 1px rgba(20, 241, 149,0.28), 0 0 18px -6px rgba(20, 241, 149,0.4)',
                     }}
                   >
                     <Terminal className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
                   </div>
-                  <p className="text-sm text-zinc-300 mb-1 font-light tracking-[0.005em]">
+                  <p className="text-sm text-zinc-300 mb-1 font-semibold tracking-[0.005em]">
                     No live endpoint on this listing
                   </p>
                   <p className="text-xs text-zinc-600">
@@ -778,7 +778,7 @@ export default function AgentDetailPage() {
                             <span className="text-zinc-600">· @{r.seller.username || 'anon'}</span>
                           </div>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-purple-300 transition-colors mt-1" />
+                        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-bolty-300 transition-colors mt-1" />
                       </Link>
                     );
                   })}
@@ -805,7 +805,7 @@ export default function AgentDetailPage() {
       </div>
       {buyPaying && !buyConsentData && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#836EF9] animate-spin" />
+          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#14F195] animate-spin" />
         </div>
       )}
       {buyConsentData && listing && (
@@ -831,15 +831,15 @@ export default function AgentDetailPage() {
       {buySuccess && listing && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
-            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}>
+            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(20, 241, 149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)' }}>
               <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" />
             </div>
-            <h3 className="text-base font-light text-white mb-2">{listing.price === 0 ? 'Claimed!' : 'Payment sent!'}</h3>
-            <p className="text-[12.5px] text-zinc-400 font-light leading-relaxed mb-5">
+            <h3 className="text-base font-semibold text-white mb-2">{listing.price === 0 ? 'Claimed!' : 'Payment sent!'}</h3>
+            <p className="text-[12.5px] text-zinc-400 font-semibold leading-relaxed mb-5">
               <span className="text-white">{listing.title}</span> has been added to your orders.
             </p>
             <div className="flex gap-2 justify-center">
-              <Link href="/orders" className="px-4 py-2 rounded-md text-[12.5px] text-white" style={{ background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)' }}>View Orders</Link>
+              <Link href="/orders" className="px-4 py-2 rounded-md text-[12.5px] text-white" style={{ background: 'linear-gradient(180deg, rgba(20, 241, 149,0.38), rgba(20, 241, 149,0.14))', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.48)' }}>View Orders</Link>
               <button type="button" onClick={() => setBuySuccess(false)} className="px-4 py-2 rounded-md text-[12.5px] text-zinc-400 hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>Continue</button>
             </div>
           </div>
@@ -868,8 +868,8 @@ function Section({
           className="w-6 h-6 rounded-md flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28)',
+              'linear-gradient(135deg, rgba(20, 241, 149,0.18) 0%, rgba(20, 241, 149,0.04) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.28)',
           }}
         >
           <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -927,7 +927,7 @@ function DemoWidget({ listingId }: { listingId: string }) {
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <div className="p-4 border-b border-white/[0.06] flex items-center justify-between gap-3">
@@ -957,12 +957,12 @@ function DemoWidget({ listingId }: { listingId: string }) {
           <button
             onClick={handleSend}
             disabled={!canSend}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed text-[11.5px] text-white font-light tracking-[0.005em] transition-all hover:brightness-110"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed text-[11.5px] text-white font-semibold tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -6px rgba(131,110,249,0.5)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -6px rgba(20, 241, 149,0.5)',
             }}
           >
             {loading ? (
@@ -1066,7 +1066,7 @@ function ReviewsWidget({
       {canReview && !showForm && (
         <button
           onClick={() => setShowForm(true)}
-          className="text-xs text-purple-300 hover:text-purple-200 transition-colors"
+          className="text-xs text-bolty-300 hover:text-bolty-200 transition-colors"
         >
           Write a review
         </button>
@@ -1084,7 +1084,7 @@ function ReviewsWidget({
             className="absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="flex items-center gap-2 mb-3">
@@ -1127,12 +1127,12 @@ function ReviewsWidget({
               <button
                 onClick={submit}
                 disabled={!rating || submitting}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed text-[11.5px] text-white font-light tracking-[0.005em] transition-all hover:brightness-110"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed text-[11.5px] text-white font-semibold tracking-[0.005em] transition-all hover:brightness-110"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -6px rgba(131,110,249,0.5)',
+                    'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -6px rgba(20, 241, 149,0.5)',
                 }}
               >
                 {submitting ? 'Submitting…' : 'Publish review'}
@@ -1209,17 +1209,17 @@ function PricingCard({
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
         Price
       </p>
       {isFree ? (
-        <p className="text-3xl font-light text-emerald-400 tracking-[-0.01em]">Free</p>
+        <p className="text-3xl font-semibold text-emerald-400 tracking-[-0.01em]">Free</p>
       ) : (
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
+          <p className="text-3xl font-semibold text-white tabular-nums tracking-[-0.01em]">
             {listing.price}
           </p>
           <p className="text-sm text-zinc-500">{listing.currency}</p>
@@ -1234,7 +1234,7 @@ function PricingCard({
         <>
           <Link
             href="/market/seller"
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-zinc-200 text-[13px] font-light tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-zinc-200 text-[13px] font-semibold tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
             style={{
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
@@ -1252,7 +1252,7 @@ function PricingCard({
         <>
           <Link
             href={ownedOrderId ? `/orders/${ownedOrderId}` : '/inventory'}
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-semibold tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
                 'linear-gradient(180deg, rgba(34,197,94,0.32) 0%, rgba(34,197,94,0.10) 100%)',
@@ -1272,12 +1272,12 @@ function PricingCard({
           <button
             onClick={onBuy}
             disabled={buyPaying}
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-semibold tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
             }}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -1327,7 +1327,7 @@ function SellerCard({ seller }: { seller: MarketListing['seller'] }) {
             {seller.username && (
               <Link
                 href={`/market/sellers/${seller.username}`}
-                className="text-xs text-purple-300 hover:text-purple-200 inline-flex items-center gap-1"
+                className="text-xs text-bolty-300 hover:text-bolty-200 inline-flex items-center gap-1"
               >
                 Storefront <ArrowUpRight className="w-3 h-3" />
               </Link>
@@ -1440,7 +1440,7 @@ function RepositoryCard({ repo }: { repo: NonNullable<MarketListing['repository'
         >
           <GitBranch className="w-3.5 h-3.5 text-blue-400" strokeWidth={1.75} />
         </div>
-        <p className="text-sm font-light text-white truncate tracking-[0.005em]">{repo.name}</p>
+        <p className="text-sm font-semibold text-white truncate tracking-[0.005em]">{repo.name}</p>
       </div>
       {repo.language && <p className="text-xs text-zinc-500 mb-3 ml-8">{repo.language}</p>}
       <a

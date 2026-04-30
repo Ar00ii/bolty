@@ -73,16 +73,16 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
           }}
         />
         <div
           className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+              'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
           }}
         >
           <Activity className="w-5 h-5 text-[#b4a7ff]" />
@@ -134,7 +134,7 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[14px] font-light text-white tracking-[0.005em]">
+                  <p className="text-[14px] font-semibold text-white tracking-[0.005em]">
                     {activity.action}
                   </p>
                   <span className="text-[11px] text-zinc-500 flex-shrink-0 tabular-nums">

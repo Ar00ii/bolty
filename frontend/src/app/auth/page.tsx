@@ -86,7 +86,7 @@ function AuthInner() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(131,110,249,0.16), rgba(131,110,249,0) 60%)',
+            'radial-gradient(ellipse at center, rgba(20, 241, 149,0.16), rgba(20, 241, 149,0) 60%)',
         }}
       />
 
@@ -98,7 +98,7 @@ function AuthInner() {
       >
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-[12px] font-light text-zinc-400 hover:text-white transition mb-6"
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-zinc-400 hover:text-white transition mb-6"
         >
           <ArrowLeft className="w-3 h-3" />
           Back
@@ -117,20 +117,20 @@ function AuthInner() {
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #836EF9 0%, #6b21a8 100%)',
-                boxShadow: '0 4px 14px rgba(131, 110, 249, 0.25)',
+                background: 'linear-gradient(135deg, #14F195 0%, #6b21a8 100%)',
+                boxShadow: '0 4px 14px rgba(20, 241, 149, 0.25)',
               }}
             >
               <Wallet className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1
-                className="font-light text-white"
+                className="font-semibold text-white"
                 style={{ fontSize: '20px', letterSpacing: '-0.3px' }}
               >
                 Connect Solana wallet
               </h1>
-              <p className="font-light text-zinc-400" style={{ fontSize: '12.5px' }}>
+              <p className="font-semibold text-zinc-400" style={{ fontSize: '12.5px' }}>
                 Sign one short message — no email, no password
               </p>
             </div>
@@ -151,14 +151,14 @@ function AuthInner() {
               >
                 <span className="flex items-center gap-3">
                   <span style={{ fontSize: '20px' }}>👻</span>
-                  <span className="text-[13.5px] font-light">
+                  <span className="text-[13.5px] font-semibold">
                     {connecting ? 'Connecting…' : 'Phantom / Solflare / …'}
                   </span>
                 </span>
                 {connecting ? (
                   <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
                 ) : (
-                  <span className="text-[11.5px] font-light" style={{ color: '#b4a7ff' }}>
+                  <span className="text-[11.5px] font-semibold" style={{ color: '#b4a7ff' }}>
                     Connect →
                   </span>
                 )}
@@ -173,7 +173,7 @@ function AuthInner() {
                     boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.18)',
                   }}
                 >
-                  <span className="flex items-center gap-2 text-[12px] font-light">
+                  <span className="flex items-center gap-2 text-[12px] font-semibold">
                     <CheckCircle className="w-3.5 h-3.5" />
                     {wallet?.adapter.name ?? 'Wallet'} connected
                   </span>
@@ -185,7 +185,7 @@ function AuthInner() {
                       setPhase('idle');
                       setError(null);
                     }}
-                    className="text-[11px] font-light text-zinc-400 hover:text-white transition"
+                    className="text-[11px] font-semibold text-zinc-400 hover:text-white transition"
                   >
                     Disconnect
                   </button>
@@ -196,19 +196,19 @@ function AuthInner() {
                   disabled={phase === 'signing' || phase === 'success'}
                   className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 transition hover:translate-x-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(131,110,249,0.15) 0%, rgba(131,110,249,0.08) 100%)',
+                    background: 'linear-gradient(135deg, rgba(20, 241, 149,0.15) 0%, rgba(20, 241, 149,0.08) 100%)',
                     color: 'white',
-                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                    boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                   }}
                 >
                   <span className="flex items-center gap-3">
                     <Wallet className="w-4 h-4" style={{ color: '#b4a7ff' }} />
-                    <span className="text-[13.5px] font-light">Sign to continue</span>
+                    <span className="text-[13.5px] font-semibold">Sign to continue</span>
                   </span>
                   {phase === 'signing' ? (
                     <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
                   ) : (
-                    <span className="text-[11.5px] font-light" style={{ color: '#b4a7ff' }}>
+                    <span className="text-[11.5px] font-semibold" style={{ color: '#b4a7ff' }}>
                       Sign →
                     </span>
                   )}
@@ -221,7 +221,7 @@ function AuthInner() {
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 flex items-center gap-2 text-[12px] font-light text-emerald-400"
+              className="mt-4 flex items-center gap-2 text-[12px] font-semibold text-emerald-400"
             >
               <CheckCircle className="w-3.5 h-3.5" />
               Signed in. Redirecting…
@@ -232,7 +232,7 @@ function AuthInner() {
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 rounded-lg p-2.5 text-[12px] font-light"
+              className="mt-4 rounded-lg p-2.5 text-[12px] font-semibold"
               style={{
                 background: 'rgba(248,113,113,0.08)',
                 color: '#f87171',
@@ -247,13 +247,13 @@ function AuthInner() {
           )}
 
           <div
-            className="mt-5 pt-5 text-[11.5px] font-light text-zinc-400"
+            className="mt-5 pt-5 text-[11.5px] font-semibold text-zinc-400"
             style={{ borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}
           >
             <div className="flex items-start gap-2">
               <ShieldCheck
                 className="w-3.5 h-3.5 mt-0.5 shrink-0"
-                style={{ color: '#836EF9' }}
+                style={{ color: '#14F195' }}
               />
               <p>
                 We only read your address and ask you to sign a short
@@ -267,7 +267,7 @@ function AuthInner() {
           </div>
         </div>
 
-        <p className="mt-4 text-center text-[11px] font-light text-zinc-500">
+        <p className="mt-4 text-center text-[11px] font-semibold text-zinc-500">
           By connecting you accept the{' '}
           <Link href="/terms" className="hover:text-white transition" style={{ color: '#b4a7ff' }}>
             terms

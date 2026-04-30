@@ -86,9 +86,9 @@ export function Pagination({
                     className="absolute inset-0 rounded-lg"
                     style={{
                       background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.08) 100%)',
+                        'linear-gradient(180deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.08) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 16px -4px rgba(131,110,249,0.4)',
+                        'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 16px -4px rgba(20, 241, 149,0.4)',
                     }}
                   />
                 )}

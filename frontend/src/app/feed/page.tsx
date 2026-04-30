@@ -52,7 +52,7 @@ const CHANNELS: Array<{
   tagline: string;
   accent: string;
 }> = [
-  { id: 'general', label: 'General', tagline: 'The whole community', accent: '#836EF9' },
+  { id: 'general', label: 'General', tagline: 'The whole community', accent: '#14F195' },
   { id: 'marketplace', label: 'Marketplace', tagline: 'Deals, drops, reviews', accent: '#06B6D4' },
   { id: 'agents', label: 'Agents', tagline: 'Show off your bots', accent: '#EC4899' },
   { id: 'dev', label: 'Dev', tagline: 'Repos, code, builds', accent: '#10B981' },
@@ -347,7 +347,7 @@ export default function FeedPage() {
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{
           background:
-            'radial-gradient(1000px 600px at 20% 0%, rgba(131,110,249,0.10), transparent 60%), radial-gradient(800px 500px at 90% 20%, rgba(6,182,212,0.07), transparent 60%)',
+            'radial-gradient(1000px 600px at 20% 0%, rgba(20, 241, 149,0.10), transparent 60%), radial-gradient(800px 500px at 90% 20%, rgba(6,182,212,0.07), transparent 60%)',
         }}
       />
 
@@ -355,7 +355,7 @@ export default function FeedPage() {
         {/* ── Channels rail ─────────────────────────────────────────────── */}
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <div
-            className="relative overflow-hidden rounded-2xl p-3 font-light"
+            className="relative overflow-hidden rounded-2xl p-3 font-semibold"
             style={{
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
@@ -439,7 +439,7 @@ export default function FeedPage() {
               <Hash className="h-4 w-4" style={{ color: activeChannel.accent }} />
             </span>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-light tracking-tight">
+              <h1 className="text-xl font-semibold tracking-tight">
                 <GradientText gradient="purple">#{activeChannel.label.toLowerCase()}</GradientText>
               </h1>
               <p className="truncate text-xs text-white/50">{activeChannel.tagline}</p>
@@ -457,7 +457,7 @@ export default function FeedPage() {
           >
             {/* Active agent chip */}
             {activeAgent && (
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#836EF9]/35 bg-[#836EF9]/10 px-2.5 py-1 text-[11px] text-white/90">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#14F195]/35 bg-[#14F195]/10 px-2.5 py-1 text-[11px] text-white/90">
                 <Bot className="h-3 w-3 text-[#C9BEFF]" />
                 <span className="uppercase tracking-[0.14em] text-white/50">Via</span>
                 <span className="font-medium">{activeAgent.title}</span>
@@ -495,7 +495,7 @@ export default function FeedPage() {
                       : `Post to #${activeChannel.label.toLowerCase()}…`
                   }
                   rows={2}
-                  className="w-full resize-none bg-transparent text-sm font-light text-white outline-none placeholder:text-white/30"
+                  className="w-full resize-none bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/30"
                   maxLength={MAX_LEN}
                 />
 
@@ -564,7 +564,7 @@ export default function FeedPage() {
                   <button
                     onClick={sendPost}
                     disabled={(!input.trim() && !pendingImage) || !connected}
-                    className="ml-auto flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-1.5 text-xs font-normal text-white shadow-[0_0_24px_-6px_#836EF9] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                    className="ml-auto flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#14F195] to-[#6B4FE8] px-4 py-1.5 text-xs font-normal text-white shadow-[0_0_24px_-6px_#14F195] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                   >
                     <Send className="h-3.5 w-3.5" />
                     Post
@@ -643,7 +643,7 @@ export default function FeedPage() {
                             {m.username || 'anon'}
                           </Link>
                           {m.viaAgentName && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-[#836EF9]/30 bg-[#836EF9]/10 px-1.5 py-[1px] text-[10px] text-[#C9BEFF]">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-[#14F195]/30 bg-[#14F195]/10 px-1.5 py-[1px] text-[10px] text-[#C9BEFF]">
                               <Bot className="h-2.5 w-2.5" />
                               via {m.viaAgentName}
                             </span>
@@ -653,7 +653,7 @@ export default function FeedPage() {
                             {timeFormatter.format(new Date(m.createdAt))}
                           </span>
                         </div>
-                        <p className="mt-1 whitespace-pre-wrap break-words text-sm font-light text-white/90">
+                        <p className="mt-1 whitespace-pre-wrap break-words text-sm font-semibold text-white/90">
                           {m.content}
                         </p>
                         {m.imageUrl && (
@@ -693,7 +693,7 @@ export default function FeedPage() {
         {/* ── Right rail ────────────────────────────────────────────────── */}
         <aside className="hidden lg:block lg:sticky lg:top-6 lg:self-start">
           <div
-            className="relative overflow-hidden rounded-2xl p-4 font-light"
+            className="relative overflow-hidden rounded-2xl p-4 font-semibold"
             style={{
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -799,14 +799,14 @@ function EmptyTimeline({ channel }: { channel: string }) {
       <div
         className="flex h-12 w-12 items-center justify-center rounded-full"
         style={{
-          background: 'linear-gradient(135deg, #836EF922, transparent)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+          background: 'linear-gradient(135deg, #14F19522, transparent)',
+          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
         }}
       >
-        <MessageSquare className="h-5 w-5 text-[#836EF9]" />
+        <MessageSquare className="h-5 w-5 text-[#14F195]" />
       </div>
-      <h3 className="text-base font-light">#{channel.toLowerCase()} is quiet</h3>
-      <p className="text-sm font-light text-white/50">
+      <h3 className="text-base font-semibold">#{channel.toLowerCase()} is quiet</h3>
+      <p className="text-sm font-semibold text-white/50">
         Be the first to post and start the conversation.
       </p>
     </div>
@@ -843,7 +843,7 @@ function AgentPicker({
           background:
             'linear-gradient(180deg, rgba(28,26,38,0.95) 0%, rgba(10,10,14,0.95) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.25), 0 30px 60px -20px rgba(0,0,0,0.8)',
+            '0 0 0 1px rgba(20, 241, 149,0.25), 0 30px 60px -20px rgba(0,0,0,0.8)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -862,12 +862,12 @@ function AgentPicker({
         <div className="max-h-[60vh] overflow-y-auto px-4 py-3">
           {agents.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm font-light text-white/60">
+              <p className="text-sm font-semibold text-white/60">
                 You don&apos;t have any AI agent listings yet.
               </p>
               <Link
                 href="/market/seller/publish"
-                className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-2 text-xs font-normal text-white transition hover:brightness-110"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#14F195] to-[#6B4FE8] px-4 py-2 text-xs font-normal text-white transition hover:brightness-110"
                 onClick={onClose}
               >
                 Publish an agent
@@ -883,7 +883,7 @@ function AgentPicker({
                       onClick={() => onPick(a)}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition ${
                         isActive
-                          ? 'bg-[#836EF9]/15 text-white'
+                          ? 'bg-[#14F195]/15 text-white'
                           : 'text-white/80 hover:bg-white/[0.04] hover:text-white'
                       }`}
                     >
@@ -891,8 +891,8 @@ function AgentPicker({
                         className="flex h-8 w-8 items-center justify-center rounded-lg"
                         style={{
                           background:
-                            'linear-gradient(135deg, rgba(131,110,249,0.18), rgba(6,182,212,0.12))',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                            'linear-gradient(135deg, rgba(20, 241, 149,0.18), rgba(6,182,212,0.12))',
+                          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
                         }}
                       >
                         <Bot className="h-4 w-4 text-[#C9BEFF]" />

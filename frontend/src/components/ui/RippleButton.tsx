@@ -13,9 +13,9 @@ interface RippleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 
 const variantStyles = {
   primary:
-    'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg hover:shadow-purple-500/30',
+    'bg-gradient-to-r from-bolty-600 to-bolty-700 text-white hover:shadow-lg hover:shadow-bolty-500/30',
   secondary: 'bg-white/10 text-white border border-white/20 hover:bg-white/15',
-  outline: 'border-2 border-purple-600 text-purple-400 hover:bg-purple-600/10',
+  outline: 'border-2 border-bolty-600 text-bolty-400 hover:bg-bolty-600/10',
   ghost: 'text-white hover:bg-white/5',
 };
 
@@ -70,7 +70,7 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, RippleButtonProp
         onClick={handleClick}
         disabled={disabled || loading}
         className={`
-          relative overflow-hidden rounded-lg font-light
+          relative overflow-hidden rounded-lg font-semibold
           transition-all duration-300
           disabled:opacity-50 disabled:cursor-not-allowed
           ${variantStyles[variant]}

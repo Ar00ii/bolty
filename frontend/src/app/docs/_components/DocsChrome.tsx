@@ -37,7 +37,7 @@ export function DocsSidebar() {
       {GROUPS.map((group) => (
         <div key={group.heading} className="space-y-1">
           <div
-            className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-light mb-2"
+            className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-semibold mb-2"
           >
             {group.heading}
           </div>
@@ -47,7 +47,7 @@ export function DocsSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group relative flex items-center pl-3 pr-3 py-1.5 rounded-md text-[13px] font-light transition ${
+                className={`group relative flex items-center pl-3 pr-3 py-1.5 rounded-md text-[13px] font-semibold transition ${
                   active
                     ? 'text-white bg-white/[0.04]'
                     : 'text-zinc-400 hover:text-white hover:bg-white/[0.02]'
@@ -56,7 +56,7 @@ export function DocsSidebar() {
                 <span
                   aria-hidden
                   className={`absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full transition ${
-                    active ? 'bg-[#836EF9]' : 'bg-transparent group-hover:bg-white/10'
+                    active ? 'bg-[#14F195]' : 'bg-transparent group-hover:bg-white/10'
                   }`}
                 />
                 {item.label}
@@ -78,12 +78,12 @@ export function DocsHero() {
         className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-[640px] h-[320px] opacity-60"
         style={{
           background:
-            'radial-gradient(closest-side, rgba(131,110,249,0.18), rgba(131,110,249,0) 70%)',
+            'radial-gradient(closest-side, rgba(20, 241, 149,0.18), rgba(20, 241, 149,0) 70%)',
         }}
       />
       <div className="relative">
         <div
-          className="text-[10px] uppercase tracking-[0.22em] text-zinc-500 font-light mb-3"
+          className="text-[10px] uppercase tracking-[0.22em] text-zinc-500 font-semibold mb-3"
         >
           Documentation
         </div>
@@ -100,7 +100,7 @@ export function DocsHero() {
           <GradientText gradient="purple">AI agents</GradientText> on Bolty.
         </h1>
         <p
-          className="mt-4 text-zinc-400 font-light max-w-2xl"
+          className="mt-4 text-zinc-400 font-semibold max-w-2xl"
           style={{ fontSize: '15.5px', lineHeight: 1.7 }}
         >
           Webhook contracts, marketplace mechanics, BoltyGuard security

@@ -32,7 +32,7 @@ export function HomeLanding() {
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[700px] rounded-full"
         style={{
           background:
-            'radial-gradient(closest-side, rgba(131,110,249,0.25), rgba(131,110,249,0) 70%)',
+            'radial-gradient(closest-side, rgba(20, 241, 149,0.25), rgba(20, 241, 149,0) 70%)',
           filter: 'blur(40px)',
         }}
       />
@@ -50,27 +50,27 @@ export function HomeLanding() {
         <Link href="/" className="flex items-center gap-2 text-white/95">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/LogoNew.png" alt="" className="w-7 h-7" />
-          <span className="text-[15px] font-light tracking-tight">BoltyNetwork</span>
+          <span className="text-[15px] font-semibold tracking-tight">BoltyNetwork</span>
         </Link>
         <nav className="flex items-center gap-2">
           <button
             onClick={howItWorks.open}
-            className="hidden sm:inline-flex items-center gap-1.5 text-[12.5px] font-light text-zinc-400 hover:text-white transition px-3 py-1.5 rounded-md"
+            className="hidden sm:inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-zinc-400 hover:text-white transition px-3 py-1.5 rounded-md"
           >
             How it works
           </button>
           <Link
             href="/docs"
-            className="hidden sm:inline-flex items-center gap-1.5 text-[12.5px] font-light text-zinc-400 hover:text-white transition px-3 py-1.5 rounded-md"
+            className="hidden sm:inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-zinc-400 hover:text-white transition px-3 py-1.5 rounded-md"
           >
             Docs
           </Link>
           <Link
             href="/auth"
-            className="inline-flex items-center gap-1.5 text-[12.5px] font-light px-3 py-1.5 rounded-md transition"
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-3 py-1.5 rounded-md transition"
             style={{
-              background: 'rgba(131,110,249,0.14)',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+              background: 'rgba(20, 241, 149,0.14)',
+              boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)',
               color: '#ede9fe',
             }}
           >
@@ -94,27 +94,27 @@ export function HomeLanding() {
             Solana · AI agents · Code repos
           </p>
           <h1
-            className="font-light text-white tracking-[-0.02em] leading-[1.05]"
+            className="font-semibold text-white tracking-[-0.02em] leading-[1.05]"
             style={{ fontSize: 'clamp(36px, 6.5vw, 68px)' }}
           >
             Buy and sell <GradientText>AI agents and code</GradientText>
             <br className="hidden sm:block" /> with one wallet, one signature.
           </h1>
-          <p className="mt-5 max-w-2xl mx-auto text-[14.5px] sm:text-[15.5px] font-light text-zinc-400 leading-relaxed">
+          <p className="mt-5 max-w-2xl mx-auto text-[14.5px] sm:text-[15.5px] font-semibold text-zinc-400 leading-relaxed">
             A direct on-chain marketplace. Connect a Solana wallet, browse, pay in SOL.
             The seller is paid in the same transaction. No middleman, no escrow waits.
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/market" className="w-full sm:w-auto">
-              <ShimmerButton className="w-full sm:w-auto px-6 py-3 text-[14px] font-light">
+              <ShimmerButton className="w-full sm:w-auto px-6 py-3 text-[14px] font-semibold">
                 Browse the marketplace
                 <ArrowRight className="w-4 h-4 ml-1.5" />
               </ShimmerButton>
             </Link>
             <button
               onClick={howItWorks.open}
-              className="inline-flex items-center gap-2 px-5 py-3 text-[13.5px] font-light text-zinc-200 rounded-xl transition hover:translate-y-[-1px]"
+              className="inline-flex items-center gap-2 px-5 py-3 text-[13.5px] font-semibold text-zinc-200 rounded-xl transition hover:translate-y-[-1px]"
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
@@ -142,7 +142,7 @@ export function HomeLanding() {
         </motion.div>
       </main>
 
-      <footer className="relative z-10 px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-[11.5px] font-light text-zinc-500">
+      <footer className="relative z-10 px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-[11.5px] font-semibold text-zinc-500">
         <div className="flex items-center gap-1.5">
           <Zap className="w-3 h-3" style={{ color: '#b4a7ff' }} />
           <span>Direct on-chain · 5% protocol fee</span>
@@ -183,14 +183,14 @@ function ValueCard({
       <div
         className="w-7 h-7 rounded-md flex items-center justify-center mb-3"
         style={{
-          background: 'rgba(131,110,249,0.12)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+          background: 'rgba(20, 241, 149,0.12)',
+          boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
         }}
       >
         <Icon className="w-3.5 h-3.5" />
       </div>
-      <div className="text-[13px] font-light text-white mb-1">{title}</div>
-      <p className="text-[11.5px] font-light text-zinc-500 leading-relaxed">{body}</p>
+      <div className="text-[13px] font-semibold text-white mb-1">{title}</div>
+      <p className="text-[11.5px] font-semibold text-zinc-500 leading-relaxed">{body}</p>
     </div>
   );
 }

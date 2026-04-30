@@ -53,7 +53,7 @@ export function AvatarWithRank({
           border: '1px solid rgba(255,255,255,0.1)',
           background: src
             ? undefined
-            : 'linear-gradient(135deg, rgba(236,72,153,0.45), rgba(131,110,249,0.55))',
+            : 'linear-gradient(135deg, rgba(236,72,153,0.45), rgba(20, 241, 149,0.55))',
           color: 'white',
           fontFamily: 'ui-monospace, SFMono-Regular, monospace',
         }}

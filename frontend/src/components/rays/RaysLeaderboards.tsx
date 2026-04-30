@@ -93,16 +93,16 @@ export const RaysLeaderboards: React.FC = () => {
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
         }}
       />
       <div
         className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+            'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+            'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
         }}
       >
         <Icon className="w-5 h-5 text-[#b4a7ff]" />
@@ -137,14 +137,14 @@ export const RaysLeaderboards: React.FC = () => {
             className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
             }}
           >
             <TrendingUp className="w-4 h-4 text-[#b4a7ff]" />
           </div>
-          <h2 className="text-2xl font-light text-white tracking-[-0.01em]">Rays Leaderboards</h2>
+          <h2 className="text-2xl font-semibold text-white tracking-[-0.01em]">Rays Leaderboards</h2>
         </div>
         <p className="text-sm text-zinc-400 tracking-[0.005em]">
           Top agents and creators ranked by accumulated rays
@@ -157,7 +157,7 @@ export const RaysLeaderboards: React.FC = () => {
           onClick={() => setActiveTab('rays')}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-          className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-light tracking-[0.005em] ${
+          className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-semibold tracking-[0.005em] ${
             activeTab === 'rays' ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
@@ -168,9 +168,9 @@ export const RaysLeaderboards: React.FC = () => {
               className="absolute inset-0 rounded-lg"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+                  'linear-gradient(180deg, rgba(20, 241, 149,0.28) 0%, rgba(20, 241, 149,0.08) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20, 241, 149,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(20, 241, 149,0.5)',
               }}
             />
           )}
@@ -181,7 +181,7 @@ export const RaysLeaderboards: React.FC = () => {
           onClick={() => setActiveTab('creators')}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-          className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-light tracking-[0.005em] ${
+          className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-semibold tracking-[0.005em] ${
             activeTab === 'creators' ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
@@ -192,9 +192,9 @@ export const RaysLeaderboards: React.FC = () => {
               className="absolute inset-0 rounded-lg"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+                  'linear-gradient(180deg, rgba(20, 241, 149,0.28) 0%, rgba(20, 241, 149,0.08) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20, 241, 149,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(20, 241, 149,0.5)',
               }}
             />
           )}
@@ -274,7 +274,7 @@ export const RaysLeaderboards: React.FC = () => {
                         />
                       ) : (
                         <span
-                          className="text-[14px] font-light tabular-nums tracking-[-0.005em]"
+                          className="text-[14px] font-semibold tabular-nums tracking-[-0.005em]"
                           style={{ color: positionMeta.textColor }}
                         >
                           {entry.position}
@@ -282,7 +282,7 @@ export const RaysLeaderboards: React.FC = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-light text-white truncate tracking-[0.005em]">
+                      <p className="text-[14px] font-semibold text-white truncate tracking-[0.005em]">
                         {entry.agent}
                       </p>
                       <p className="text-[11px] text-zinc-500 truncate font-mono tracking-[0.005em] mt-0.5">
@@ -290,7 +290,7 @@ export const RaysLeaderboards: React.FC = () => {
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-lg font-light text-white tabular-nums tracking-[-0.005em]">
+                      <p className="text-lg font-semibold text-white tabular-nums tracking-[-0.005em]">
                         {entry.totalRays.toLocaleString()}
                       </p>
                       <p
@@ -352,7 +352,7 @@ export const RaysLeaderboards: React.FC = () => {
                         />
                       ) : (
                         <span
-                          className="text-[14px] font-light tabular-nums tracking-[-0.005em]"
+                          className="text-[14px] font-semibold tabular-nums tracking-[-0.005em]"
                           style={{ color: positionMeta.textColor }}
                         >
                           {entry.position}
@@ -360,7 +360,7 @@ export const RaysLeaderboards: React.FC = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-light text-white truncate tracking-[0.005em]">
+                      <p className="text-[14px] font-semibold text-white truncate tracking-[0.005em]">
                         @{entry.creator}
                       </p>
                       <p className="text-[11px] text-zinc-500 mt-0.5 tracking-[0.005em]">
@@ -368,7 +368,7 @@ export const RaysLeaderboards: React.FC = () => {
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-lg font-light text-[#b4a7ff] tabular-nums tracking-[-0.005em]">
+                      <p className="text-lg font-semibold text-[#b4a7ff] tabular-nums tracking-[-0.005em]">
                         {entry.totalRays.toLocaleString()}
                       </p>
                       <p className="text-[11px] text-zinc-500 mt-0.5 tabular-nums tracking-[0.005em]">

@@ -520,7 +520,7 @@ function MarketScreener() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search agents, repos, bots, tags…"
-              className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-400"
+              className="flex-1 bg-transparent border-none outline-none text-[13px] font-semibold text-white placeholder-zinc-400"
             />
           </div>
 
@@ -634,10 +634,10 @@ function StatTile({
       <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-200 mb-1">
         {label}
       </div>
-      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+      <div className="font-mono text-xl md:text-2xl font-semibold text-white tabular-nums">
         {value}
       </div>
-      <div className="text-[10.5px] text-zinc-200 font-light mt-0.5">{sub}</div>
+      <div className="text-[10.5px] text-zinc-200 font-semibold mt-0.5">{sub}</div>
     </div>
   );
 }
@@ -694,7 +694,7 @@ function NewLaunchesTicker({
                 <Link
                   href={`/market/agents/${item.id}`}
                   key={`${item.id}-${i}`}
-                  className="inline-flex items-center gap-2 text-[12px] font-light text-zinc-300 hover:text-white transition"
+                  className="inline-flex items-center gap-2 text-[12px] font-semibold text-zinc-300 hover:text-white transition"
                 >
                   <Icon
                     className="w-3 h-3"
@@ -748,11 +748,11 @@ function TypeTabs({ value, onChange }: { value: TypeFilter; onChange: (v: TypeFi
           key={t.key}
           type="button"
           onClick={() => onChange(t.key)}
-          className="px-2.5 py-1 text-[12px] font-light rounded-md transition"
+          className="px-2.5 py-1 text-[12px] font-semibold rounded-md transition"
           style={{
             color: value === t.key ? '#ffffff' : '#d4d4d8',
-            background: value === t.key ? 'rgba(131,110,249,0.2)' : 'transparent',
-            boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+            background: value === t.key ? 'rgba(20, 241, 149,0.2)' : 'transparent',
+            boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(20, 241, 149,0.35)' : 'none',
           }}
         >
           {t.label}
@@ -778,11 +778,11 @@ function IntentChip({
       type="button"
       onClick={onClick}
       title={hint}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-light transition-all hover:translate-y-[-1px]"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all hover:translate-y-[-1px]"
       style={{
-        background: active ? 'rgba(131,110,249,0.16)' : 'rgba(255,255,255,0.03)',
+        background: active ? 'rgba(20, 241, 149,0.16)' : 'rgba(255,255,255,0.03)',
         color: active ? '#ede9fe' : '#a1a1aa',
-        boxShadow: `inset 0 0 0 1px ${active ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.08)'}`,
+        boxShadow: `inset 0 0 0 1px ${active ? 'rgba(20, 241, 149,0.5)' : 'rgba(255,255,255,0.08)'}`,
       }}
     >
       {label}
@@ -805,12 +805,12 @@ function SortChip({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold transition"
       style={{
         color: active ? '#ffffff' : '#d4d4d8',
-        background: active ? 'rgba(131,110,249,0.18)' : 'rgba(255,255,255,0.02)',
+        background: active ? 'rgba(20, 241, 149,0.18)' : 'rgba(255,255,255,0.02)',
         boxShadow: active
-          ? 'inset 0 0 0 1px rgba(131,110,249,0.4)'
+          ? 'inset 0 0 0 1px rgba(20, 241, 149,0.4)'
           : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
@@ -834,7 +834,7 @@ function ScreenerTable({
   if (loading && listings.length === 0) {
     return (
       <div
-        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-200 font-light"
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-200 font-semibold"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
           boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
@@ -854,8 +854,8 @@ function ScreenerTable({
           boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
         }}
       >
-        <div className="text-sm font-light text-zinc-300">No listings match your filters.</div>
-        <div className="text-xs font-light text-zinc-200 mt-1">
+        <div className="text-sm font-semibold text-zinc-300">No listings match your filters.</div>
+        <div className="text-xs font-semibold text-zinc-200 mt-1">
           Try changing the type or clearing the search.
         </div>
       </div>
@@ -921,7 +921,7 @@ function Row({
           background: flashing
             ? 'linear-gradient(90deg, rgba(34,197,94,0.12), rgba(34,197,94,0.02))'
             : isLive
-              ? 'linear-gradient(90deg, rgba(131,110,249,0.08), transparent)'
+              ? 'linear-gradient(90deg, rgba(20, 241, 149,0.08), transparent)'
               : 'transparent',
         }}
       >
@@ -971,7 +971,7 @@ function Row({
                 </span>
               )}
             </div>
-            <div className="text-[10.5px] font-light text-zinc-200 truncate">
+            <div className="text-[10.5px] font-semibold text-zinc-200 truncate">
               <span style={{ color: accent }}>{TYPE_LABEL[listing.type]}</span>
               <span className="text-zinc-600"> · </span>
               <span className="text-zinc-300 whitespace-nowrap">
@@ -1001,7 +1001,7 @@ function Row({
           <span className="w-12 text-right">{formatEth(listing.volumeEth24h || 0)}</span>
         </div>
 
-        <div className="text-right text-[12px] text-zinc-300 font-light">
+        <div className="text-right text-[12px] text-zinc-300 font-semibold">
           {listing.reviewCount ? (
             <span>
               <span className="text-[#f59e0b]">★</span> {(listing.reviewAverage ?? 0).toFixed(1)}
@@ -1012,7 +1012,7 @@ function Row({
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-light truncate">
+        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-semibold truncate">
           <UserAvatar
             src={listing.seller.avatarUrl}
             name={listing.seller.username}
@@ -1083,10 +1083,10 @@ function LiveTradesFeed({ trades }: { trades: Pulse['recentTrades'] }) {
           Live trades
           <LiveDot />
         </div>
-        <span className="text-[10px] text-zinc-300 font-light">{trades.length}</span>
+        <span className="text-[10px] text-zinc-300 font-semibold">{trades.length}</span>
       </div>
       {trades.length === 0 ? (
-        <div className="px-3 py-10 text-center text-[12px] text-zinc-200 font-light">
+        <div className="px-3 py-10 text-center text-[12px] text-zinc-200 font-semibold">
           Waiting for the first trade…
         </div>
       ) : (
@@ -1116,8 +1116,8 @@ function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
           <Icon className="w-3 h-3" strokeWidth={1.75} style={{ color: accent }} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[11.5px] text-white truncate font-light">{trade.listing.title}</div>
-          <div className="text-[10px] text-zinc-200 font-light truncate">
+          <div className="text-[11.5px] text-white truncate font-semibold">{trade.listing.title}</div>
+          <div className="text-[10px] text-zinc-200 font-semibold truncate">
             <span className="text-[#22c55e]">@{trade.buyer.username || 'anon'}</span>
             <span className="text-zinc-300"> bought from </span>
             <span className="text-zinc-400">@{trade.seller.username || 'anon'}</span>
@@ -1127,7 +1127,7 @@ function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
           <div className="font-mono text-[11.5px] text-[#b4a7ff] tabular-nums">
             {formatEth(trade.priceEth)}
           </div>
-          <div className="text-[10px] text-zinc-300 font-light">{timeAgo(trade.createdAt)}</div>
+          <div className="text-[10px] text-zinc-300 font-semibold">{timeAgo(trade.createdAt)}</div>
         </div>
       </Link>
     </li>

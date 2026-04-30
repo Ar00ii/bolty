@@ -64,8 +64,8 @@ export function WalletPickerModal({
           className="relative w-full max-w-md rounded-2xl overflow-hidden"
           style={{
             background: '#06060f',
-            border: '1px solid rgba(131,110,249,0.3)',
-            boxShadow: '0 0 80px rgba(131,110,249,0.08)',
+            border: '1px solid rgba(20, 241, 149,0.3)',
+            boxShadow: '0 0 80px rgba(20, 241, 149,0.08)',
           }}
         >
           <span
@@ -73,7 +73,7 @@ export function WalletPickerModal({
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
             }}
           />
           <div
@@ -81,7 +81,7 @@ export function WalletPickerModal({
             style={{ borderColor: 'rgba(255,255,255,0.06)' }}
           >
             <div>
-              <div className="text-sm font-light text-white">{title}</div>
+              <div className="text-sm font-semibold text-white">{title}</div>
               <p className="text-[11px] text-white/50 mt-1 leading-relaxed">{subtitle}</p>
             </div>
             <button
@@ -104,8 +104,8 @@ export function WalletPickerModal({
                   onClick={() => onPick(w.address)}
                   className="w-full text-left rounded-xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-colors border"
                   style={{
-                    background: active ? 'rgba(131,110,249,0.10)' : 'rgba(255,255,255,0.02)',
-                    borderColor: active ? 'rgba(131,110,249,0.55)' : 'rgba(255,255,255,0.06)',
+                    background: active ? 'rgba(20, 241, 149,0.10)' : 'rgba(255,255,255,0.02)',
+                    borderColor: active ? 'rgba(20, 241, 149,0.55)' : 'rgba(255,255,255,0.06)',
                   }}
                 >
                   <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -113,7 +113,7 @@ export function WalletPickerModal({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-light text-white/90 truncate">
+                      <span className="text-sm font-semibold text-white/90 truncate">
                         {w.label || walletProviderLabel(w.provider)}
                       </span>
                       {w.isPrimary && (

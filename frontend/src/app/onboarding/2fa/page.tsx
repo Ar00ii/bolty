@@ -18,7 +18,7 @@ export default function Onboarding2FAPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#06060a] grid place-items-center">
-          <Loader2 className="w-6 h-6 animate-spin text-purple-300" />
+          <Loader2 className="w-6 h-6 animate-spin text-bolty-300" />
         </div>
       }
     >
@@ -113,7 +113,7 @@ function Onboarding2FAInner() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle at 20% 10%, rgba(131,110,249,0.15), transparent 40%), radial-gradient(circle at 80% 80%, rgba(6,182,212,0.10), transparent 45%)',
+            'radial-gradient(circle at 20% 10%, rgba(20, 241, 149,0.15), transparent 40%), radial-gradient(circle at 80% 80%, rgba(6,182,212,0.10), transparent 45%)',
         }}
       />
 
@@ -122,24 +122,24 @@ function Onboarding2FAInner() {
           <div
             className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
             style={{
-              background: 'rgba(131,110,249,0.12)',
-              border: '1px solid rgba(131,110,249,0.35)',
+              background: 'rgba(20, 241, 149,0.12)',
+              border: '1px solid rgba(20, 241, 149,0.35)',
             }}
           >
-            <ShieldCheck className="w-6 h-6 text-purple-300" strokeWidth={1.75} />
+            <ShieldCheck className="w-6 h-6 text-bolty-300" strokeWidth={1.75} />
           </div>
-          <h1 className="text-3xl font-light tracking-tight mb-1">
+          <h1 className="text-3xl font-semibold tracking-tight mb-1">
             Secure your account with <GradientText>2FA</GradientText>
           </h1>
-          <p className="text-sm text-zinc-400 font-light">
+          <p className="text-sm text-zinc-400 font-semibold">
             Bolty requires two-factor authentication for every account. It only takes a minute.
           </p>
           {reason === 'sensitive' && (
             <div
-              className="mt-4 inline-flex items-start gap-2 text-[12px] text-purple-200/90 text-left px-3 py-2 rounded-lg"
+              className="mt-4 inline-flex items-start gap-2 text-[12px] text-bolty-200/90 text-left px-3 py-2 rounded-lg"
               style={{
-                background: 'rgba(131,110,249,0.08)',
-                border: '1px solid rgba(131,110,249,0.3)',
+                background: 'rgba(20, 241, 149,0.08)',
+                border: '1px solid rgba(20, 241, 149,0.3)',
               }}
             >
               <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
@@ -152,7 +152,7 @@ function Onboarding2FAInner() {
 
         {step === 'loading' && (
           <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-300" />
+            <Loader2 className="w-6 h-6 animate-spin text-bolty-300" />
           </div>
         )}
 
@@ -190,9 +190,9 @@ function Onboarding2FAInner() {
                 )}
               </div>
               <div className="flex-1 min-w-0 space-y-3">
-                <div className="flex items-start gap-2 text-[13px] text-zinc-300 font-light leading-snug">
+                <div className="flex items-start gap-2 text-[13px] text-zinc-300 font-semibold leading-snug">
                   <Smartphone
-                    className="w-4 h-4 text-purple-300 mt-0.5 flex-shrink-0"
+                    className="w-4 h-4 text-bolty-300 mt-0.5 flex-shrink-0"
                     strokeWidth={1.75}
                   />
                   <div>
@@ -281,7 +281,7 @@ function Onboarding2FAInner() {
             }}
           >
             <ShieldCheck className="w-10 h-10 mx-auto text-emerald-300 mb-3" strokeWidth={1.5} />
-            <div className="text-lg font-light mb-1">Two-factor authentication enabled</div>
+            <div className="text-lg font-semibold mb-1">Two-factor authentication enabled</div>
             <div className="text-[13px] text-zinc-400">Redirecting you to Bolty...</div>
           </div>
         )}

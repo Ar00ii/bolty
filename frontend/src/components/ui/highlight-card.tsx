@@ -20,7 +20,7 @@ export function HighlightCard({
   title,
   description,
   href,
-  accentColor = 'var(--brand, #836EF9)',
+  accentColor = 'var(--brand, #14F195)',
   className,
 }: HighlightCardProps) {
   const cardContent = (
@@ -91,7 +91,7 @@ export function HighlightCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-light leading-tight text-[var(--text)]">{title}</h3>
+          <h3 className="text-sm font-semibold leading-tight text-[var(--text)]">{title}</h3>
           <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">{description}</p>
         </div>
       </CardContent>

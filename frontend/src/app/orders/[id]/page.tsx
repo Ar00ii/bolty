@@ -59,13 +59,13 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
   PENDING_DELIVERY: '#f59e0b',
-  IN_PROGRESS: '#836EF9',
+  IN_PROGRESS: '#14F195',
   DELIVERED: '#34d399',
   COMPLETED: '#71717a',
   DISPUTED: '#f87171',
 };
 
-const BRAND = '#836EF9';
+const BRAND = '#14F195';
 
 function Avatar({
   user,
@@ -80,8 +80,8 @@ function Avatar({
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'rgba(131,110,249,0.15)',
-        border: '1px solid rgba(131,110,249,0.2)',
+        background: 'rgba(20, 241, 149,0.15)',
+        border: '1px solid rgba(20, 241, 149,0.2)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -442,8 +442,8 @@ export default function OrderDetailPage() {
                   fontSize: '0.72rem',
                   fontWeight: 500,
                   color: '#b4a7ff',
-                  background: 'rgba(131, 110, 249, 0.12)',
-                  border: '1px solid rgba(131, 110, 249, 0.25)',
+                  background: 'rgba(20, 241, 149, 0.12)',
+                  border: '1px solid rgba(20, 241, 149, 0.25)',
                   textDecoration: 'none',
                   whiteSpace: 'nowrap',
                 }}
@@ -497,8 +497,8 @@ export default function OrderDetailPage() {
                         width: 28,
                         height: 28,
                         borderRadius: '50%',
-                        background: 'rgba(131,110,249,0.15)',
-                        border: '1px solid rgba(131,110,249,0.2)',
+                        background: 'rgba(20, 241, 149,0.15)',
+                        border: '1px solid rgba(20, 241, 149,0.2)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -531,7 +531,7 @@ export default function OrderDetailPage() {
                     <div
                       style={{
                         background: isMe
-                          ? 'linear-gradient(135deg, #836EF9, #6b4fe0)'
+                          ? 'linear-gradient(135deg, #14F195, #00B96E)'
                           : 'var(--bg-elevated)',
                         border: isMe ? 'none' : '1px solid var(--border)',
                         borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
@@ -597,7 +597,7 @@ export default function OrderDetailPage() {
                 disabled={!input.trim() || sending}
                 style={{
                   background: input.trim()
-                    ? 'linear-gradient(135deg, #836EF9, #6b4fe0)'
+                    ? 'linear-gradient(135deg, #14F195, #00B96E)'
                     : 'var(--bg-card)',
                   border: `1px solid ${input.trim() ? 'transparent' : 'var(--border)'}`,
                   borderRadius: 10,
@@ -687,7 +687,7 @@ export default function OrderDetailPage() {
                             fontSize: '0.65rem',
                             fontWeight: 700,
                             color: BRAND,
-                            background: 'rgba(131,110,249,0.1)',
+                            background: 'rgba(20, 241, 149,0.1)',
                             padding: '0.1rem 0.4rem',
                             borderRadius: 999,
                           }}
@@ -876,8 +876,8 @@ export default function OrderDetailPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
-                    background: 'rgba(131,110,249,0.1)',
-                    border: '1px solid rgba(131,110,249,0.3)',
+                    background: 'rgba(20, 241, 149,0.1)',
+                    border: '1px solid rgba(20, 241, 149,0.3)',
                     borderRadius: 10,
                     padding: '0.7rem',
                     cursor: 'pointer',
@@ -1028,7 +1028,7 @@ export default function OrderDetailPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
-                    background: 'linear-gradient(135deg, #836EF9, #6b4fe0)',
+                    background: 'linear-gradient(135deg, #14F195, #00B96E)',
                     border: 'none',
                     borderRadius: 10,
                     padding: '0.7rem',
@@ -1036,7 +1036,7 @@ export default function OrderDetailPage() {
                     color: '#fff',
                     fontWeight: 700,
                     fontSize: '0.85rem',
-                    boxShadow: '0 4px 16px rgba(131,110,249,0.3)',
+                    boxShadow: '0 4px 16px rgba(20, 241, 149,0.3)',
                   }}
                 >
                   <CheckCircle2 style={{ width: 15, height: 15 }} strokeWidth={2} />

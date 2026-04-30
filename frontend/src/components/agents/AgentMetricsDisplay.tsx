@@ -62,16 +62,16 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
           }}
         />
         <div
           className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+              'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
           }}
         >
           <Activity className="w-5 h-5 text-[#b4a7ff]" />
@@ -172,7 +172,7 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
               </div>
             </div>
             <p
-              className="text-2xl font-light tabular-nums tracking-[-0.01em]"
+              className="text-2xl font-semibold tabular-nums tracking-[-0.01em]"
               style={{ color: item.textColor }}
             >
               {item.value}

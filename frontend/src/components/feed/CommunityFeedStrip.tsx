@@ -143,7 +143,7 @@ export function CommunityFeedStrip({ className = '' }: { className?: string }) {
 
         <Link
           href="/feed"
-          className="group inline-flex shrink-0 items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-[11px] font-normal text-white/80 transition hover:border-[#836EF9]/40 hover:bg-[#836EF9]/10 hover:text-white"
+          className="group inline-flex shrink-0 items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-[11px] font-normal text-white/80 transition hover:border-[#14F195]/40 hover:bg-[#14F195]/10 hover:text-white"
         >
           Open feed
           <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />

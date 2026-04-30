@@ -147,10 +147,10 @@ function SetupXContent() {
               <Twitter className="w-3.5 h-3.5" />
               <span>X account setup — required</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-light text-white">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white">
               Link this agent&apos;s X account
             </h1>
-            <p className="text-[13px] text-zinc-500 font-light mt-2 max-w-xl">
+            <p className="text-[13px] text-zinc-500 font-semibold mt-2 max-w-xl">
               Generate 4 keys on developer.x.com, paste them here, click Link.
               Done. No OAuth dance, no callback URLs to register, works on X
               Free tier.
@@ -160,11 +160,11 @@ function SetupXContent() {
             href="/docs/agent-x/agent-x-setup"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-light text-white transition hover:brightness-110 shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-semibold text-white transition hover:brightness-110 shrink-0"
             style={{
-              background: 'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+              background: 'linear-gradient(180deg, rgba(20, 241, 149,0.55) 0%, rgba(20, 241, 149,0.4) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.5), 0 0 24px -8px rgba(131,110,249,0.7)',
+                '0 0 0 1px rgba(20, 241, 149,0.5), 0 0 24px -8px rgba(20, 241, 149,0.7)',
             }}
           >
             <BookOpen className="w-4 h-4" strokeWidth={1.75} />
@@ -194,7 +194,7 @@ function SetupXContent() {
           }}
         >
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="text-[13px] text-emerald-200 font-light flex items-center gap-2">
+            <div className="text-[13px] text-emerald-200 font-semibold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               Linked as{' '}
               <a
@@ -218,7 +218,7 @@ function SetupXContent() {
               Disconnect
             </button>
           </div>
-          <p className="mt-2 text-[11.5px] text-emerald-200/70 font-light">
+          <p className="mt-2 text-[11.5px] text-emerald-200/70 font-semibold">
             {justConnected
               ? `Done. Your listing is now live in the marketplace.`
               : `Your listing is live in the marketplace and the launch wizard auto-tweet will fire from this account.`}
@@ -232,7 +232,7 @@ function SetupXContent() {
         title="Get your 4 keys from developer.x.com"
         subtitle="Free tier works. ~3 minutes one-time setup."
       >
-        <ol className="text-[12.5px] text-zinc-300 font-light leading-relaxed space-y-1.5 list-decimal pl-5">
+        <ol className="text-[12.5px] text-zinc-300 font-semibold leading-relaxed space-y-1.5 list-decimal pl-5">
           <li>
             Go to{' '}
             <a
@@ -331,16 +331,16 @@ function SetupXContent() {
               !accessToken.trim() ||
               !accessTokenSecret.trim()
             }
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-light text-white transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-white transition disabled:opacity-50"
             style={{
-              background: 'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-              boxShadow: '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+              background: 'linear-gradient(180deg, rgba(20, 241, 149,0.55) 0%, rgba(20, 241, 149,0.4) 100%)',
+              boxShadow: '0 0 0 1px rgba(20, 241, 149,0.5), 0 0 20px -8px rgba(20, 241, 149,0.6)',
             }}
           >
             {linking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
             {status?.connected ? 'Re-link X account' : 'Link X account'}
           </button>
-          <p className="text-[11px] text-zinc-500 font-light">
+          <p className="text-[11px] text-zinc-500 font-semibold">
             We verify the keys against X before saving. If anything is wrong
             you&apos;ll see the exact error from X.
           </p>
@@ -395,7 +395,7 @@ function SetupXContent() {
           transition: box-shadow 0.15s;
         }
         .input-std:focus {
-          box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.5);
+          box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.5);
         }
       `}</style>
     </div>
@@ -425,8 +425,8 @@ function Section({
         <span
           className="flex h-9 w-9 items-center justify-center rounded-xl text-[10px] font-mono"
           style={{
-            background: 'rgba(131,110,249,0.14)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20, 241, 149,0.14)',
+            boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
             color: '#C9BEFF',
           }}
         >
@@ -434,7 +434,7 @@ function Section({
         </span>
         <div>
           <h2 className="text-sm font-normal text-white">{title}</h2>
-          <p className="text-[11.5px] font-light text-white/50 mt-0.5">{subtitle}</p>
+          <p className="text-[11.5px] font-semibold text-white/50 mt-0.5">{subtitle}</p>
         </div>
       </div>
       {children}
@@ -568,7 +568,7 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
 
   if (!config) {
     return (
-      <div className="mt-6 text-[12px] text-zinc-500 font-light">
+      <div className="mt-6 text-[12px] text-zinc-500 font-semibold">
         <Loader2 className="w-3 h-3 animate-spin inline mr-1.5" />
         Loading autonomous settings…
       </div>
@@ -586,7 +586,7 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
         subtitle="Cron asks your agent every N hours whether to tweet. Optional human approval before each post."
       >
         {error && (
-          <div className="mb-3 rounded-lg p-2.5 text-[11.5px] text-rose-300 font-light"
+          <div className="mb-3 rounded-lg p-2.5 text-[11.5px] text-rose-300 font-semibold"
             style={{ background: 'rgba(239,68,68,0.06)', boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)' }}
           >
             {error}
@@ -626,14 +626,14 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
               type="button"
               onClick={decideNow}
               disabled={decideBusy || !config.autonomousEnabled}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-light text-white transition disabled:opacity-50"
-              style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white transition disabled:opacity-50"
+              style={{ background: 'rgba(20, 241, 149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.4)' }}
             >
               {decideBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
               Ask agent now (test)
             </button>
             {decideMsg && (
-              <span className="text-[11.5px] text-zinc-400 font-light">{decideMsg}</span>
+              <span className="text-[11.5px] text-zinc-400 font-semibold">{decideMsg}</span>
             )}
           </div>
         </div>
@@ -646,7 +646,7 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
           subtitle="Click Approve to post · Reject to drop. Posting drains your X dev account credits (~$0.015 each)."
         >
           {pending.length === 0 ? (
-            <div className="text-[12px] text-zinc-500 font-light italic">
+            <div className="text-[12px] text-zinc-500 font-semibold italic">
               No proposals waiting. The cron checks every hour — try &quot;Ask agent now&quot; above to test.
             </div>
           ) : (
@@ -697,8 +697,8 @@ function ToggleRow({
   return (
     <label className="flex items-start justify-between gap-3 cursor-pointer select-none">
       <div className="flex-1">
-        <div className="text-[12.5px] text-white font-light">{label}</div>
-        <div className="text-[11px] text-zinc-500 font-light">{sub}</div>
+        <div className="text-[12.5px] text-white font-semibold">{label}</div>
+        <div className="text-[11px] text-zinc-500 font-semibold">{sub}</div>
       </div>
       <button
         type="button"
@@ -707,7 +707,7 @@ function ToggleRow({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition disabled:opacity-50 ${
-          checked ? 'bg-[#836EF9]' : 'bg-zinc-700'
+          checked ? 'bg-[#14F195]' : 'bg-zinc-700'
         }`}
       >
         <span
@@ -732,8 +732,8 @@ function IntervalRow({
   const presets = [1, 6, 12, 24, 48];
   return (
     <div>
-      <div className="text-[12.5px] text-white font-light">Post interval</div>
-      <div className="text-[11px] text-zinc-500 font-light mb-2">
+      <div className="text-[12.5px] text-white font-semibold">Post interval</div>
+      <div className="text-[11px] text-zinc-500 font-semibold mb-2">
         Minimum hours between autonomous posts. Agent may still decline.
       </div>
       <div className="flex items-center gap-1.5 flex-wrap">
@@ -743,13 +743,13 @@ function IntervalRow({
             type="button"
             disabled={disabled}
             onClick={() => onChange(h)}
-            className={`px-2.5 py-1 rounded-md text-[11.5px] font-light transition disabled:opacity-50 ${
+            className={`px-2.5 py-1 rounded-md text-[11.5px] font-semibold transition disabled:opacity-50 ${
               value === h
-                ? 'bg-[#836EF9]/20 text-white'
+                ? 'bg-[#14F195]/20 text-white'
                 : 'bg-white/5 text-zinc-400 hover:text-white'
             }`}
             style={{
-              boxShadow: value === h ? 'inset 0 0 0 1px rgba(131,110,249,0.5)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+              boxShadow: value === h ? 'inset 0 0 0 1px rgba(20, 241, 149,0.5)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
             {h === 1 ? '1 h' : h === 24 ? '24 h (daily)' : `${h} h`}
@@ -783,22 +783,22 @@ function QueueItem({
       className="rounded-lg p-3"
       style={{ background: 'rgba(255,255,255,0.03)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)' }}
     >
-      <div className="flex items-center gap-2 mb-1.5 text-[11px] text-zinc-500 font-light">
+      <div className="flex items-center gap-2 mb-1.5 text-[11px] text-zinc-500 font-semibold">
         <Bot className="w-3 h-3" />
         {item.triggerType === 'MENTION_REPLY' ? 'Reply to mention' : item.triggerType === 'MANUAL' ? 'Manual trigger' : 'Scheduled'}
         <span className="text-zinc-700">·</span>
         <span>{new Date(item.createdAt).toLocaleString()}</span>
       </div>
-      <div className="text-[12.5px] text-zinc-200 font-light whitespace-pre-wrap">{item.text}</div>
+      <div className="text-[12.5px] text-zinc-200 font-semibold whitespace-pre-wrap">{item.text}</div>
       {item.reason && (
-        <div className="mt-1.5 text-[11px] text-zinc-500 italic font-light">Why: {item.reason}</div>
+        <div className="mt-1.5 text-[11px] text-zinc-500 italic font-semibold">Why: {item.reason}</div>
       )}
       <div className="mt-2.5 flex items-center gap-2">
         <button
           type="button"
           onClick={() => handle('approve', onApprove)}
           disabled={busy !== null}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-emerald-300 font-light transition disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-emerald-300 font-semibold transition disabled:opacity-50"
           style={{ background: 'rgba(34,197,94,0.08)', boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.25)' }}
         >
           {busy === 'approve' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
@@ -808,7 +808,7 @@ function QueueItem({
           type="button"
           onClick={() => handle('reject', onReject)}
           disabled={busy !== null}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-rose-300 font-light transition disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-rose-300 font-semibold transition disabled:opacity-50"
           style={{ background: 'rgba(239,68,68,0.06)', boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)' }}
         >
           {busy === 'reject' ? <Loader2 className="w-3 h-3 animate-spin" /> : <XIcon className="w-3 h-3" />}
@@ -833,14 +833,14 @@ function RecentItem({
         boxShadow: `inset 0 0 0 1px ${colour}33`,
       }}
     >
-      <div className="flex items-center gap-2 mb-1 text-[11px] font-light" style={{ color: colour }}>
+      <div className="flex items-center gap-2 mb-1 text-[11px] font-semibold" style={{ color: colour }}>
         {item.status === 'POSTED' ? '✓ Posted' : item.status === 'FAILED' ? '✗ Failed' : '— ' + item.status}
         <span className="text-zinc-700">·</span>
         <span className="text-zinc-500">{new Date(item.createdAt).toLocaleString()}</span>
       </div>
-      <div className="text-[12px] text-zinc-300 font-light whitespace-pre-wrap">{item.text}</div>
+      <div className="text-[12px] text-zinc-300 font-semibold whitespace-pre-wrap">{item.text}</div>
       {item.failureReason && (
-        <div className="mt-1.5 text-[11px] text-rose-300/80 font-light">
+        <div className="mt-1.5 text-[11px] text-rose-300/80 font-semibold">
           {item.failureReason}
         </div>
       )}

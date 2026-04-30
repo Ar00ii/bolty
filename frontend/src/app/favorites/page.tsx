@@ -119,8 +119,8 @@ export default function FavoritesPage() {
         <Heart className="w-3.5 h-3.5 text-[#EC4899]" />
         <span>Saved for later</span>
       </div>
-      <h1 className="text-3xl font-light text-white tracking-[-0.01em]">Favorites</h1>
-      <p className="text-sm text-zinc-400 font-light mt-1 max-w-2xl">
+      <h1 className="text-3xl font-semibold text-white tracking-[-0.01em]">Favorites</h1>
+      <p className="text-sm text-zinc-400 font-semibold mt-1 max-w-2xl">
         Repos and agents you&apos;ve saved to come back to. Saved privately on this
         device — nothing is shared publicly.
       </p>
@@ -139,7 +139,7 @@ export default function FavoritesPage() {
       </div>
 
       <div className="mt-5">
-        {error && <p className="text-sm text-red-400 font-light mb-4">{error}</p>}
+        {error && <p className="text-sm text-red-400 font-semibold mb-4">{error}</p>}
 
         {tab === 'repos' &&
           (repoIds.length === 0 ? (
@@ -195,14 +195,14 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className="relative px-3 py-2 text-[12.5px] font-light transition-colors"
+      className="relative px-3 py-2 text-[12.5px] font-semibold transition-colors"
       style={{ color: active ? '#ffffff' : '#9ca3af' }}
     >
       {children}
       {active && (
         <span
           className="absolute left-0 right-0 -bottom-px h-[2px]"
-          style={{ background: 'linear-gradient(90deg, #06B6D4, #836EF9, #EC4899)' }}
+          style={{ background: 'linear-gradient(90deg, #06B6D4, #14F195, #EC4899)' }}
         />
       )}
     </button>
@@ -229,24 +229,24 @@ function FavoriteRepoRow({ repo, onRemove }: { repo: RepoSummary; onRemove: () =
       <Link href={`/market/repos/${repo.id}`} className="min-w-0 block">
         <div className="flex items-center gap-2 min-w-0">
           <GitBranch className="w-3.5 h-3.5 text-[#b4a7ff] flex-shrink-0" />
-          <span className="text-[13px] text-white font-light truncate">{repo.name}</span>
+          <span className="text-[13px] text-white font-semibold truncate">{repo.name}</span>
           {repo.isLocked && repo.lockedPriceUsd && (
             <span
               className="px-1.5 py-0.5 rounded text-[10px] font-mono"
               style={{
-                background: 'rgba(131,110,249,0.1)',
+                background: 'rgba(20, 241, 149,0.1)',
                 color: '#b4a7ff',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+                boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
               }}
             >
               ${repo.lockedPriceUsd}
             </span>
           )}
         </div>
-        <p className="text-[11px] text-zinc-500 font-light truncate mt-0.5">
+        <p className="text-[11px] text-zinc-500 font-semibold truncate mt-0.5">
           {repo.description || repo.fullName}
         </p>
-        <div className="flex items-center gap-3 text-[10.5px] text-zinc-500 font-light mt-1">
+        <div className="flex items-center gap-3 text-[10.5px] text-zinc-500 font-semibold mt-1">
           {repo.language && <span>{repo.language}</span>}
           <span className="inline-flex items-center gap-1">
             <Star className="w-3 h-3" /> {repo.stars}
@@ -291,19 +291,19 @@ function FavoriteListingRow({
       >
         <div className="flex items-center gap-2 min-w-0">
           <Bot className="w-3.5 h-3.5 text-[#b4a7ff] flex-shrink-0" />
-          <span className="text-[13px] text-white font-light truncate">{listing.title}</span>
+          <span className="text-[13px] text-white font-semibold truncate">{listing.title}</span>
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-mono"
             style={{
-              background: 'rgba(131,110,249,0.1)',
+              background: 'rgba(20, 241, 149,0.1)',
               color: '#b4a7ff',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+              boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.3)',
             }}
           >
             {listing.price} {listing.currency}
           </span>
         </div>
-        <div className="flex items-center gap-3 text-[10.5px] text-zinc-500 font-light mt-1">
+        <div className="flex items-center gap-3 text-[10.5px] text-zinc-500 font-semibold mt-1">
           <span>{listing.type}</span>
           {listing.seller?.username && <span>by @{listing.seller.username}</span>}
           {listing.tags?.slice(0, 2).map((t) => (
@@ -370,8 +370,8 @@ function Empty({
         <Icon className="w-5 h-5 text-[#EC4899]" />
       </div>
       <div>
-        <p className="text-sm text-white font-light">{title}</p>
-        <p className="text-xs text-zinc-500 font-light mt-1">{subtitle}</p>
+        <p className="text-sm text-white font-semibold">{title}</p>
+        <p className="text-xs text-zinc-500 font-semibold mt-1">{subtitle}</p>
       </div>
       <Link
         href={href}

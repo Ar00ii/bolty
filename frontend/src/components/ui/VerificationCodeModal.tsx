@@ -74,16 +74,16 @@ export function VerificationCodeModal({
         <div
           className="rounded-lg p-3 flex items-start gap-3"
           style={{
-            background: 'rgba(131,110,249,0.06)',
-            border: '1px solid rgba(131,110,249,0.22)',
+            background: 'rgba(20, 241, 149,0.06)',
+            border: '1px solid rgba(20, 241, 149,0.22)',
           }}
         >
           {source === 'totp' ? (
-            <Shield className="w-4 h-4 text-purple-300 flex-shrink-0 mt-0.5" strokeWidth={2} />
+            <Shield className="w-4 h-4 text-bolty-300 flex-shrink-0 mt-0.5" strokeWidth={2} />
           ) : (
-            <Mail className="w-4 h-4 text-purple-300 flex-shrink-0 mt-0.5" strokeWidth={2} />
+            <Mail className="w-4 h-4 text-bolty-300 flex-shrink-0 mt-0.5" strokeWidth={2} />
           )}
-          <div className="text-[12px] text-zinc-300 font-light leading-snug">
+          <div className="text-[12px] text-zinc-300 font-semibold leading-snug">
             {source === 'totp'
               ? 'Codes refresh every 30 seconds. Make sure your device clock is correct.'
               : 'The code expires in 10 minutes. Check your spam folder if you cannot find it.'}
@@ -131,12 +131,12 @@ export function VerificationCodeModal({
             type="button"
             onClick={handleSubmit}
             disabled={submitting || code.length < length}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-light transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-semibold transition disabled:opacity-50"
             style={{
               color: '#ffffff',
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-              boxShadow: '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.55) 0%, rgba(20, 241, 149,0.4) 100%)',
+              boxShadow: '0 0 0 1px rgba(20, 241, 149,0.5), 0 0 20px -8px rgba(20, 241, 149,0.6)',
             }}
           >
             {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}

@@ -54,7 +54,7 @@ export function BackToTop({ threshold = 500 }: { threshold?: number }) {
             className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             style={{
               background:
-                'radial-gradient(circle at 50% 20%, rgba(131,110,249,0.35) 0%, transparent 70%)',
+                'radial-gradient(circle at 50% 20%, rgba(20, 241, 149,0.35) 0%, transparent 70%)',
             }}
           />
           <ArrowUp

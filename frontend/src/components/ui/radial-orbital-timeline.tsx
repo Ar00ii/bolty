@@ -149,14 +149,14 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
             />
             <div
               className="absolute inset-0 rounded-full blur-xl opacity-40"
-              style={{ background: 'rgba(131,110,249,0.6)' }}
+              style={{ background: 'rgba(20, 241, 149,0.6)' }}
             />
             <BoltyLogo
               size={250}
-              color="#836EF9"
+              color="#14F195"
               className="relative z-10"
               style={
-                { filter: 'drop-shadow(0 0 14px rgba(131,110,249,0.9))' } as React.CSSProperties
+                { filter: 'drop-shadow(0 0 14px rgba(20, 241, 149,0.9))' } as React.CSSProperties
               }
             />
           </div>
@@ -193,7 +193,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                   className={`absolute rounded-full ${isPulsing ? 'animate-pulse' : ''}`}
                   style={{
                     background:
-                      'radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0) 70%)',
+                      'radial-gradient(circle, rgba(20, 241, 149,0.25) 0%, rgba(20, 241, 149,0) 70%)',
                     width: `${item.energy * 0.5 + 40}px`,
                     height: `${item.energy * 0.5 + 40}px`,
                     left: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,
@@ -217,7 +217,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
 
                 {/* Label */}
                 <div
-                  className={`absolute top-12 whitespace-nowrap text-xs font-light tracking-wider transition-all duration-300 ${isExpanded ? 'text-bolty-300 scale-125' : 'text-white/70'}`}
+                  className={`absolute top-12 whitespace-nowrap text-xs font-semibold tracking-wider transition-all duration-300 ${isExpanded ? 'text-bolty-300 scale-125' : 'text-white/70'}`}
                   style={{
                     left: '50%',
                     transform: `translateX(-50%) ${isExpanded ? 'scale(1.25)' : ''}`,
@@ -264,7 +264,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                         <div className="mt-4 pt-3 border-t border-white/10">
                           <div className="flex items-center mb-2">
                             <Link size={10} className="text-bolty-400 mr-1" />
-                            <h4 className="text-xs uppercase tracking-wider font-light text-white/70">
+                            <h4 className="text-xs uppercase tracking-wider font-semibold text-white/70">
                               Connected to
                             </h4>
                           </div>

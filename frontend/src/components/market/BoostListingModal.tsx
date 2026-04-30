@@ -116,7 +116,7 @@ export function BoostListingModal({
           }}
         >
           <Flame className="w-4 h-4 text-pink-300 flex-shrink-0 mt-0.5" strokeWidth={2} />
-          <div className="text-[12px] text-zinc-300 font-light leading-snug">
+          <div className="text-[12px] text-zinc-300 font-semibold leading-snug">
             Boosted listings rank higher in <span className="text-white">/market</span> browse and
             appear in the global ticker — typically 3–5x more impressions while active.
           </div>
@@ -154,7 +154,7 @@ export function BoostListingModal({
                     : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
                 }}
               >
-                <div className="text-[13px] font-light">{tier.days}d</div>
+                <div className="text-[13px] font-semibold">{tier.days}d</div>
                 <div className="text-[10.5px] font-mono mt-0.5 text-zinc-500">
                   {tier.price} BOLTY
                 </div>
@@ -163,10 +163,10 @@ export function BoostListingModal({
           })}
         </div>
 
-        {error && <div className="text-[12px] text-red-300 font-light">{error}</div>}
+        {error && <div className="text-[12px] text-red-300 font-semibold">{error}</div>}
 
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
-          <div className="text-[11.5px] text-zinc-500 font-light">
+          <div className="text-[11.5px] text-zinc-500 font-semibold">
             Total{' '}
             <span className="text-white font-mono">
               {selectedTier?.price ?? '—'} {pricing?.currency || 'BOLTY'}
@@ -185,11 +185,11 @@ export function BoostListingModal({
               type="button"
               onClick={handleBoost}
               disabled={submitting}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-light transition"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-semibold transition"
               style={{
                 color: '#ffffff',
                 background:
-                  'linear-gradient(180deg, rgba(236,72,153,0.55) 0%, rgba(131,110,249,0.55) 100%)',
+                  'linear-gradient(180deg, rgba(236,72,153,0.55) 0%, rgba(20, 241, 149,0.55) 100%)',
                 boxShadow: '0 0 0 1px rgba(236,72,153,0.5), 0 0 20px -8px rgba(236,72,153,0.6)',
               }}
             >

@@ -54,7 +54,7 @@ export const EvervaultCard = ({
           {children ? (
             children
           ) : (
-            <p className="text-sm font-light text-white text-center">{text}</p>
+            <p className="text-sm font-semibold text-white text-center">{text}</p>
           )}
         </div>
       </div>
@@ -78,14 +78,14 @@ export function CardPattern({
     <div className="pointer-events-none">
       <div className="absolute inset-0 rounded-2xl [mask-image:linear-gradient(white,transparent)] group-hover/card:opacity-50"></div>
       <motion.div
-        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-bolty-500/20 to-purple-700/20 opacity-0 group-hover/card:opacity-100 backdrop-blur-xl transition duration-500"
+        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-bolty-500/20 to-bolty-700/20 opacity-0 group-hover/card:opacity-100 backdrop-blur-xl transition duration-500"
         style={style}
       />
       <motion.div
         className="absolute inset-0 rounded-2xl opacity-0 mix-blend-overlay group-hover/card:opacity-100"
         style={style}
       >
-        <p className="absolute inset-x-0 text-[0.6rem] h-full break-words whitespace-pre-wrap text-white font-mono font-light transition duration-500 leading-tight p-2 opacity-40">
+        <p className="absolute inset-x-0 text-[0.6rem] h-full break-words whitespace-pre-wrap text-white font-mono font-semibold transition duration-500 leading-tight p-2 opacity-40">
           {randomString}
         </p>
       </motion.div>

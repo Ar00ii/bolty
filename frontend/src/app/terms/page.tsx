@@ -167,7 +167,7 @@ const SECTIONS: LegalSection[] = [
           href="https://x.com/BoltyNetwork"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-purple-300 hover:text-purple-200 underline underline-offset-2"
+          className="text-bolty-300 hover:text-bolty-200 underline underline-offset-2"
         >
           X
         </a>{' '}

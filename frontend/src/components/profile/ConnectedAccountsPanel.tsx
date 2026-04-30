@@ -99,7 +99,7 @@ export function ConnectedAccountsPanel({
   return (
     <div className="profile-content-card space-y-4">
       <div>
-        <h3 className="text-[14px] text-white font-light">Connected accounts</h3>
+        <h3 className="text-[14px] text-white font-semibold">Connected accounts</h3>
         <p className="text-[11.5px] text-zinc-500 mt-0.5">
           External accounts and on-chain identities tied to this profile. Disconnect any
           of them at any time.
@@ -127,8 +127,8 @@ export function ConnectedAccountsPanel({
           <Wallet className="w-4 h-4 text-zinc-300" strokeWidth={1.75} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] text-white font-light">Wallets</div>
-          <div className="text-[11.5px] text-zinc-500 font-light">
+          <div className="text-[13px] text-white font-semibold">Wallets</div>
+          <div className="text-[11.5px] text-zinc-500 font-semibold">
             {walletCount === 0
               ? 'No wallet connected yet.'
               : walletCount === 1
@@ -138,7 +138,7 @@ export function ConnectedAccountsPanel({
         </div>
         <Link
           href="/profile?tab=wallet"
-          className="text-[12px] font-light px-3 py-1.5 rounded-md text-zinc-300 hover:text-white transition"
+          className="text-[12px] font-semibold px-3 py-1.5 rounded-md text-zinc-300 hover:text-white transition"
           style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -208,7 +208,7 @@ export function ConnectedAccountsPanel({
                 >
                   <Bot className="w-3.5 h-3.5 text-zinc-400 shrink-0" strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-[12.5px] text-white font-light truncate">{a.title}</div>
+                    <div className="text-[12.5px] text-white font-semibold truncate">{a.title}</div>
                     <div className="text-[10.5px] text-zinc-500 truncate">
                       {xPill}
                       {a.listingStatus !== 'ACTIVE' && (
@@ -221,7 +221,7 @@ export function ConnectedAccountsPanel({
                   </div>
                   <Link
                     href={`/market/agents/${a.listingId}/setup-x`}
-                    className="text-[11px] font-light px-2 py-1 rounded text-zinc-300 hover:text-white transition"
+                    className="text-[11px] font-semibold px-2 py-1 rounded text-zinc-300 hover:text-white transition"
                     style={{
                       background: 'rgba(255,255,255,0.04)',
                       border: '1px solid rgba(255,255,255,0.08)',
@@ -241,7 +241,7 @@ export function ConnectedAccountsPanel({
             })}
           </ul>
         )}
-        <p className="mt-2 text-[10.5px] text-zinc-600 font-light leading-relaxed">
+        <p className="mt-2 text-[10.5px] text-zinc-600 font-semibold leading-relaxed">
           Each agent connects its own X Developer App + X account. The agent IS its own brand.
           Setup runs in the per-agent setup-x page after the listing is created.
         </p>

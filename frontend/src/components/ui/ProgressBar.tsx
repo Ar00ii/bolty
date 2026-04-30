@@ -13,7 +13,7 @@ interface ProgressBarProps {
 export function ProgressBar({
   isLoading,
   duration = 3,
-  color = 'from-purple-500 to-cyan-400',
+  color = 'from-bolty-500 to-cyan-400',
 }: ProgressBarProps) {
   const [progress, setProgress] = useState(0);
 
@@ -46,7 +46,7 @@ export function ProgressBar({
       animate={{ width: `${progress}%`, opacity: isLoading || progress > 0 ? 1 : 0 }}
       transition={{ width: { duration: 0.35, ease: 'easeOut' }, opacity: { duration: 0.3 } }}
       style={{
-        boxShadow: '0 0 10px rgba(131,110,249,0.55), 0 0 20px rgba(131,110,249,0.25)',
+        boxShadow: '0 0 10px rgba(20, 241, 149,0.55), 0 0 20px rgba(20, 241, 149,0.25)',
       }}
     >
       {/* Leading glow */}

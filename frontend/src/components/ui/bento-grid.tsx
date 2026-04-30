@@ -51,18 +51,18 @@ export function BentoCard({
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center mb-2.5"
           style={{
-            background: 'rgba(131,110,249,0.1)',
-            border: '1px solid rgba(131,110,249,0.18)',
+            background: 'rgba(20, 241, 149,0.1)',
+            border: '1px solid rgba(20, 241, 149,0.18)',
           }}
         >
           <Icon className="w-3.5 h-3.5 text-bolty-400" strokeWidth={1.5} />
         </div>
-        <div className="text-[13px] font-light text-zinc-200 mb-0.5 leading-tight">{name}</div>
+        <div className="text-[13px] font-semibold text-zinc-200 mb-0.5 leading-tight">{name}</div>
         <div className="text-[11px] text-zinc-500 leading-relaxed">{description}</div>
         {href && cta && (
           <a
             href={href}
-            className="inline-flex items-center gap-1 mt-2 text-[11px] font-light text-bolty-400 hover:text-bolty-300 transition-colors opacity-0 group-hover:opacity-100"
+            className="inline-flex items-center gap-1 mt-2 text-[11px] font-semibold text-bolty-400 hover:text-bolty-300 transition-colors opacity-0 group-hover:opacity-100"
           >
             {cta}
             <ArrowRight className="w-3 h-3" />

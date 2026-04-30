@@ -79,7 +79,7 @@ export default function TopSellersPage() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -left-20 w-[420px] h-[420px] rounded-full blur-3xl opacity-30"
-          style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
         />
         <div
           className="absolute top-40 right-0 w-[380px] h-[380px] rounded-full blur-3xl opacity-20"
@@ -98,13 +98,13 @@ export default function TopSellersPage() {
 
         <div className="relative border-t-2 border-l-2 border-white/20 rounded-tl-2xl p-5 sm:p-8 mb-8 sm:mb-10">
           <div className="flex items-center gap-3 mb-3">
-            <Users className="w-5 h-5 text-[#836EF9]" />
+            <Users className="w-5 h-5 text-[#14F195]" />
             <span className="text-xs uppercase tracking-[0.2em] text-zinc-500">Discovery</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-light text-white mb-3">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white mb-3">
             Top <GradientText>sellers</GradientText>
           </h1>
-          <p className="text-zinc-400 font-light max-w-xl">
+          <p className="text-zinc-400 font-semibold max-w-xl">
             The most-purchased creators on Bolty — ranked by all-time sales. Explore their agents,
             scripts and repos.
           </p>
@@ -123,7 +123,7 @@ export default function TopSellersPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
               }}
             />
             <div className="relative flex-1 max-w-sm">
@@ -137,7 +137,7 @@ export default function TopSellersPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Find a creator…"
-                className="w-full rounded-lg pl-9 pr-14 py-2.5 text-[12.5px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+                className="w-full rounded-lg pl-9 pr-14 py-2.5 text-[12.5px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(20, 241, 149,0.12)]"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -211,9 +211,9 @@ export default function TopSellersPage() {
                           className="absolute inset-0 rounded-md"
                           style={{
                             background:
-                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                              'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                             boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                              'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                           }}
                         />
                       )}
@@ -252,22 +252,22 @@ export default function TopSellersPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
               }}
             />
             <span
               aria-hidden="true"
               className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
-              style={{ background: 'rgba(131,110,249,0.18)' }}
+              style={{ background: 'rgba(20, 241, 149,0.18)' }}
             />
             <div
               className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                border: '1px solid rgba(131,110,249,0.28)',
+                  'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.06) 100%)',
+                border: '1px solid rgba(20, 241, 149,0.28)',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.35)',
               }}
             >
               <Users className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
@@ -305,17 +305,17 @@ export default function TopSellersPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
               }}
             />
             <div
               className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                border: '1px solid rgba(131,110,249,0.28)',
+                  'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.06) 100%)',
+                border: '1px solid rgba(20, 241, 149,0.28)',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20, 241, 149,0.35)',
               }}
             >
               <Users className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
@@ -356,13 +356,13 @@ export default function TopSellersPage() {
                     className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60"
                     style={{
                       background:
-                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                        'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.5) 50%, transparent 100%)',
                     }}
                   />
                   <span
                     aria-hidden="true"
                     className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl"
-                    style={{ background: 'rgba(131,110,249,0.25)' }}
+                    style={{ background: 'rgba(20, 241, 149,0.25)' }}
                   />
                   <div className="relative flex items-start gap-4">
                     <Avatar url={s.avatarUrl} username={s.username} userId={s.id} />
@@ -377,7 +377,7 @@ export default function TopSellersPage() {
                             style={{
                               background: 'linear-gradient(180deg, #9a83ff 0%, #7056ec 100%)',
                               boxShadow:
-                                '0 2px 8px -1px rgba(131,110,249,0.45), inset 0 1px 0 rgba(255,255,255,0.2)',
+                                '0 2px 8px -1px rgba(20, 241, 149,0.45), inset 0 1px 0 rgba(255,255,255,0.2)',
                             }}
                           >
                             #{i + 1}
@@ -389,7 +389,7 @@ export default function TopSellersPage() {
                           {s.bio}
                         </p>
                       ) : (
-                        <p className="text-[11.5px] text-zinc-600 italic font-light mb-3">
+                        <p className="text-[11.5px] text-zinc-600 italic font-semibold mb-3">
                           No bio yet
                         </p>
                       )}

@@ -53,7 +53,7 @@ export default function AgentChatPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
-        <span className="text-purple-400 font-mono text-sm animate-pulse">
+        <span className="text-bolty-400 font-mono text-sm animate-pulse">
           Loading agent chat...
         </span>
       </div>
@@ -68,7 +68,7 @@ export default function AgentChatPage() {
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
         }}
       >
         <span
@@ -76,29 +76,29 @@ export default function AgentChatPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.55) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
           }}
         />
         {/* Header */}
         <div
           className="relative px-6 py-4 flex items-center justify-between"
           style={{
-            borderBottom: '1px solid rgba(168,85,247,0.12)',
-            background: 'rgba(168,85,247,0.04)',
+            borderBottom: '1px solid rgba(20, 241, 149,0.12)',
+            background: 'rgba(20, 241, 149,0.04)',
           }}
         >
           <div className="flex items-center gap-4">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
-                background: 'rgba(168, 85, 247, 0.15)',
-                border: '1px solid rgba(168, 85, 247, 0.3)',
+                background: 'rgba(20, 241, 149, 0.15)',
+                border: '1px solid rgba(20, 241, 149, 0.3)',
               }}
             >
-              <Bot className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
+              <Bot className="w-5 h-5 text-bolty-400" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-lg font-light text-white">Global AI Agent Chat</h1>
+              <h1 className="text-lg font-semibold text-white">Global AI Agent Chat</h1>
               <div className="flex items-center gap-2">
                 <span
                   className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-500'}`}
@@ -110,7 +110,7 @@ export default function AgentChatPage() {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-mono text-purple-300">{activeAgents} agents active</div>
+            <div className="text-sm font-mono text-bolty-300">{activeAgents} agents active</div>
             <div className="text-xs text-zinc-500">{messages.length} messages</div>
           </div>
         </div>
@@ -141,11 +141,11 @@ export default function AgentChatPage() {
               >
                 {/* Agent Avatar */}
                 <div
-                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center flex-col text-xs font-light"
+                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center flex-col text-xs font-semibold"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))',
-                    border: '1px solid rgba(168, 85, 247, 0.3)',
+                      'linear-gradient(135deg, rgba(20, 241, 149, 0.3), rgba(236, 72, 153, 0.3))',
+                    border: '1px solid rgba(20, 241, 149, 0.3)',
                   }}
                 >
                   {msg.agentAvatar ? (
@@ -155,7 +155,7 @@ export default function AgentChatPage() {
                       className="w-full h-full rounded-xl object-cover"
                     />
                   ) : (
-                    <span className="text-purple-300">
+                    <span className="text-bolty-300">
                       {msg.agentName[0]?.toUpperCase() || 'A'}
                     </span>
                   )}
@@ -164,7 +164,7 @@ export default function AgentChatPage() {
                 {/* Message Bubble */}
                 <div className="flex-1 max-w-2xl">
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="text-sm font-light text-purple-300">{msg.agentName}</span>
+                    <span className="text-sm font-semibold text-bolty-300">{msg.agentName}</span>
                     <span className="text-xs text-zinc-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {formatTime(msg.timestamp)}
@@ -180,11 +180,11 @@ export default function AgentChatPage() {
                     style={{
                       background:
                         msg.type === 'user'
-                          ? 'rgba(168, 85, 247, 0.1)'
+                          ? 'rgba(20, 241, 149, 0.1)'
                           : 'rgba(255, 255, 255, 0.06)',
                       border:
                         msg.type === 'user'
-                          ? '1px solid rgba(168, 85, 247, 0.2)'
+                          ? '1px solid rgba(20, 241, 149, 0.2)'
                           : '1px solid rgba(255, 255, 255, 0.08)',
                       color: '#e4e4e7',
                     }}
@@ -199,7 +199,7 @@ export default function AgentChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t px-6 py-4" style={{ borderColor: 'rgba(168, 85, 247, 0.15)' }}>
+        <div className="border-t px-6 py-4" style={{ borderColor: 'rgba(20, 241, 149, 0.15)' }}>
           <div className="flex gap-3 items-end">
             <div className="flex-1">
               <label className="text-xs text-zinc-500 block mb-2">Agent Name</label>
@@ -262,7 +262,7 @@ export default function AgentChatPage() {
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
         }}
       >
         <span
@@ -270,16 +270,16 @@ export default function AgentChatPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.55) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-center gap-2 mb-4">
-          <Bot className="w-5 h-5 text-purple-400" />
-          <h3 className="font-light text-white">Active Agents</h3>
+          <Bot className="w-5 h-5 text-bolty-400" />
+          <h3 className="font-semibold text-white">Active Agents</h3>
           <span
             className="ml-auto px-2 py-0.5 rounded-full text-xs font-mono"
             style={{
-              background: 'rgba(168, 85, 247, 0.2)',
+              background: 'rgba(20, 241, 149, 0.2)',
               color: '#a855f7',
             }}
           >
@@ -312,15 +312,15 @@ export default function AgentChatPage() {
                 className="p-3 rounded-lg cursor-pointer"
                 style={{
                   background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(168, 85, 247, 0.2)',
+                  border: '1px solid rgba(20, 241, 149, 0.2)',
                 }}
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-light shrink-0"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0"
                     style={{
-                      background: 'rgba(168, 85, 247, 0.3)',
-                      border: '1px solid rgba(168, 85, 247, 0.4)',
+                      background: 'rgba(20, 241, 149, 0.3)',
+                      border: '1px solid rgba(20, 241, 149, 0.4)',
                     }}
                   >
                     {agent.avatar ? (
@@ -330,11 +330,11 @@ export default function AgentChatPage() {
                         className="w-full h-full rounded-lg object-cover"
                       />
                     ) : (
-                      <span className="text-purple-300">{agent.name[0]?.toUpperCase() || 'A'}</span>
+                      <span className="text-bolty-300">{agent.name[0]?.toUpperCase() || 'A'}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-light text-white truncate">{agent.name}</p>
+                    <p className="text-sm font-semibold text-white truncate">{agent.name}</p>
                     <p className="text-xs text-zinc-500">Active now</p>
                   </div>
                   <div className="w-2 h-2 rounded-full bg-green-400" />
@@ -348,7 +348,7 @@ export default function AgentChatPage() {
           )}
         </div>
 
-        <div className="mt-4 pt-4 border-t" style={{ borderColor: 'rgba(168, 85, 247, 0.2)' }}>
+        <div className="mt-4 pt-4 border-t" style={{ borderColor: 'rgba(20, 241, 149, 0.2)' }}>
           <button
             onClick={clearChat}
             className="w-full px-3 py-2 rounded-lg text-xs font-mono transition-all hover:opacity-80"

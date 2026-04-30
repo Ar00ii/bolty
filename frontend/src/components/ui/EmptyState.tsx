@@ -17,9 +17,9 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
   const primaryStyle = {
-    background: 'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+    background: 'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
     boxShadow:
-      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+      'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
   };
 
   return (
@@ -39,13 +39,13 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <span
         aria-hidden="true"
         className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
-        style={{ background: 'rgba(131,110,249,0.18)' }}
+        style={{ background: 'rgba(20, 241, 149,0.18)' }}
       />
       {Icon && (
         <motion.div
@@ -55,15 +55,15 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
           className="relative w-12 h-12 rounded-xl mb-4 flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 24px -6px rgba(131,110,249,0.45)',
+              'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 24px -6px rgba(20, 241, 149,0.45)',
           }}
         >
           <Icon className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
         </motion.div>
       )}
-      <h3 className="relative text-lg font-light text-white tracking-[-0.005em] mb-1.5">{title}</h3>
+      <h3 className="relative text-lg font-semibold text-white tracking-[-0.005em] mb-1.5">{title}</h3>
       <p className="relative text-[13px] text-zinc-400 text-center max-w-sm mb-6 tracking-[0.005em] leading-relaxed">
         {description}
       </p>
@@ -74,7 +74,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-light text-[13px] text-white hover:brightness-110 tracking-[0.005em]"
+            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-semibold text-[13px] text-white hover:brightness-110 tracking-[0.005em]"
             style={primaryStyle}
           >
             {action.label}
@@ -85,7 +85,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-light text-[13px] text-white hover:brightness-110 tracking-[0.005em]"
+            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-semibold text-[13px] text-white hover:brightness-110 tracking-[0.005em]"
             style={primaryStyle}
           >
             {action.label}

@@ -65,9 +65,9 @@ export function Footer() {
             <div className="flex items-center gap-2.5 mb-3">
               <BoltyLogoSVG size={24} />
               <span
-                className="text-sm font-light tracking-tight"
+                className="text-sm font-semibold tracking-tight"
                 style={{
-                  background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
+                  background: 'linear-gradient(135deg, #e0d4ff 0%, #14F195 50%, #7DFFBF 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
@@ -84,7 +84,7 @@ export function Footer() {
           {/* Links */}
           {footerLinks.map((section) => (
             <div key={section.label}>
-              <h3 className="text-xs font-light text-zinc-400 uppercase tracking-wider mb-3">
+              <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
                 {section.label}
               </h3>
               <ul className="space-y-1.5">

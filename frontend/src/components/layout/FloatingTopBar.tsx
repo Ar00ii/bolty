@@ -89,7 +89,7 @@ export function FloatingTopBar() {
         style={chipStyle}
       >
         <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
-        <span className="text-[12px] font-light text-zinc-500">Search</span>
+        <span className="text-[12px] font-semibold text-zinc-500">Search</span>
         <kbd
           className="text-[10px] font-medium text-zinc-600 rounded-md px-1.5 py-0.5 leading-none"
           style={{
@@ -116,7 +116,7 @@ export function FloatingTopBar() {
               ? {
                   ...chipStyle,
                   boxShadow:
-                    '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+                    '0 0 0 1px rgba(20, 241, 149,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
                 }
               : chipStyle
           }
@@ -131,7 +131,7 @@ export function FloatingTopBar() {
             className="flex-shrink-0"
           />
 
-          <span className="text-[12px] font-light text-zinc-300 max-w-[96px] truncate">
+          <span className="text-[12px] font-semibold text-zinc-300 max-w-[96px] truncate">
             {user?.displayName || user?.username || 'User'}
           </span>
 
@@ -156,7 +156,7 @@ export function FloatingTopBar() {
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
                 boxShadow:
-                  '0 20px 48px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
+                  '0 20px 48px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
               }}
             >
               <div
@@ -164,7 +164,7 @@ export function FloatingTopBar() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.6) 50%, transparent 100%)',
                 }}
               />
               {/* User Info */}
@@ -177,7 +177,7 @@ export function FloatingTopBar() {
                   className="flex-shrink-0"
                 />
                 <div className="min-w-0">
-                  <p className="text-[13px] font-light text-white truncate">
+                  <p className="text-[13px] font-semibold text-white truncate">
                     {user?.displayName || user?.username}
                   </p>
                   {user?.email && (
@@ -191,7 +191,7 @@ export function FloatingTopBar() {
                 <Link
                   href="/profile"
                   onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
                 >
                   <User className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" strokeWidth={1.75} />
                   My Profile
@@ -199,7 +199,7 @@ export function FloatingTopBar() {
                 <Link
                   href="/profile?tab=security"
                   onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
                 >
                   <Settings
                     className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0"
@@ -219,7 +219,7 @@ export function FloatingTopBar() {
                     setProfileOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-400 hover:text-red-300 hover:bg-red-500/[0.06] transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-semibold text-zinc-400 hover:text-red-300 hover:bg-red-500/[0.06] transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
                   Sign out

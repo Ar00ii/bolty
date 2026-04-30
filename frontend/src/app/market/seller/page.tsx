@@ -210,7 +210,7 @@ export default function SellerDashboardPage() {
       {/* Ambient glows */}
       <div
         className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
       />
 
       <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
@@ -223,7 +223,7 @@ export default function SellerDashboardPage() {
               <span className="text-zinc-700">/</span>
               <span className="text-zinc-300">Seller</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white">
               <GradientText gradient="purple">Seller dashboard</GradientText>
             </h1>
             <p className="text-[13px] sm:text-sm text-zinc-400 mt-1">
@@ -235,9 +235,9 @@ export default function SellerDashboardPage() {
             className="group hidden sm:inline-flex items-center gap-2 rounded-lg h-10 px-3.5 text-[12.5px] font-medium text-white transition-colors"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.08) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(131,110,249,0.4)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(20, 241, 149,0.4)',
             }}
           >
             <Plus
@@ -261,7 +261,7 @@ export default function SellerDashboardPage() {
                 value={`${totals.revenueLast30.toFixed(2)}`}
                 suffix="ETH"
                 icon={DollarSign}
-                accent="#836EF9"
+                accent="#14F195"
               />
               <Kpi
                 label="Sales (30d)"
@@ -301,7 +301,7 @@ export default function SellerDashboardPage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                 }}
               />
               <div className="relative flex items-center justify-between mb-5">
@@ -310,8 +310,8 @@ export default function SellerDashboardPage() {
                     className="w-7 h-7 rounded-lg flex items-center justify-center"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                      border: '1px solid rgba(131,110,249,0.28)',
+                        'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.06) 100%)',
+                      border: '1px solid rgba(20, 241, 149,0.28)',
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                     }}
                   >
@@ -349,7 +349,7 @@ export default function SellerDashboardPage() {
                               : 'rgba(255,255,255,0.05)',
                           boxShadow:
                             d.sales > 0
-                              ? 'inset 0 1px 0 rgba(255,255,255,0.18), 0 0 10px -2px rgba(131,110,249,0.5)'
+                              ? 'inset 0 1px 0 rgba(255,255,255,0.18), 0 0 10px -2px rgba(20, 241, 149,0.5)'
                               : 'none',
                         }}
                       />
@@ -385,7 +385,7 @@ export default function SellerDashboardPage() {
                   className="pointer-events-none absolute inset-x-0 top-0 h-px"
                   style={{
                     background:
-                      'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                      'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                   }}
                 />
                 <header className="relative flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06]">
@@ -394,8 +394,8 @@ export default function SellerDashboardPage() {
                       className="w-7 h-7 rounded-lg flex items-center justify-center"
                       style={{
                         background:
-                          'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                        border: '1px solid rgba(131,110,249,0.28)',
+                          'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.06) 100%)',
+                        border: '1px solid rgba(20, 241, 149,0.28)',
                         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                       }}
                     >
@@ -434,9 +434,9 @@ export default function SellerDashboardPage() {
                                 className="absolute inset-0 rounded-md"
                                 style={{
                                   background:
-                                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                                    'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                                   boxShadow:
-                                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                                    'inset 0 0 0 1px rgba(20, 241, 149,0.35), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                                 }}
                               />
                             )}
@@ -482,7 +482,7 @@ export default function SellerDashboardPage() {
                         value={listingQuery}
                         onChange={(e) => setListingQuery(e.target.value)}
                         placeholder="Filter listings by title, type, or status"
-                        className="w-full rounded-lg pl-9 pr-16 py-2 text-[12px] text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+                        className="w-full rounded-lg pl-9 pr-16 py-2 text-[12px] text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_3px_rgba(20, 241, 149,0.12)]"
                         style={{
                           background:
                             'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -582,7 +582,7 @@ export default function SellerDashboardPage() {
                             </div>
                           </div>
                           <div className="text-right min-w-[80px]">
-                            <div className="text-sm font-medium text-purple-300">
+                            <div className="text-sm font-medium text-bolty-300">
                               {l.revenue.toFixed(2)}
                             </div>
                             <div className="text-[10px] uppercase tracking-widest text-zinc-500">
@@ -597,7 +597,7 @@ export default function SellerDashboardPage() {
                                 e.stopPropagation();
                                 setBoostTarget(l);
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-light transition-all"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all"
                               style={{
                                 color: isBoosted ? '#f9a8d4' : '#d4d4d8',
                                 background: isBoosted
@@ -637,7 +637,7 @@ export default function SellerDashboardPage() {
                   className="pointer-events-none absolute inset-x-0 top-0 h-px"
                   style={{
                     background:
-                      'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                      'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
                   }}
                 />
                 <header className="relative flex items-center gap-2.5 px-5 py-4 border-b border-white/[0.06]">
@@ -645,8 +645,8 @@ export default function SellerDashboardPage() {
                     className="w-7 h-7 rounded-lg flex items-center justify-center"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                      border: '1px solid rgba(131,110,249,0.28)',
+                        'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.06) 100%)',
+                      border: '1px solid rgba(20, 241, 149,0.28)',
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                     }}
                   >
@@ -684,7 +684,7 @@ export default function SellerDashboardPage() {
                           <span className="text-zinc-600">bought</span>{' '}
                           <Link
                             href={`/market/agents/${s.listing.id}`}
-                            className="text-purple-300 hover:underline"
+                            className="text-bolty-300 hover:underline"
                           >
                             {s.listing.title}
                           </Link>
@@ -797,7 +797,7 @@ function Kpi({
           {label}
         </span>
       </div>
-      <div className="relative text-[24px] font-light text-white leading-none tracking-[-0.01em] mb-1.5">
+      <div className="relative text-[24px] font-semibold text-white leading-none tracking-[-0.01em] mb-1.5">
         {value}
         {suffix && (
           <span className="ml-1.5 text-[11px] text-zinc-500 font-normal tracking-wide">
@@ -861,21 +861,21 @@ function EmptyState() {
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.45) 50%, transparent 100%)',
         }}
       />
       <span
         aria-hidden="true"
         className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl opacity-40"
-        style={{ background: 'rgba(131,110,249,0.18)' }}
+        style={{ background: 'rgba(20, 241, 149,0.18)' }}
       />
       <div
         className="relative w-14 h-14 rounded-xl mx-auto mb-5 flex items-center justify-center"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-          border: '1px solid rgba(131,110,249,0.3)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 28px -8px rgba(131,110,249,0.4)',
+            'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
+          border: '1px solid rgba(20, 241, 149,0.3)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 28px -8px rgba(20, 241, 149,0.4)',
         }}
       >
         <Package className="w-6 h-6 text-[#b4a7ff]" strokeWidth={1.5} />
@@ -891,9 +891,9 @@ function EmptyState() {
         className="group relative inline-flex items-center gap-2 rounded-lg h-10 px-4 text-[12.5px] font-medium text-white transition-colors"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+            'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.08) 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(131,110,249,0.4)',
+            'inset 0 0 0 1px rgba(20, 241, 149,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(20, 241, 149,0.4)',
         }}
       >
         <Plus

@@ -100,10 +100,10 @@ export function UnifiedHeader() {
                 WebkitMaskImage:
                   'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
                 maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
-                filter: 'drop-shadow(0 0 12px rgba(131,110,249,0.35))',
+                filter: 'drop-shadow(0 0 12px rgba(20, 241, 149,0.35))',
               }}
             />
-            <span className="text-xl md:text-2xl hidden sm:inline text-white font-light">
+            <span className="text-xl md:text-2xl hidden sm:inline text-white font-semibold">
               BoltyNetwork
             </span>
           </Link>
@@ -128,8 +128,8 @@ export function UnifiedHeader() {
                       className="absolute inset-0 rounded-lg -z-0"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
-                        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                          'linear-gradient(180deg, rgba(20, 241, 149,0.14) 0%, rgba(20, 241, 149,0.04) 100%)',
+                        boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
                       }}
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
@@ -171,8 +171,8 @@ export function UnifiedHeader() {
                   className="text-white text-xs md:text-[13px] px-3.5 md:px-4 py-2 rounded-lg transition-all"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                    border: '1px solid rgba(131,110,249,0.35)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.08) 100%)',
+                    border: '1px solid rgba(20, 241, 149,0.35)',
                     fontWeight: 700,
                   }}
                 >
@@ -240,7 +240,7 @@ export function UnifiedHeader() {
                         background:
                           'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
                         boxShadow:
-                          '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
+                          '0 0 0 1px rgba(20, 241, 149,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
                         backdropFilter: 'blur(8px)',
                       }}
                     >
@@ -248,7 +248,7 @@ export function UnifiedHeader() {
                         className="px-4 py-3.5 border-b"
                         style={{ borderColor: 'rgba(255,255,255,0.05)' }}
                       >
-                        <p className="text-[13px] font-light text-white truncate">
+                        <p className="text-[13px] font-semibold text-white truncate">
                           {user?.displayName || user?.username}
                         </p>
                         <p className="text-[11px] text-zinc-500 truncate mt-0.5">{user?.email}</p>
@@ -278,7 +278,7 @@ export function UnifiedHeader() {
                           logout();
                           setProfileOpen(false);
                         }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] font-light text-red-400 hover:text-red-300 transition-colors border-t"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] font-semibold text-red-400 hover:text-red-300 transition-colors border-t"
                         style={{ borderColor: 'rgba(255,255,255,0.05)' }}
                       >
                         <LogOut className="w-3.5 h-3.5" strokeWidth={1.75} />
@@ -354,7 +354,7 @@ export function UnifiedHeader() {
                 height: '100dvh',
                 background:
                   'linear-gradient(180deg, rgba(14,14,18,0.98) 0%, rgba(8,8,11,0.98) 100%)',
-                borderLeft: '1px solid rgba(131,110,249,0.18)',
+                borderLeft: '1px solid rgba(20, 241, 149,0.18)',
                 boxShadow: '-24px 0 60px -10px rgba(0,0,0,0.6)',
               }}
             >
@@ -364,7 +364,7 @@ export function UnifiedHeader() {
                 className="absolute -top-24 -right-24 w-64 h-64 rounded-full opacity-40 pointer-events-none"
                 style={{
                   background:
-                    'radial-gradient(closest-side, rgba(131,110,249,0.28), transparent 70%)',
+                    'radial-gradient(closest-side, rgba(20, 241, 149,0.28), transparent 70%)',
                   filter: 'blur(10px)',
                 }}
               />
@@ -401,8 +401,8 @@ export function UnifiedHeader() {
                   className="relative mx-5 mt-5 p-4 rounded-xl"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.1) 0%, rgba(131,110,249,0.02) 100%)',
-                    border: '1px solid rgba(131,110,249,0.22)',
+                      'linear-gradient(135deg, rgba(20, 241, 149,0.1) 0%, rgba(20, 241, 149,0.02) 100%)',
+                    border: '1px solid rgba(20, 241, 149,0.22)',
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -413,7 +413,7 @@ export function UnifiedHeader() {
                       size={44}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[14px] font-light text-white truncate">
+                      <p className="text-[14px] font-semibold text-white truncate">
                         {user?.displayName || user?.username}
                       </p>
                       <p className="text-[11px] text-zinc-500 truncate mt-0.5">{user?.email}</p>
@@ -428,8 +428,8 @@ export function UnifiedHeader() {
                   className="relative mx-5 mt-5 p-4 rounded-xl"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0.02) 100%)',
-                    border: '1px solid rgba(131,110,249,0.2)',
+                      'linear-gradient(135deg, rgba(20, 241, 149,0.08) 0%, rgba(20, 241, 149,0.02) 100%)',
+                    border: '1px solid rgba(20, 241, 149,0.2)',
                   }}
                 >
                   <div className="flex items-center gap-2.5 mb-2.5">
@@ -438,24 +438,24 @@ export function UnifiedHeader() {
                       Join Bolty
                     </span>
                   </div>
-                  <p className="text-[13px] font-light text-zinc-300 leading-relaxed">
+                  <p className="text-[13px] font-semibold text-zinc-300 leading-relaxed">
                     Publish agents, earn reputation, and grow your revenue on-chain.
                   </p>
                   <div className="flex items-center gap-2 mt-3">
                     <Link
                       href="/auth"
-                      className="flex-1 text-center py-2 rounded-lg text-[12px] font-light text-zinc-300 border border-white/10 hover:border-white/20 hover:text-white transition-all"
+                      className="flex-1 text-center py-2 rounded-lg text-[12px] font-semibold text-zinc-300 border border-white/10 hover:border-white/20 hover:text-white transition-all"
                     >
                       <LogIn className="w-3.5 h-3.5 inline mr-1.5" strokeWidth={1.75} />
                       Sign in
                     </Link>
                     <Link
                       href="/auth?tab=register"
-                      className="flex-1 text-center py-2 rounded-lg text-[12px] font-light text-white transition-all"
+                      className="flex-1 text-center py-2 rounded-lg text-[12px] font-semibold text-white transition-all"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.12) 100%)',
-                        border: '1px solid rgba(131,110,249,0.45)',
+                          'linear-gradient(180deg, rgba(20, 241, 149,0.28) 0%, rgba(20, 241, 149,0.12) 100%)',
+                        border: '1px solid rgba(20, 241, 149,0.45)',
                       }}
                     >
                       Get started
@@ -483,14 +483,14 @@ export function UnifiedHeader() {
                       >
                         <Link
                           href={link.href}
-                          className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-light transition-colors relative"
+                          className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-semibold transition-colors relative"
                           style={
                             active
                               ? {
                                   color: '#ffffff',
                                   background:
-                                    'linear-gradient(90deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
-                                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.22)',
+                                    'linear-gradient(90deg, rgba(20, 241, 149,0.14) 0%, rgba(20, 241, 149,0.04) 100%)',
+                                  boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.22)',
                                 }
                               : { color: 'rgb(212,212,216)' }
                           }
@@ -499,9 +499,9 @@ export function UnifiedHeader() {
                             className="inline-flex w-8 h-8 items-center justify-center rounded-lg flex-shrink-0"
                             style={{
                               background: active
-                                ? 'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.04) 100%)'
+                                ? 'linear-gradient(135deg, rgba(20, 241, 149,0.2) 0%, rgba(20, 241, 149,0.04) 100%)'
                                 : 'rgba(255,255,255,0.025)',
-                              border: `1px solid ${active ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.05)'}`,
+                              border: `1px solid ${active ? 'rgba(20, 241, 149,0.3)' : 'rgba(255,255,255,0.05)'}`,
                             }}
                           >
                             <Icon
@@ -545,7 +545,7 @@ export function UnifiedHeader() {
                           >
                             <Link
                               href={link.href}
-                              className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.035] transition-colors"
+                              className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.035] transition-colors"
                             >
                               <span
                                 className="inline-flex w-8 h-8 items-center justify-center rounded-lg flex-shrink-0"
@@ -580,7 +580,7 @@ export function UnifiedHeader() {
                       logout();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-light text-red-400 hover:text-red-300 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-semibold text-red-400 hover:text-red-300 transition-colors"
                     style={{
                       background: 'rgba(239,68,68,0.04)',
                       border: '1px solid rgba(239,68,68,0.18)',
@@ -614,7 +614,7 @@ function ProfileMenuItem({
     <Link
       href={href}
       onClick={onClick}
-      className="flex items-center gap-2.5 px-4 py-2 text-[13px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.03] transition-colors"
+      className="flex items-center gap-2.5 px-4 py-2 text-[13px] font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.03] transition-colors"
     >
       <Icon className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
       {label}

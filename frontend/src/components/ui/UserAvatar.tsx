@@ -61,7 +61,7 @@ export function UserAvatar({
   const hue = hashHue(seed || 'bolty');
   const letters = initials(name);
   const bg = `linear-gradient(135deg, hsl(${hue}, 72%, 62%) 0%, hsl(${(hue + 40) % 360}, 68%, 52%) 100%)`;
-  const ringStyle = ring ? { boxShadow: '0 0 0 2px rgba(131,110,249,0.35)' } : {};
+  const ringStyle = ring ? { boxShadow: '0 0 0 2px rgba(20, 241, 149,0.35)' } : {};
 
   if (resolved && !errored) {
     return (
@@ -84,7 +84,7 @@ export function UserAvatar({
 
   return (
     <div
-      className={`rounded-full flex items-center justify-center text-white font-light select-none ${className}`}
+      className={`rounded-full flex items-center justify-center text-white font-semibold select-none ${className}`}
       style={{
         width: size,
         height: size,
@@ -94,7 +94,7 @@ export function UserAvatar({
         border: '1px solid rgba(255,255,255,0.12)',
         boxShadow:
           'inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.18)' +
-          (ring ? ', 0 0 0 2px rgba(131,110,249,0.35)' : ''),
+          (ring ? ', 0 0 0 2px rgba(20, 241, 149,0.35)' : ''),
       }}
       aria-label={name || 'avatar'}
     >

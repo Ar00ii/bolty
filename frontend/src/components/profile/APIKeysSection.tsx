@@ -109,7 +109,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-light text-white">API Keys</h2>
+          <h2 className="text-xl font-semibold text-white">API Keys</h2>
           <p className="text-sm text-gray-400 mt-1">Manage your API keys for programmatic access</p>
         </div>
         <motion.button
@@ -117,12 +117,12 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
           whileHover={{ y: -1 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-          className="flex items-center gap-2 px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
+          className="flex items-center gap-2 px-4 py-2.5 text-white rounded-lg font-semibold text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+              'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
           }}
         >
           <Plus className="w-4 h-4" />
@@ -143,16 +143,16 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
             className="absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
             }}
           />
           <div
             className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+                'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20, 241, 149,0.5)',
             }}
           >
             <KeyRound className="w-5 h-5 text-[#b4a7ff]" />
@@ -186,7 +186,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 className="absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.4) 50%, transparent 100%)',
                 }}
               />
               <div className="flex items-start justify-between gap-4">
@@ -196,22 +196,22 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                       className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{
                         background:
-                          'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                          'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                         boxShadow:
-                          'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                       }}
                     >
                       <KeyRound className="w-3.5 h-3.5 text-[#b4a7ff]" />
                     </div>
-                    <h3 className="font-light text-white truncate tracking-[0.005em]">
+                    <h3 className="font-semibold text-white truncate tracking-[0.005em]">
                       {apiKey.name}
                     </h3>
                     <span
                       className="text-[10.5px] font-medium uppercase tracking-[0.18em] px-2 py-0.5 rounded-md text-[#b4a7ff]"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                          'linear-gradient(180deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
+                        boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.35)',
                       }}
                     >
                       {apiKey.scopes?.[0] || 'read'}
@@ -362,7 +362,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                           whileHover={loadingDelete === apiKey.id ? undefined : { y: -1 }}
                           whileTap={loadingDelete === apiKey.id ? undefined : { scale: 0.97 }}
                           transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                          className="flex-1 px-3 py-1.5 text-white rounded-md text-[12px] font-light tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50"
+                          className="flex-1 px-3 py-1.5 text-white rounded-md text-[12px] font-semibold tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50"
                           style={{
                             background:
                               'linear-gradient(180deg, rgba(239,68,68,0.6) 0%, rgba(239,68,68,0.3) 100%)',
@@ -378,7 +378,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                           whileHover={loadingDelete === apiKey.id ? undefined : { y: -1 }}
                           whileTap={loadingDelete === apiKey.id ? undefined : { scale: 0.97 }}
                           transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                          className="flex-1 px-3 py-1.5 text-zinc-300 rounded-md text-[12px] font-light tracking-[0.005em] transition-all hover:brightness-110 hover:text-white disabled:opacity-50"
+                          className="flex-1 px-3 py-1.5 text-zinc-300 rounded-md text-[12px] font-semibold tracking-[0.005em] transition-all hover:brightness-110 hover:text-white disabled:opacity-50"
                           style={{
                             background:
                               'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
@@ -423,14 +423,14 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.95) 0%, rgba(10,10,14,0.95) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
+                  '0 0 0 1px rgba(20, 241, 149,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
               }}
             >
               <div
                 className="absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
                 }}
               />
               <div className="flex items-center gap-3 mb-4">
@@ -438,14 +438,14 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                   className="w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      'linear-gradient(135deg, rgba(20, 241, 149,0.22) 0%, rgba(20, 241, 149,0.06) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20, 241, 149,0.45)',
                   }}
                 >
                   <KeyRound className="w-4 h-4 text-[#b4a7ff]" />
                 </div>
-                <h3 className="text-lg font-light text-white tracking-[-0.005em]">
+                <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                   Generate New API Key
                 </h3>
               </div>
@@ -483,12 +483,12 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                   whileHover={loadingGenerate ? undefined : { y: -1 }}
                   whileTap={loadingGenerate ? undefined : { scale: 0.97 }}
                   transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                  className="flex-1 px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 text-white rounded-lg font-semibold text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      'inset 0 0 0 1px rgba(20, 241, 149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20, 241, 149,0.55)',
                   }}
                 >
                   {loadingGenerate ? 'Generating...' : 'Generate'}
@@ -502,7 +502,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                   whileHover={loadingGenerate ? undefined : { y: -1 }}
                   whileTap={loadingGenerate ? undefined : { scale: 0.97 }}
                   transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                  className="flex-1 px-4 py-2.5 text-zinc-300 rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 hover:text-white disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 text-zinc-300 rounded-lg font-semibold text-[13px] tracking-[0.005em] transition-all hover:brightness-110 hover:text-white disabled:opacity-50"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
@@ -540,14 +540,14 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.97) 0%, rgba(10,10,14,0.97) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.6)',
+                  '0 0 0 1px rgba(20, 241, 149,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.6)',
               }}
             >
               <div
                 className="absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20, 241, 149,0.55) 50%, transparent 100%)',
                 }}
               />
               <div className="flex items-center gap-3 mb-4">
@@ -562,7 +562,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 >
                   <Check className="w-4 h-4 text-[#86efac]" />
                 </div>
-                <h3 className="text-lg font-light text-white tracking-[-0.005em]">
+                <h3 className="text-lg font-semibold text-white tracking-[-0.005em]">
                   API Key Created
                 </h3>
               </div>
@@ -602,14 +602,14 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                    className="px-3 text-white rounded-lg font-light text-[12px] tracking-[0.005em] transition-all hover:brightness-110 flex items-center gap-1.5 shrink-0"
+                    className="px-3 text-white rounded-lg font-semibold text-[12px] tracking-[0.005em] transition-all hover:brightness-110 flex items-center gap-1.5 shrink-0"
                     style={{
                       background: revealCopied
                         ? 'linear-gradient(180deg, rgba(34,197,94,0.38) 0%, rgba(34,197,94,0.14) 100%)'
-                        : 'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                        : 'linear-gradient(180deg, rgba(20, 241, 149,0.38) 0%, rgba(20, 241, 149,0.14) 100%)',
                       boxShadow: revealCopied
                         ? 'inset 0 0 0 1px rgba(34,197,94,0.5)'
-                        : 'inset 0 0 0 1px rgba(131,110,249,0.48), 0 0 18px -4px rgba(131,110,249,0.5)',
+                        : 'inset 0 0 0 1px rgba(20, 241, 149,0.48), 0 0 18px -4px rgba(20, 241, 149,0.5)',
                     }}
                   >
                     {revealCopied ? (
@@ -630,7 +630,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                className="w-full px-4 py-2.5 text-zinc-300 rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 hover:text-white"
+                className="w-full px-4 py-2.5 text-zinc-300 rounded-lg font-semibold text-[13px] tracking-[0.005em] transition-all hover:brightness-110 hover:text-white"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
