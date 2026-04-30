@@ -335,7 +335,7 @@ function RepoCard({
               onClick={() => onUnlock(repo)}
               className="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:shadow-[0_0_12px_rgba(20, 241, 149,0.4)]"
               style={{
-                background: 'linear-gradient(135deg,#7c3aed,#6d28d9)',
+                background: 'linear-gradient(135deg,#00DC83,#6d28d9)',
                 border: '1px solid rgba(20, 241, 149,0.4)',
               }}
             >

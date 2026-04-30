@@ -1,5 +1,5 @@
 .gradient-text {
-  background: linear-gradient(90deg, #a855f7, #7c3aed, #a855f7);
+  background: linear-gradient(90deg, #14F195, #00FFA3, #14F195);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -7,22 +7,33 @@
   font-weight: inherit;
 }
 
-.gradient-text-purple {
-  background: linear-gradient(90deg, #a855f7, #7c3aed, #a855f7);
+/* The historical "purple" variant now resolves to Solana green for
+   continuity with all existing call sites. Use the `green` variant
+   below for clarity in new code. */
+.gradient-text-purple,
+.gradient-text-green {
+  background: linear-gradient(90deg, #14F195, #00FFA3, #14F195);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-mint {
+  background: linear-gradient(90deg, #00FFA3, #14F195, #00FFA3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-blue {
-  background: linear-gradient(90deg, #3b82f6, #1e40af, #3b82f6);
+  background: linear-gradient(90deg, #03E1FF, #06b6d4, #03E1FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-cyan {
-  background: linear-gradient(90deg, #06b6d4, #0891b2, #06b6d4);
+  background: linear-gradient(90deg, #03E1FF, #06b6d4, #03E1FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -35,8 +46,10 @@
   background-clip: text;
 }
 
+/* Solana-style: green → cyan → pink, drifting forever. Used for
+   premium hero accents. */
 .gradient-text-rainbow {
-  background: linear-gradient(90deg, #a855f7, #06b6d4, #10b981, #f59e0b, #ef4444, #a855f7);
+  background: linear-gradient(90deg, #14F195, #00FFA3, #03E1FF, #ec4899, #14F195);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

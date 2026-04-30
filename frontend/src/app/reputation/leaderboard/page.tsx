@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { GradientText } from '@/components/ui/GradientText';
 import { getReputationRank, RANK_TIERS } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
@@ -172,8 +173,8 @@ export default function LeaderboardPage() {
                 <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Hall of Fame</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
-                Rays Leaderboard
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                Rays <GradientText gradient="green">Leaderboard</GradientText>
               </h1>
               <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
                 The most trusted builders in Bolty — ranked by rays earned.

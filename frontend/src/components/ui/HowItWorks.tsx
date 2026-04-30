@@ -113,7 +113,7 @@ export function HowItWorks({ open, onClose }: HowItWorksProps) {
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{
-                    background: 'linear-gradient(135deg, #14F195 0%, #6b21a8 100%)',
+                    background: 'linear-gradient(135deg, #14F195 0%, #008F55 100%)',
                     boxShadow: '0 4px 14px rgba(20, 241, 149,0.25)',
                   }}
                 >

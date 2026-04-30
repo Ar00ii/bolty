@@ -4,14 +4,14 @@ import './GradientText.css';
 interface GradientTextProps {
   children: React.ReactNode;
   className?: string;
-  gradient?: 'purple' | 'blue' | 'cyan' | 'pink' | 'rainbow';
+  gradient?: 'green' | 'mint' | 'purple' | 'blue' | 'cyan' | 'pink' | 'rainbow';
   animated?: boolean;
 }
 
 export const GradientText = ({
   children,
   className = '',
-  gradient = 'purple',
+  gradient = 'green',
   animated = true,
 }: GradientTextProps) => {
   return (

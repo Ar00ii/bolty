@@ -28,6 +28,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { GradientText } from '@/components/ui/GradientText';
 
 // three.js is ~150 kB minified. Defer it off the critical path so the first
 // render of /repos doesn't wait on the background decoration.
@@ -437,34 +438,50 @@ export default function ReposPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-10 relative">
       <DottedSurface />
 
-      <div className="mb-10">
-        <p className="text-xs font-mono text-bolty-400 uppercase tracking-widest mb-3">
-          Repository Showcase
-        </p>
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-3xl font-semibold text-white mb-1">Explore Repos</h1>
-            <p className="text-sm text-zinc-500">
-              Community repositories — public &amp; locked. Discover, vote, download.
-            </p>
+      {/* Hero — corner brackets + ambient glow + GradientText to match landing */}
+      <header className="relative mb-8 sm:mb-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-12 -left-10 w-72 h-72 rounded-full opacity-50 blur-2xl"
+          style={{
+            background:
+              'radial-gradient(closest-side, rgba(20,241,149,0.18), transparent 70%)',
+          }}
+        />
+        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/15 rounded-tl-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/15 rounded-tr-2xl pointer-events-none" />
+
+        <div className="relative pt-6 sm:pt-8 pl-4 pr-4">
+          <p className="text-[10.5px] font-mono uppercase tracking-[0.22em] text-bolty-400 mb-3">
+            Repository showcase
+          </p>
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-1.5">
+                Explore <GradientText gradient="green">Repos</GradientText>
+              </h1>
+              <p className="text-[13px] sm:text-sm text-zinc-400 max-w-xl font-medium">
+                Community repositories — public &amp; locked. Discover, vote, download, ship.
+              </p>
+            </div>
+            {isAuthenticated && (
+              <button
+                onClick={loadGhRepos}
+                className="flex items-center gap-2 text-sm font-mono font-bold px-5 py-2.5 rounded-xl text-[#06210F] transition-all hover:opacity-90 shrink-0 cursor-pointer"
+                style={{
+                  background: 'linear-gradient(135deg,#14F195,#00DC83)',
+                  boxShadow: '0 8px 22px -10px rgba(20,241,149,0.55), inset 0 1px 0 rgba(255,255,255,0.18)',
+                }}
+              >
+                <Upload className="w-4 h-4" strokeWidth={2.25} /> Publish repo
+              </button>
+            )}
           </div>
-          {isAuthenticated && (
-            <button
-              onClick={loadGhRepos}
-              className="flex items-center gap-2 text-sm font-mono font-semibold px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90 shrink-0"
-              style={{
-                background: 'linear-gradient(135deg,#14F195,#00B96E)',
-                border: '1px solid rgba(20, 241, 149,0.4)',
-              }}
-            >
-              <Upload className="w-4 h-4" /> Publish repo
-            </button>
-          )}
         </div>
-      </div>
+      </header>
 
       {/* Controls */}
       <div

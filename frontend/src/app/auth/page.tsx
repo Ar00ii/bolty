@@ -117,7 +117,7 @@ function AuthInner() {
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #14F195 0%, #6b21a8 100%)',
+                background: 'linear-gradient(135deg, #14F195 0%, #008F55 100%)',
                 boxShadow: '0 4px 14px rgba(20, 241, 149, 0.25)',
               }}
             >

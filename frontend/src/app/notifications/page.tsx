@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { GradientText } from '@/components/ui/GradientText';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import {
   fetchNotifications,
@@ -155,8 +156,8 @@ export default function NotificationsPage() {
                 <span>Activity feed</span>
                 {unread > 0 && <LiveDot />}
               </div>
-              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
-                Notifications
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                <GradientText gradient="green">Notifications</GradientText>
               </h1>
               <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
                 {unread > 0 ? `${unread} unread · ${items.length} total` : 'You are all caught up.'}

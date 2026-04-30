@@ -126,8 +126,8 @@ img {
   --text-muted: #a1a1aa;
   --brand: #14f195;
   --brand-dim: rgba(20, 241, 149, 0.08);
-  --brand-hover: #9580ff;
-  --accent-cyan: #06b6d4;
+  --brand-hover: #00DC83;
+  --accent-cyan: #03e1ff;
   --accent-magenta: #ec4899;
   --success: #22c55e;
   --warning: #f59e0b;
@@ -139,15 +139,17 @@ img {
   --shadow-brand: 0 4px 14px rgba(20, 241, 149, 0.25);
   --shadow-glow: 0 0 20px rgba(20, 241, 149, 0.3), 0 0 40px rgba(6, 182, 212, 0.2);
   --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(20, 241, 149, 0.1);
-  /* Extended color palette */
-  --purple-300: #d8b4fe;
-  --purple-400: #c084fc;
-  --purple-500: #a855f7;
-  --purple-600: #9333ea;
-  --purple-700: #7e22ce;
-  --purple-800: #6b21a8;
-  --purple-900: #581c87;
-  --purple-950: #3f0f5c;
+  /* Extended brand palette — historical names kept for backwards compat,
+     values retoned to Solana green so legacy `var(--purple-*)` references
+     stay on brand. */
+  --purple-300: #7DFFBF;
+  --purple-400: #48F9A6;
+  --purple-500: #14F195;
+  --purple-600: #00DC83;
+  --purple-700: #00B96E;
+  --purple-800: #008F55;
+  --purple-900: #00663D;
+  --purple-950: #003D24;
   /* Spacing constants */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -169,8 +171,8 @@ img {
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --brand: #00B96E;
-  --brand-dim: rgba(107, 79, 224, 0.07);
-  --brand-hover: #7c5cf0;
+  --brand-dim: rgba(20, 241, 149, 0.07);
+  --brand-hover: #008F55;
   --success: #16a34a;
   --warning: #d97706;
   --error: #dc2626;
@@ -4993,17 +4995,20 @@ aside button[data-active='true']::after {
   color: #e4e4e7;
 }
 .mk-mobile-tab--active {
-  color: #c9beff;
+  color: #14f195;
+  font-weight: 700;
 }
 .mk-mobile-tab--active::before {
   content: '';
   position: absolute;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 28px;
   height: 2px;
   border-radius: 0 0 2px 2px;
   background: #14f195;
-  box-shadow: 0 0 10px #14f195;
+  box-shadow: 0 0 12px rgba(20, 241, 149, 0.7);
 }
 .mk-mobile-tab {
   position: relative;

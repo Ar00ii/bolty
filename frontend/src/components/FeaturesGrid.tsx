@@ -61,7 +61,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       width="190"
       height="190"
       fill="none"
-      stroke="#9333ea"
+      stroke="#00DC83"
       strokeWidth="1.5"
       transform="rotate(45 200 200)"
       opacity="0.85"
@@ -73,7 +73,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       cy="200"
       r="110"
       fill="none"
-      stroke="#9333ea"
+      stroke="#00DC83"
       strokeWidth="1.5"
       opacity="0.85"
     />,
@@ -82,7 +82,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       key="s2"
       points="200,75 320,310 80,310"
       fill="none"
-      stroke="#9333ea"
+      stroke="#00DC83"
       strokeWidth="1.5"
       opacity="0.85"
     />,
@@ -91,7 +91,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       key="s3"
       points="200,85 290,140 290,260 200,315 110,260 110,140"
       fill="none"
-      stroke="#9333ea"
+      stroke="#00DC83"
       strokeWidth="1.5"
       opacity="0.85"
     />,
@@ -107,7 +107,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
         width="240"
         height="240"
         fill="none"
-        stroke="#7c3aed"
+        stroke="#00DC83"
         strokeWidth="1.5"
         strokeDasharray="10 7"
         opacity="0.65"
@@ -137,7 +137,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
         width="230"
         height="230"
         fill="none"
-        stroke="#7c3aed"
+        stroke="#00DC83"
         strokeWidth="1.5"
         strokeDasharray="10 7"
         opacity="0.65"
@@ -164,7 +164,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
         cy="200"
         r="130"
         fill="none"
-        stroke="#7c3aed"
+        stroke="#00DC83"
         strokeWidth="1.5"
         strokeDasharray="10 7"
         opacity="0.65"
@@ -190,7 +190,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
         width="170"
         height="170"
         fill="none"
-        stroke="#7c3aed"
+        stroke="#00DC83"
         strokeWidth="1.5"
         strokeDasharray="10 7"
         transform="rotate(45 200 200)"
@@ -438,7 +438,7 @@ export const FeaturesGrid = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 group-hover:shadow-[0_0_28px_rgba(147,51,234,0.6)] group-hover:scale-125"
-                    style={{ background: '#9333ea' }}
+                    style={{ background: '#00DC83' }}
                   >
                     <Icon className="w-4 h-4 text-white" />
                   </div>

@@ -23,7 +23,7 @@ const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #EC4899, #be185d)',
   'linear-gradient(135deg, #f59e0b, #b45309)',
   'linear-gradient(135deg, #22c55e, #15803d)',
-  'linear-gradient(135deg, #a855f7, #6b21a8)',
+  'linear-gradient(135deg, #a855f7, #008F55)',
 ];
 
 function gradientFor(seed: string) {
@@ -86,7 +86,7 @@ const AvatarCircles = ({ numPeople = 99, avatarUrls = [] }: AvatarCirclesProps) 
         <div
           className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#0d0d0d] text-xs font-medium text-white -ml-4"
           style={{
-            background: 'linear-gradient(135deg, #9333ea, #7c3aed)',
+            background: 'linear-gradient(135deg, #00DC83, #00DC83)',
             zIndex: 0,
           }}
         >

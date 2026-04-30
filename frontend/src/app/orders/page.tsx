@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
@@ -327,7 +328,7 @@ export default function OrdersPage() {
   return (
     <div className="mk-app-page min-h-screen pb-20" style={{ maxWidth: 'none', padding: 0 }}>
       {/* Header */}
-      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+      <header className="px-4 sm:px-6 md:px-10 pt-6 sm:pt-8 md:pt-10 pb-4">
         <div className="mx-auto max-w-[1400px]">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <div>
@@ -336,7 +337,9 @@ export default function OrdersPage() {
                 <span>Bolty Orders</span>
                 <LiveDot />
               </div>
-              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">Orders</h1>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                <GradientText gradient="green">Orders</GradientText>
+              </h1>
               <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
                 Track every purchase, sale and escrow release in one feed.
               </p>
@@ -726,27 +729,34 @@ function OrdersTable({
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
-      <div className="grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
-        <span className="text-center">#</span>
-        <span>Order</span>
-        <span>Status</span>
-        <span>Escrow</span>
-        <span className="text-right">Amount</span>
-        <span className="hidden md:block">{tab === 'buying' ? 'Seller' : 'Buyer'}</span>
-        <span className="text-right">Age</span>
-        <span />
+      {/* Horizontal scroll container — preserves dense layout on desktop while
+          letting narrow phones swipe through the table without breaking the
+          page layout. */}
+      <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
+        <div className="min-w-[640px]">
+          <div className="grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-bold border-b border-white/5">
+            <span className="text-center">#</span>
+            <span>Order</span>
+            <span>Status</span>
+            <span>Escrow</span>
+            <span className="text-right">Amount</span>
+            <span className="hidden md:block">{tab === 'buying' ? 'Seller' : 'Buyer'}</span>
+            <span className="text-right">Age</span>
+            <span />
+          </div>
+          <ul>
+            {orders.map((o, i) => (
+              <OrderRow
+                key={o.id}
+                order={o}
+                index={i}
+                isSeller={tab === 'selling'}
+                onClick={() => onRowClick(o.id)}
+              />
+            ))}
+          </ul>
+        </div>
       </div>
-      <ul>
-        {orders.map((o, i) => (
-          <OrderRow
-            key={o.id}
-            order={o}
-            index={i}
-            isSeller={tab === 'selling'}
-            onClick={() => onRowClick(o.id)}
-          />
-        ))}
-      </ul>
     </div>
   );
 }
@@ -1002,17 +1012,22 @@ function NegotiationsTable({
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
-      <ul>
-        {negotiations.map((n, i) => (
-          <NegoRow
-            key={n.id}
-            index={i}
-            neg={n}
-            userId={userId}
-            onClick={() => onRowClick(n)}
-          />
-        ))}
-      </ul>
+      {/* Horizontal scroll on narrow viewports — keeps the dense desktop layout. */}
+      <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
+        <div className="min-w-[600px]">
+          <ul>
+            {negotiations.map((n, i) => (
+              <NegoRow
+                key={n.id}
+                index={i}
+                neg={n}
+                userId={userId}
+                onClick={() => onRowClick(n)}
+              />
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

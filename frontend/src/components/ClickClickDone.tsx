@@ -65,7 +65,7 @@ export function ClickClickDone() {
                 style={{
                   width: '32px',
                   height: '32px',
-                  background: '#9333ea',
+                  background: '#00DC83',
                   fontSize: '16px',
                   lineHeight: 1,
                   borderRadius: '50%',
@@ -143,7 +143,7 @@ export function ClickClickDone() {
                         overflow: 'hidden',
                       }}
                     >
-                      <div style={{ height: '100%', background: '#9333ea', width: '57%' }} />
+                      <div style={{ height: '100%', background: '#00DC83', width: '57%' }} />
                     </div>
                     <div>
                       <div style={{ fontSize: '12px', color: '#ccc', marginBottom: '6px' }}>
@@ -155,7 +155,7 @@ export function ClickClickDone() {
                           padding: '6px 10px',
                           borderRadius: '4px',
                           fontSize: '11px',
-                          color: '#9333ea',
+                          color: '#00DC83',
                           fontFamily: 'monospace',
                         }}
                       >
@@ -188,7 +188,7 @@ export function ClickClickDone() {
                     </div>
                     <button
                       style={{
-                        background: '#9333ea',
+                        background: '#00DC83',
                         color: '#fff',
                         padding: '8px 12px',
                         borderRadius: '4px',
@@ -229,7 +229,7 @@ export function ClickClickDone() {
                         <div
                           key={tier.label}
                           style={{
-                            background: '#9333ea',
+                            background: '#00DC83',
                             color: '#fff',
                             padding: '6px 10px',
                             borderRadius: '4px',
@@ -327,14 +327,14 @@ export function ClickClickDone() {
                           <div style={{ color: '#999', fontSize: '10px', marginBottom: '4px' }}>
                             {item.desc}
                           </div>
-                          <div style={{ color: '#9333ea', fontSize: '10px' }}>{item.link}</div>
+                          <div style={{ color: '#00DC83', fontSize: '10px' }}>{item.link}</div>
                         </div>
                       ))}
                     </div>
                     <div
                       style={{
                         fontSize: '11px',
-                        color: '#9333ea',
+                        color: '#00DC83',
                         marginTop: 'auto',
                         textAlign: 'center',
                       }}

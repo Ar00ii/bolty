@@ -308,7 +308,7 @@ export function EliteBoost() {
               style={{
                 width: '40px',
                 height: '40px',
-                background: '#9333ea',
+                background: '#00DC83',
                 fontSize: '18px',
                 lineHeight: 1,
                 borderRadius: '50%',
@@ -374,7 +374,7 @@ export function EliteBoost() {
               style={{
                 width: '40px',
                 height: '40px',
-                background: '#9333ea',
+                background: '#00DC83',
                 fontSize: '18px',
                 lineHeight: 1,
                 borderRadius: '50%',
@@ -441,7 +441,7 @@ export function EliteBoost() {
               style={{
                 width: '40px',
                 height: '40px',
-                background: '#9333ea',
+                background: '#00DC83',
                 fontSize: '18px',
                 lineHeight: 1,
                 borderRadius: '50%',
@@ -508,7 +508,7 @@ export function EliteBoost() {
               style={{
                 width: '40px',
                 height: '40px',
-                background: '#9333ea',
+                background: '#00DC83',
                 fontSize: '18px',
                 lineHeight: 1,
                 borderRadius: '50%',
